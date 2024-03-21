@@ -77,13 +77,12 @@ import RaceInfoPanel from "../components/RaceInfoPanel.vue";
 import Card from 'primevue/card';
 
 import SelectButton from 'primevue/selectbutton';
-import Inplace from 'primevue/inplace';
-import DataTable from 'primevue/datatable';
+
 
 import Dropdown from 'primevue/dropdown';
 import { computed, ref, reactive } from 'vue';
 import { useRoute } from 'vue-router';
-import _ from "lodash"
+import {chain,cloneDeep,map,take,keys,orderBy,sumBy,pickBy,split,sortBy,tap,startsWith}  from "lodash-es"
 
 let props = defineProps ({
   option: String
@@ -105,7 +104,7 @@ let race=computed(()=>{
 
   if(racefilt.length>0) {
     // debugger
-    raceObj=_.cloneDeep(racefilt[0])
+    raceObj=cloneDeep(racefilt[0])
   
     return raceObj //racefilt[0]
   } else 

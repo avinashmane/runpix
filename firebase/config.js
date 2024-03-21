@@ -2,8 +2,9 @@ import { initializeApp } from 'firebase/app'
 import { getAuth,
     // connectAuthEmulator ,initializeAuth, indexedDBLocalPersistence, browserPopupRedirectResolver
  } from 'firebase/auth'
-import { getFirestore   } from "firebase/firestore"; 
+import { getFirestore, doc ,getDoc   } from "firebase/firestore"; 
 import { getStorage } from "firebase/storage"
+import { config } from '../src/config';
 
 const firebaseConfig = {
     apiKey: `${import.meta.env.VITE_API_KEY}`,
@@ -26,5 +27,15 @@ const firebaseAuth = getAuth()
 const db = getFirestore()
 const storage = getStorage()
 // console.debug('firebaseAuth', firebaseAuth)
+getDoc(doc(db,'app/config'))
+                .then(docSnap => {
+                    if (docSnap.exists()) {
+                        config.app = docSnap.data()
+                        console.log("app/config loaded :"+Object.keys(config.app).length );
+                    } else {
+                        // doc.data() will be undefined in this case
+                        console.log("No app/config");
+                    }
+                })
 
 export { firebaseAuth, db, storage }

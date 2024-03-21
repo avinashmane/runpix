@@ -117,11 +117,11 @@ import Dropdown from 'primevue/dropdown';   // optional
 // import TabView from 'primevue/tabview';
 // import TabPanel from 'primevue/tabpanel';
 // import Row from 'primevue/row';                   // optional
-import _ from "lodash"
+import { orderBy as _orderBy }  from "lodash-es"
 import { db, storage } from "../../firebase/config" //storage
 import { config } from "../config"
 import { collection,query,doc,limit, orderBy ,onSnapshot,getDocs, updateDoc } from "firebase/firestore";
-// import { config } from '../config';
+
 let props = defineProps({
   race: Object,
   raceId: String,
@@ -138,7 +138,7 @@ const startListCols=config.startListHeaders
 
 
 let entries=computed(()=> {
-  let ret=_.cloneDeep(allEntries.value)
+  let ret=cloneDeep(allEntries.value)
   const bibRegExp = race.bibPattern ? RegExp(race.bibPattern) : false
 
   if (selWpt.value && (selWpt.value!='All') ){
@@ -171,7 +171,7 @@ let entries=computed(()=> {
   } 
   
   // sort  
-  ret = _.orderBy(ret,"timestamp",sortVal.value.toLowerCase())
+  ret = _orderBy(ret,"timestamp",sortVal.value.toLowerCase())
   
   // search text debugger
   if (bibSearch.value) ret = ret.filter(x=>x.bib.includes(bibSearch.value))
@@ -290,7 +290,7 @@ const formatDate = (value) => {
   if (!value) return '--:--:--'
   try {
     // console.debug(value)
-    value=new Date(_.cloneDeep(value))//-new Date(props.race.timestamp.start)
+    value=new Date(cloneDeep(value))//-new Date(props.race.timestamp.start)
     return value.toLocaleString('en-US',tsOptions)
   }
   catch (e)
@@ -363,7 +363,7 @@ function submitChange(){
   let re=RegExp(props.bibRegex ? `^${props.bibRegex}$` : '^\\d{3,5}$')
   
   if(entries.value[entryToEdit.value].bib.search(re)>=0){
-    let payload=_.cloneDeep(entries.value[entryToEdit.value])
+    let payload=cloneDeep(entries.value[entryToEdit.value])
     let path=`races/${props.raceId}/readings/${payload.id}`
     delete payload.id
     // debugger

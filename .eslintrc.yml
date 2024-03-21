@@ -10,7 +10,8 @@ parserOptions:
 plugins:
   - vue
 rules: {}
-eslint.validate: 
-  -  "javascript"
-  -  "javascriptreact"
-  -  "vue"
+# eslint:
+# validate: 
+#   -  "javascript"
+#   -  "javascriptreact"
+#   -  "vue"

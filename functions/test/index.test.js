@@ -25,8 +25,6 @@ const test = require('firebase-functions-test')(config,
   
 // process.env.FIREBASE_CONFIG=config.storageBucket
   
-// console.log(`key is ${key}`, JSON.stringify(config))
-
 
 // after firebase-functions-test has been initialized
 describe('Storage_tests', function () {
@@ -110,6 +108,20 @@ describe('Storage_tests', function () {
       await wrapped(data_PNG)
 
     })
+    it('ScanImages_reprocess image', async function () {
+      this.timeout(20000); // A very long environment setup.
+      process.env.RUNTIME_OPTION=JSON.stringify({scanImages:{vision:false}})
+
+      // Wrap the makeUppercase function
+      // myFunctions.storage.bucket(config.storageBucket);
+      const wrapped = test.wrap(myFunctions.ScanImages);
+      const data_JPEG = {bucket: config.storageBucket,
+                  name: 'uploads/werun2024/2024-03-17T05:49:48.000Z~VENUE~avinashmane$gmail.com~1Z2A2506.jpg', 
+                   contentType: 'image/jpeg'};
+      await wrapped(data_JPEG)
+
+    })
+
 
     it('Process the EXIF rotation image', async function () {
       this.timeout(20000); // A very long environment setup.
@@ -192,7 +204,77 @@ now=()=>new Date().toISOString()
 function timeout(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
+
 async function sleep(secs,fn, ...args) {
   await timeout(secs);
   return fn(...args);
 }
+
+
+// let admin=null
+// describe('List all video files', function ( ){
+//   admin= admin ||  require('firebase-admin')
+//   const bucketName = 'run-pix-videos'
+//   const bucket = admin.storage().bucket(bucketName)
+//   let filenames=[];
+
+//   before('Before: list files',async function (done){
+//     const [files] = await bucket.getFiles();
+//     filenames=files.map(o=>o.name)
+//     // 'files' will be an array containing information about each file in the bucket.
+//     console.log('Files:', );
+//     done()
+//     // debugger
+//     return true
+//   })
+
+//   filenames.forEach(function (x){
+//     it('processing ${x}',function () {
+//       console.log(`file ${x}`)
+//     })
+//   })
+
+// })
+
+
+// describe('OCR video test suite', function () {
+  
+//   var indexModule = require('../index.js'); // Works for both ESM and CommonJS
+//   var videocrModule = require('../videoocr.js'); // Works for both ESM and CommonJS
+//   this.timeout(5000); 
+
+//   before(function () {
+//     // testModule = require("../index.js")
+//     // console.log("before", testModule,testModule.value )
+//   });
+
+//   it('Create and save annotations from video',async function (done){
+//     this.skip()
+    
+//     indexModule.scanVideo('gs://run-pix-videos/test/VID_20240310_074051.mp4').then(x=>{
+//       console.log('scanVideo()',x);
+//       done()
+//     })
+//     .catch(console.error)
+    
+//     // testModule.detectText('gs://run-pix-videos/test/VID_20240310_074051.mp4')
+//   })
+
+//   it('Read metadata from video',async function (done) {
+//     this.skip()
+//     indexModule.getImageMetadata('gs://run-pix-videos','test/VID_20240310_074051.mp4')
+//     .then(res=>{
+//       console.log(res);
+//       done()
+//     })
+//     .catch(console.error)
+
+//   })
+
+//   it('Read annotations',async function (){
+//       // videocr.
+//       let res=JSON.parse(await indexModule.readFile('test/out/textAnnotations.json'))
+//       console.log(videocrModule.videoDetectionFilter(res.textAnnotations))
+//       // testModule.detectText('gs://run-pix-videos/test/VID_20240310_074051.mp4')
+//   })
+// })

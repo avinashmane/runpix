@@ -87,7 +87,8 @@ import Dialog from 'primevue/dialog';
 import InputText from 'primevue/inputtext';
 import Dropdown from 'primevue/dropdown';
 import Checkbox from 'primevue/checkbox';
-import { getDocData , getPublicUrl} from "../api" 
+import { getDocData  } from "../api" 
+import {  getPublicUrl} from "../helpers" 
 import { db, storage } from "../../firebase/config" 
 // import { ref as dbRef, getDownloadURL } from "firebase/storage";
 import { collection,query,doc, onSnapshot, updateDoc,getDocs } from "firebase/firestore";

@@ -5,7 +5,7 @@
     <h1 @dblclick="klick()">Photos</h1>
     
     <form @submit="searchImages" class="gap-2 mx-2">
-      <Dropdown v-model="raceId" :options="races" optionLabel="Name" optionValue="id"
+      <Dropdown v-model="raceId" :options="races" optionLabel="Name" optionValue="id" @change="onChangeEvent"
                         placeholder="Select a race" class="md:w-14rem w-full" />   
       <div class="card flex justify-content-center w-full gap-2 py-1" v-if="!races.find(x=>x.id==raceId)?.photoStatus.includes('faceonly')">
         <Button @click="bibSelection='';allImages=[];uploadedImage=''" class="text-white" raised >
@@ -109,7 +109,7 @@ import AutoComplete from 'primevue/autocomplete';
 import ProgressSpinner from 'primevue/progressspinner';
 import FileUpload from 'primevue/fileupload'
 import Button from 'primevue/button';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter} from 'vue-router';
 import { computed, ref } from 'vue';
 import { ref as storageRef, getDownloadURL } from "firebase/storage";
 import {config} from "../config"
@@ -118,19 +118,19 @@ import { uploadFiletoGCS } from "../helpers/file-uploader"
 import axios from 'axios';
 import Compressor from 'compressorjs';
 import { db, storage } from "../../firebase/config" 
-import _ from "lodash"
+import {chain,cloneDeep,map,take,keys,orderBy,sumBy,pickBy,split,sortBy,tap,startsWith}  from "lodash-es"
 // wakesup the backend
 fetch(config.api.faceMatchUpload+'/api/faceapi',{headers: {mode: "cors", "Referer": "https://runpix.web.app" }}) //call the fetch function passing the url of the API as a parameter
 .then(function(x) {console.log(`/api/faceapi: Status: ${x.status}`)})
-.catch(function(e) {console.error(e) });
+.catch(function(e) {console.log(e) });
 
 const store = useStore()
 store.dispatch('getRacesAction')
 
 const route = useRoute();  
-
+const router = useRouter()
 const races =  computed(() => 
-                _.orderBy(store.state.datastore.races
+                orderBy(store.state.datastore.races
                   .filter(r=>(r.photoStatus && (r.photoStatus.indexOf("available")>=0) )),
                   "Date","desc")
                 );
@@ -140,6 +140,7 @@ if(route.params.raceId){
   console.log(route.params.raceId)
   raceId.value=route.params.raceId
 }
+
 const bibSelection = ref("");
 if (route.params.bib)
   bibSelection.value=route.params.bib
@@ -161,6 +162,11 @@ const searchInProgress=ref(false)
 const minDist = ref(config.face.minDistx100);
 let bibNo=computed(()=>bibSelection.value.split(" ")[0])
 // const getFirstPart = function(bibstr) { return "x"+bibstr.split(/\t\ /)[0]}
+
+function onChangeEvent(e){
+  console.log(e,router,router.currentRoute.value)
+  router.replace(`/p/${e.value}`)
+}
 
 /**
  * Dropdown for the Bib
@@ -224,7 +230,7 @@ const searchImages = async () => {
     if(querySnapshot.docs.length){
       let data = querySnapshot.docs.map(x=>x.data())
       
-      allImages.value=_.orderBy(data
+      allImages.value=orderBy(data
                         .map(mapFaceMatchRet),
                         "dist","asc") ;
     }
@@ -313,7 +319,7 @@ let faceUploader=async (x)=>{
       .then((ret) => {
         console.log('Upload success',ret);
     
-        allImages.value=_.orderBy(ret.data
+        allImages.value=orderBy(ret.data
                                     .map(mapFaceMatchRet),
                                     "dist","asc") ;        
         message.value=`Searching faces in the uploaded image`
@@ -365,14 +371,12 @@ function toggleDialog  (i){
   }
 }
 
-
-const getPublicUrl = (folder,raceId,file) => 
-  `https://storage.googleapis.com/run-pix.appspot.com/${folder}/${raceId}/${file.replace(/.png/i,'.jpg')}`
+import { getPublicUrl } from "../helpers/index";
+// const getPublicUrl = (folder,raceId,file) => 
+//   `https://storage.googleapis.com/run-pix.appspot.com/${folder}/${raceId}/${file.replace(/.png/i,'.jpg')}`
 const shareableUrl = computed(() => {
   return `https://run-pix.web.app/image/${btoa([raceId.value,bibNo.value,images.value[entryToEdit.value].imagePath.replace(/.png/i,'.jpg')].join('/'))}`})
 
-// let thumbUrl=ref(getPublicUrl('thumbs',raceId.value,images.value[entryToEdit.value].imagePath))
-// let photoUrl=ref(getPublicUrl('processed',raceId.value,images.value[entryToEdit.value].imagePath))
 function copyUrl(url) {
   url = url || shareableUrl.value
   navigator.clipboard.writeText(url)

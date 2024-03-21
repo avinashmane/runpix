@@ -1,4 +1,3 @@
-
 <template>
   <div class="container mx-auto py-4">
     <h1 @dblclick="klick()" class="text-lg">Results </h1>
@@ -72,9 +71,13 @@
             <td>{{ bibData.Rank }}</td>
           </tr>
         </table>
+
+        <Certificate :bibData="bibData" :race="race" />
+
       </template>
     </Card>
   </div>
+
   <div v-if="!bibSelection" class="container mx-auto">
     <Card >
       <template #subtitle>
@@ -116,16 +119,22 @@
 </template>
 
 <script setup>
+import { config } from "../config"
 import { useStore } from 'vuex';
 import Dropdown from 'primevue/dropdown';
 import AutoComplete from 'primevue/autocomplete';
 import Card from 'primevue/card';
+
+import Certificate  from '../components/CertificateView.vue';
+
 import { collection, getDocs, doc, query, where, limit, onSnapshot } from "firebase/firestore"; //ref as dbRef,
 import { db } from "../../firebase/config"
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { computed, ref } from 'vue';
-import _ from "lodash"
+import {chain,cloneDeep,map,take,keys,orderBy,groupBy,sumBy,pickBy,split,sortBy,tap,startsWith}  from "lodash-es"
+// import * as _ from 'lodash-es'
 
+const router = useRouter()
 const route = useRoute();
 const params = route.params;
 const store = useStore()
@@ -160,6 +169,7 @@ let bibData = computed(() => {
 
 const year = ref(new Date().getUTCFullYear())
 let years = Array(year.value - (year.value - 6)).fill('').map((v, idx) => year.value - idx);
+
 
 /////////////////////////////
 const searchBib = async (event) => {
@@ -255,6 +265,8 @@ let loadRace = (e) => {
     // debugger
     loadRaceId(raceId)
   }
+  router.replace(`/r/${e.value}`)
+
 }
 const setBib = async (bibNo) => {
   bibSelection.value = bibNo
@@ -286,10 +298,15 @@ async function loadRaceId(raceId) {
         }
         return dat;
       });
-      raceInfo.value.top = _.chain(data)
-        .groupBy("Category")
-        .pickBy((x, k) => { console.log(k); return !k.includes('Other') })
-        .value()
+      // tree shaking has problem with chain
+      // raceInfo.value.top = _.chain(data)
+      //   .groupBy("Category")
+      //   .pickBy((x, k) => { console.log(">",k); return !k.includes('Other') })
+      //   .value()
+      raceInfo.value.top = pickBy(
+                              groupBy(data,"Category"),
+                              (x, k) => { console.log(">",k); return !k.includes('Other') })
+
     })
 }
 

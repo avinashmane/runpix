@@ -8,11 +8,18 @@
 */
 'use strict';
 /* ~~~~~~~~~~~~ 1. includes ~~~~~~~~~~~~~ */
+let lazy={ // modules to be lazy loaded
+  videocr:null,
+  Video:null// video intelligence
+} 
+
+
 const sharp = require('sharp')
 // Firebase setup
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
 // const { encode } = require('pluscodes')
+let _ = require('lodash');
 
 // Node.js core modules
 // const ExifReader = require('exif-reader');
@@ -112,6 +119,7 @@ const getRaceCfg= (race) =>  {
  
  const express = require('express');
  const exphbs = require('express-handlebars');
+const { cleanForFS, getNormalSize, getpathfromGcsUri } = require('./utils');
 // const { assert } = require('chai');
  const app = express();
 //  const firebaseUser = require('./firebaseUser');
@@ -263,14 +271,14 @@ exports.ScanImages = functions.runWith({
         log(`Function is disabled due to RUNTIME_OPTION.ScanImages.disabled=${RUNTIME_OPTION.ScanImages.disabled}`);
         return null;
   // Ignore images not in uploads
-  } else if (! object.name.startsWith(`${UPLOADS_FOLDER}/`) && 
-      ! object.name.startsWith(`test/`)) {  
+  } else if (! object?.name?.startsWith(`${UPLOADS_FOLDER}/`) && 
+      ! object?.name?.startsWith(`test/`)) {  
     // Exit if this is triggered on a file that is not an image.
-    if (!object.contentType.startsWith('image/')) {
+    if (!object?.contentType?.startsWith('image/')) {
       log(`Ignoring upload "${object.name}"  is not an image.`);
       return null;
     }
-    log(`Ignoring upload "${object.name}" because not in ${UPLOADS_FOLDER}/.`);
+    // log(`Ignoring upload "${object.name}" because not in ${UPLOADS_FOLDER}/.`);
     return null;
   }
 
@@ -295,7 +303,7 @@ exports.ScanImages = functions.runWith({
     // var pluscode=encode({  latitude: attrs.latitude,longitude: attrs.longitude})
     log(`AI results on image "${object.name}"`, detections.length);
     let texts=[];    
-    // get ISO Date for correct part TODO
+    // get ISO Date for correct part TODO /// for time readings
     let readingDate = getIsoDate(attrs,date)
 
     for (let i = 0; i < detections.length; i++) {
@@ -307,7 +315,7 @@ exports.ScanImages = functions.runWith({
           let score = processBounding(d.boundingPoly, getImageHeight(attrs))
 
           // if its not a  non-timing waypoint record timing
-          if (NOTIMING_WAYPOINTS.contains(waypoint)==false){ 
+          if (NOTIMING_WAYPOINTS.includes(waypoint)==false){ 
             await updFSReadings(raceId, userId, d.description, 
                       readingDate, score, 
                       waypoint, attrs, imagePath )
@@ -410,17 +418,22 @@ async function compressImage(raceId,filePath, bucketName, metadata) {
 async function getImageMetadata(bucket,filePath,metadataReqd=true) {
   // Downloads the file into a buffer in memory.
   const contents =   await bucket.file(filePath).download();
-  let img
+  let img,size,imgMetadata;
   try{
       img = sharp(contents[0])// contents
-  } catch {
-    error(`can't make sharp object for ${filePath}`)
+      size = getNormalSize(await img.metadata())
+      imgMetadata=size
+  } catch (e){
+    error(`can't make sharp object for ${filePath}`,e)
   }
   if (metadataReqd){
-    var imgMetadata =  await exifr.parse(contents[0],true)
+    imgMetadata =  Object.assign(imgMetadata,
+                        await exifr.parse(contents[0],true)
+    )
   }
   return [img, imgMetadata]
 }
+
 
 /**
  * Saves image in storage after a) resize b) watermark
@@ -445,9 +458,9 @@ async function saveJPG(bucket, filePath, image, metadata, watermarkImg) {
     
   if (watermarkImg && (watermarkImg!=NOTFOUND)){
     // let _width = Object.keys(metadata).filter(x=>x.includes('idth')).map(x=>metadata[x])[0]
-    let _width = Math.max.apply(Math,Object.keys(metadata).filter(x=>x.includes('idth')).map(x=>metadata[x]))
+    // let _width = getImageWidth(image,metadata)
     // let metadata_jpg=await image.metadata()
-    log(">>>4", RESIZE_OPTION.width,_width,metadata)
+    // log(">>>4", RESIZE_OPTION.width,_width,metadata)
     
     let adjWm=await watermarkImg.resize({ width: RESIZE_OPTION.width})
                                 .toBuffer()
@@ -462,18 +475,34 @@ async function saveJPG(bucket, filePath, image, metadata, watermarkImg) {
   let options = {resumable:false,public:true,metadata:metadata}
   const remoteWriteStream = bucket.file(filePath).createWriteStream(options);
   await (image.rotate()
-      .pipe(transformer)
-      // .jpeg(JPG_OPTIONS)
-      .pipe(remoteWriteStream))
-      .on('error', function(err) {error(`Error saving JPG ${JSON.stringify(err)}`)})
-      .on('finish', function() {
-        // The file upload is complete.
-        log(`Saved JPG ${filePath}`)
-      });
+        .pipe(transformer)
+        // .jpeg(JPG_OPTIONS)
+        .pipe(remoteWriteStream)
+      )
+        .on('error', function(err) {error(`Error saving JPG ${JSON.stringify(err)}`)})
+        .on('finish', function() {
+          // The file upload is complete.
+          log(`Saved JPG ${filePath}`)
+      })
     // .then(()=>log(`Writing watermarked image: ${newFilePath}`))
     // .catch((e)=>{error(`error in saveJPG() ${JSON.stringify(e)}`)})
   
   return image
+}
+
+function getImageWidth(image,metadata) {
+  try{
+    // fails for light room https://www.reddit.com/r/Lightroom/comments/yheq9r/image_dimensions_not_included_in_exif_data_for/
+    let width = Math.max.apply(Math, Object.keys(metadata).filter(x => x.includes('idth')).map(x => metadata[x]));
+    return width
+  } catch(e){
+    console.error(e)
+    // const size = getNormalSize(await sharp(input).metadata());
+
+    // return (orientation || 0) >= 5
+    //     ?  width: height  :  width ;
+    // }
+  }
 }
 
 function saveThumb(bucket, filePath, image,metadata) {
@@ -496,22 +525,6 @@ function saveThumb(bucket, filePath, image,metadata) {
     // .catch((e)=>{error(`error in saveThumb() ${JSON.stringify(e)}`)});
 
 }
-
-// Based on EXIF rotation metadata, get the right-side-up width and height:
-function getNormalSize({
-  width,
-  height,
-  orientation
-}) {
-  return (orientation || 0) >= 5 ? {
-    width: height,
-    height: width
-  } : {
-    width,
-    height
-  };
-}
-
 
 /** return bounding box 
  */
@@ -594,22 +607,25 @@ async function firebaseGet(path) {
       error("Error getting document:", error);
   });
 }
+
 function getIsoDate(metadata,date){
   let isoDate;
   try{
-    for (let x of ['DateTimeOriginal','DateCreated','CreatedDate']){
-      isoDate=metadata[x].toISOString()//.replace("Z",metadata.OffsetTimeOriginal)
-      debug(x,metadata[x], typeof metadata[x], isoDate,)
+    ['DateTimeOriginal','DateCreated','CreatedDate']
+    .forEach (x => {
+      if (metadata.hasOwnProperty(x) && metadata[x] && metadata[x].length>0 ) {
+        isoDate=metadata[x].toISOString()
         return isoDate
-    }
-    isoDate = date //.replace(/\.[^/.]+$/, "")
+      }
+    })
   } catch (e) {
-    isoDate = '2000-01-01T10:00:00.000Z' // default date
+    debug(e)
   }
-  return isoDate
+  
+  return isoDate || date
 }
 
-function parseObjName(name){
+function parseObjName(name) {
   // uploads/race/wpt~time~user~waypoint
   // uploads/mychoice23mar/2022-01-13T12:23:36.476Z~start~avinashmane@gmail.com~9955-3Certificate.png
   var raceId='default', 
@@ -643,18 +659,141 @@ function parseObjName(name){
   return [folder, raceId,waypoint,  userId, date, gps, fileName]
 }
 
-function encodeKey(x){
-  return x.replace(/[\\\/]/g,"~")
-}
-function decodeKey(){
-  return x.replace(/[\^]/g,"/")
-}
-
-function cleanForFS(s) {
-  return s.replace(/[\/]/g,"_")
-}
-
 function getImageHeight(meta){
-  return meta.Orientation=="Horizontal (normal)"? meta.ImageHeight : meta.ImageWidth
-  // return (meta.orientation || 0) >= 5 ? meta.height : meta.width;
+  try{
+    return meta.Orientation=="Horizontal (normal)"? meta.ImageHeight : meta.ImageWidth
+  } catch(e){
+    return (meta.orientation || 0) >= 5 ? meta.height : meta.width;
+  }
 }
+
+
+/**
+ * Video OCR
+ * 
+ * 
+ * 
+ * scanVideo:  gets text annotations from GCS video to firestore
+ * @param {*} gcsUri 
+ */
+lazy.videocr=require('./videoocr')
+  
+exports.scanVideo = async function (gcsUri) {
+  
+  try{
+    var [bucket,raceId,videoPath] = gcsUri.split(/\//,).splice(-3)
+  } catch (e) {
+    console.error(`error parsing ${gcsUri}`,e)
+  }
+
+  // raceId='testrun'
+  // const detections = [ {
+  //   text: 'testt',
+  //   confidence: 0.9237396717071533,
+  //   secStart: 0.233333,
+  //   secEnd: 0.333333,
+  //   frames: 2
+  // }]
+  const raw_detections = await detectVideoText(gcsUri)
+  const detections = lazy.videocr.videoDetectionFilter(raw_detections)
+  log(detections)
+  return updFSVideoData( raceId, videoPath, detections) 
+};
+
+
+async function updFSVideoData(raceId, videoPath, detections, metadata) {
+
+  let payload={
+    videoPath: videoPath,
+    textAnnotations: detections,
+    }
+  payload.timestamp = new Date().toISOString()
+  if (metadata) 
+    payload.metadata = metadata
+  
+  debug(`writing to firestore ${videoPath}`)
+
+  return await admin.firestore()
+                .collection('races').doc(raceId)
+                .collection('videos').doc(videoPath)
+                .set(payload)
+                .catch(console.error)
+  // .then(firestoreSetRes=>{
+  // });
+}
+
+const detectVideoText = async function (gcsUri) {
+  // [START video_detect_text]
+  // Imports the Google Cloud Video Intelligence library
+
+  lazy.Video = lazy.Video || require('@google-cloud/video-intelligence');
+  // Creates a client
+  lazy.videoClient = lazy.videoClient || new lazy.Video.VideoIntelligenceServiceClient();
+
+  /**
+   * TODO(developer): Uncomment the following line before running the sample.
+   */
+  // const gcsUri = 'GCS URI of the video to analyze, e.g. gs://my-bucket/my-video.mp4';
+
+  const request = {
+      inputUri: gcsUri,
+      features: ['TEXT_DETECTION'],
+  };
+  // Detects text in a video
+  const [operation] = await lazy.videoClient.annotateVideo(request);
+  console.log(`Waiting for operation to complete...`,request);
+  try {
+    // Gets annotations for video
+    const results = await operation.promise();
+    const textAnnotations = results[0].annotationResults[0].textAnnotations;
+  } catch (err) {
+    console.error(`>> ${gcsUri}>>`,err);
+  }
+
+  // printannotations(textAnnotations);
+  return textAnnotations
+}
+
+function printannotations(textAnnotations) {
+  textAnnotations.forEach(textAnnotation => {
+    console.log(`Text ${textAnnotation.text} occurs at:`);
+    textAnnotation.segments.forEach(segment => {
+      const time = segment.segment;
+      console.log(
+        ` Start: ${time.startTimeOffset.seconds || 0}.${(
+          time.startTimeOffset.nanos / 1e6
+        ).toFixed(0)}s`
+      );
+      console.log(
+        ` End: ${time.endTimeOffset.seconds || 0}.${(
+          time.endTimeOffset.nanos / 1e6
+        ).toFixed(0)}s`
+      );
+      console.log(` Confidence: ${segment.confidence}`);
+      segment.frames.forEach(frame => {
+        const timeOffset = frame.timeOffset;
+        console.log(
+          `Time offset for the frame: ${timeOffset.seconds || 0}` +
+          `.${(timeOffset.nanos / 1e6).toFixed(0)}s`
+        );
+        // console.log('Rotated Bounding Box Vertices:');
+        // frame.rotatedBoundingBox.vertices.forEach(vertex => {
+        //   console.log(`Vertex.x:${vertex.x}, Vertex.y:${vertex.y}`);
+        // });
+      });
+    });
+  });
+}
+
+async function getVideoMetadata(bucket,filePath,metadataReqd=true) {
+  // Downloads the file into a buffer in memory.
+  //not possible
+  
+}
+
+/**
+ * Exports for testing
+ */
+exports.readFile = lazy.videocr.readFile
+exports.imageresult = lazy.videocr.imageresult;
+exports.parseObjName = parseObjName;

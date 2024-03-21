@@ -11,7 +11,8 @@ let props = defineProps({
 })
 let imagePath=props.imagePath
 const visible = ref(false);
-const getPublicUrl = (folder,raceId,file) => `https://storage.googleapis.com/run-pix.appspot.com/${folder}/${raceId}/${file.replace(/.png/i,'.jpg')}`
+import { getPublicUrl } from "../helpers/index";
+// const getPublicUrl = (folder,raceId,file) => `https://storage.googleapis.com/run-pix.appspot.com/${folder}/${raceId}/${file.replace(/.png/i,'.jpg')}`
 const shareableUrl = computed(() => `https://run-pix.web.app/image/${btoa([props.raceId,props.bibNo,imagePath].join('/'))}`)
 
 let thumbUrl=ref(getPublicUrl('thumbs',props.raceId,imagePath))

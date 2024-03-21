@@ -1,18 +1,6 @@
 <template>
   <div class="card p-fluid">
 
-    <!-- <DataTable :value="allEntries" editMode="cell" @cell-edit-complete="onCellEditComplete" tableClass="editable-cells-table" tableStyle="min-width: 50rem">
-        <Column v-for="col of columns" :key="col.field" :field="col.field" :header="col.header" >
-            <template #body="{ data, field }">
-                {{ data[field] }}
-            </template>
-            <template #editor="{ data, field }">
-                <template v-if="field !== 'price'">
-                    <InputText v-model="data[field]" autofocus />
-                </template>
-            </template>
-        </Column>
-    </DataTable> -->
     <InputText v-model="bibSearch"/>
     <Paginator v-model:first="first" v-model:rows="rows" :totalRecords="filtBibs.length" 
       template="FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
@@ -37,12 +25,6 @@ import { useStore } from 'vuex';
 
 import Paginator from 'primevue/paginator';
 import Image from 'primevue/image';
-
-// import DataTable from 'primevue/datatable';
-// import Column from 'primevue/column';
-// import ColumnGroup from 'primevue/columngroup';   // optional
-// import Row from 'primevue/row';                   // optional
-
 import Dialog from 'primevue/dialog';
 import InputText from 'primevue/inputtext';
 import Checkbox from 'primevue/checkbox';

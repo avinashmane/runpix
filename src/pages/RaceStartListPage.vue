@@ -236,7 +236,7 @@ import { usePrimeVue } from "primevue/config"; // optional
 import { db, storage } from "../../firebase/config"; //storage
 import { CSVToArray } from "../helpers/index";
 import { config } from "../config";
-import _ from "lodash";
+import {chain,cloneDeep,map,take,keys,orderBy,sumBy,pickBy,split,sortBy,tap,startsWith}  from "lodash-es";
 import {getAllDocs,setDocData} from '../api'
 
 // import {
@@ -258,7 +258,7 @@ const store = useStore();
 const racesObj = store.state.datastore.racesObj;
 const raceId = route.params.raceId;
 const race = racesObj[raceId];
-const validHeaders = _.map(config.startListHeaders,x=>x.field);
+const validHeaders = map(config.startListHeaders,x=>x.field);
 const editingRows = ref([]);
 const allEntries = ref([]);
 // const totalSize = ref(0);
@@ -287,7 +287,7 @@ const onTemplatedUpload = async () => {
   // debugger;
   console.log(allEntries.value)
   allEntries.value.forEach(async (x,i,arr)=>{
-    const bibData=_.pick(x,validHeaders)
+    const bibData=pick(x,validHeaders)
     {
       let ret =await setDocData(`/races/${raceId}/bibs/${bibData.Bib}`,bibData)
       progressValue.value=100*i/arr.length

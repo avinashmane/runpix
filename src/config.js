@@ -1,6 +1,7 @@
 var config = {};
 
 // config = {};
+config.app = {};// default from firestore app
 config.storage = {};
 config.api = {};
 config.face = {};
@@ -39,7 +40,7 @@ config.raceInfoPanelLabels={
   linkFeedback: 'Feedback link',
 }
 
-config.api.faceMatchUpload =  "https://runpix-face-nqmxzlpvyq-uc.a.run.app" //"https://express.runpix.forthe.life" //"http://localhost:8080"//
+config.api.faceMatchUpload = import.meta.env.VITE_FACEMATCHUPLOAD || "https://runpix-face-nqmxzlpvyq-uc.a.run.app" //"https://express.runpix.forthe.life" //"http://localhost:8080"//
 
 
 

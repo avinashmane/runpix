@@ -12,8 +12,8 @@ import TabView from 'primevue/tabview';
 import TabPanel from 'primevue/tabpanel';
 import InputText from 'primevue/inputtext';
 import { doc, getDoc ,updateDoc, setDoc } from 'firebase/firestore'
-import { getPublicUrl} from "../api" 
-import _ from "lodash"
+import { getPublicUrl } from "../helpers/index";
+import {chain,cloneDeep,map,take,keys,orderBy,sumBy,pickBy,split,sortBy,tap,startsWith}  from "lodash-es"
 
 const store = useStore()
 const router = useRouter()
@@ -21,7 +21,7 @@ const router = useRouter()
 const newRaceId=ref('newrace23month')
 const races = computed(() => {let arr = store.state.datastore.races
                               if (arr instanceof Object) 
-                                arr=_.orderBy(arr,"Date","desc")
+                                arr=orderBy(arr,"Date","desc")
                                 if (nolist.value ){
                                   return arr
                                 } else {

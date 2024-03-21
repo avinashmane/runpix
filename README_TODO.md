@@ -3,7 +3,13 @@
 ## use case
 * find timing from images
 * for images for a bib
- 
+
+# problems
+
+* sync problems in githus and 2 laptops
+* Deploy Error: Could not load the default credentials. Browse to https://cloud.google.com/docs/authentication/getting-started for more information.
+pnpm add @google-cloud/functions-framework
+
 # Todo:
 
 * result publishing
@@ -25,6 +31,13 @@ res=_.chain(allEntries.value).filter(checkBib).groupBy("bib").map((x,k)=>_.chain
 
 
 ### current 
+
+
+* Certification link from result (WIP)
+* router replace for event
+* lodash tree shaking (gone bad since _.chain does not work)
+import {chain,cloneDeep,map,take,keys,orderBy,sumBy,pickBy,split,sortBy,tap,startsWith} as _ from 'lodash-es'
+
 * rename API as /image as /api/facematch
 
 * defect: merge two fields 'user' for start else 'userId'
@@ -36,6 +49,31 @@ res=_.chain(allEntries.value).filter(checkBib).groupBy("bib").map((x,k)=>_.chain
     * event logos
 
 ### features
+
+* **22Mar**
+
+* Certification link from result (WIP)
+* router replace for event
+* lodash tree shaking (gone bad since _.chain does not work)
+import {chain,cloneDeep,map,take,keys,orderBy,sumBy,pickBy,split,sortBy,tap,startsWith} as _ from 'lodash-es'
+
+* rename API as /image as /api/facematch
+
+* defect: merge two fields 'user' for start else 'userId'
+* Event mgt UI finetuning
+* backend changes
+    * change image waypoint
+* Start list
+* SVG logos
+    * event logos
+
+
+* **14jan**
+    * start list
+    * finalize provisional timings
+    * problems with results page /formatting
+    * images everywhere
+
 * **28sep**
     * face search
         * service that wakes up for performance

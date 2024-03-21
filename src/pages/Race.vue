@@ -79,15 +79,16 @@ import SplitButton from 'primevue/splitbutton';
 import { config } from '../config';
 import Tag from 'primevue/tag'
 import RaceAdmin from "./RaceAdmin.vue";
-import { getPublicUrl,  getUser, checkAccessEventRole} from "../api" 
-import _ from "lodash"
+import { getPublicUrl } from "../helpers/index";
+import { getUser, checkAccessEventRole} from "../api" 
+import {chain,cloneDeep,map,take,keys,orderBy,sumBy,pickBy,split,sortBy,tap,startsWith}  from "lodash-es"
 
 let props = defineProps ({
   option: String
 })
 
 const bibRegexDefault = /^\d{3,5}$/;
-const links=ref(_.pickBy(config.raceInfoPanelLabels,(v,k)=>_.startsWith(k,'link')))
+const links=ref(pickBy(config.raceInfoPanelLabels,(v,k)=>startsWith(k,'link')))
 const route = useRoute();  
 const router = useRouter()
 const store = useStore()
@@ -183,7 +184,7 @@ table#raceinfo ::v-deep(td) {
   border-top: thin lightgrey;
 }
 
-btn {
+/* btn {
   @apply bg-blue-500 hover:bg-blue-400
-}
+} */
 </style>

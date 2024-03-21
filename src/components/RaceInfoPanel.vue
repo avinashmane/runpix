@@ -76,7 +76,8 @@ import { computed ,ref, reactive } from 'vue';
 import { useRoute } from 'vue-router';
 import { doc, getDoc ,updateDoc, setDoc } from 'firebase/firestore'
 import {db} from '../../firebase/config'
-import _ from "lodash"
+
+import {chain,cloneDeep,map,take,keys,orderBy,sumBy,pickBy,split,sortBy,tap,startsWith} from 'lodash-es'
 import { getLocalDateTime  } from '../helpers';
 import { config } from '../config';
 
@@ -129,7 +130,7 @@ let flagOff=(e,a)=>{
   
   race.value.timestamp['start']=now
       
-  let ts=_.cloneDeep(race.value.timestamp)
+  let ts=cloneDeep(race.value.timestamp)
   
   updateDoc(doc(db,`races/${raceId}`),{'timestamp':ts})
   setDoc(doc(db,
@@ -145,7 +146,7 @@ let flagOff=(e,a)=>{
 
 let saveChanges=(e)=>{
   const now=new Date().toISOString()
-  let UpdValues=_.cloneDeep(race.value)
+  let UpdValues=cloneDeep(race.value)
   
   if (!race.value.timestamp)  UpdValues['timestamp']={'create': now}
   UpdValues['timestamp']['modify']= now
