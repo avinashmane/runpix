@@ -10,6 +10,14 @@ This project was created with [Vite](https://vitejs.dev/).
 * [Feature requests](https://github.com/avinashmane/runpix/discussions)
 
 # Development details
+
+## Repos
+
+* runpix
+* run-pix-admin (python)
+* runpix-face
+* docs?
+
 ## Languages and Tools
 
 <div align="center">

@@ -57,8 +57,7 @@
             </router-link>
             <Button name="create" @click="klick">Check</Button>
           </template> -->
-
-                    
+    
       </Card>       
     </div>
   </div>

@@ -9,10 +9,10 @@
     </div>
 
     <div class="card flex justify-content-center w-full mt-2">
-      <Button @click="bibSelection = ''; entries = [];"><i class="pi pi-times w-6 "></i></Button>
+      <Button @click="cancelBibSelection()"><i class="pi pi-times w-6 "></i></Button>
 
       <AutoComplete v-model="bibSelection" showClear :suggestions="items" @complete="searchBib"
-        :dropdown-click="searchBib" class="w-full " inputClass="px-2 mx-2" />
+        :dropdown-click="searchBib" class="w-full " inputClass="w-full px-2 mx-2" />
       <Button name="searchResults" @click="searchResults" icon="pi pi-search" raised></Button>
     </div>
   </div>
@@ -24,11 +24,20 @@
           <img alt="user header" src="/images/finisher.png" />
       </template> -->
       <template #title>
-        <span class="text-center w-full">{{ getFinishStatus() }}</span>
+        <div class="flex flex-row w-full ">
+          <img
+          :src="getPublicUrl('processed', race.id, race.coverPage)"
+          class="w-[20%] "
+          />
+          <div>
+            <div class=" w-full">{{ getFinishStatus() }}</div>
+            <div class=" w-full text-2xl">{{ race.Name }} </div>
+            <div class=" w-full text-base">{{ race.Location }} </div>
+            <div class=" w-full text-base">{{ race.Date }} </div>
+          </div>
+        </div>
       </template>
-      <template #subtitle>
-        <span class="text-center w-full text-2xl">{{ race.Name }} </span>
-      </template>
+
       <template #content>
         <table>
           <tr>
@@ -72,7 +81,24 @@
           </tr>
         </table>
 
-        <Certificate :bibData="bibData" :race="race" />
+
+        <div class="mx-auto mt-2">
+            <div v-if="race.status.includes('final')" class="mx-auto">
+                Official Results
+            </div>
+
+            <div v-if="race.status.includes('provisional')"
+              class="mx-auto"
+              >
+                Provisional Results
+
+            </div>            
+
+            <Certificate v-if="race.certificate" 
+                  :template="race.certificate.finisherCertificate"
+                  :data="getCertData()" />
+
+        </div>
 
       </template>
     </Card>
@@ -124,14 +150,14 @@ import { useStore } from 'vuex';
 import Dropdown from 'primevue/dropdown';
 import AutoComplete from 'primevue/autocomplete';
 import Card from 'primevue/card';
-
+import { getPublicUrl } from "../helpers";
 import Certificate  from '../components/CertificateView.vue';
 
 import { collection, getDocs, doc, query, where, limit, onSnapshot } from "firebase/firestore"; //ref as dbRef,
 import { db } from "../../firebase/config"
 import { useRoute, useRouter } from 'vue-router';
 import { computed, ref } from 'vue';
-import {chain,cloneDeep,map,take,keys,orderBy,groupBy,sumBy,pickBy,split,sortBy,tap,startsWith}  from "lodash-es"
+import {chain,cloneDeep,map,take,keys,orderBy,groupBy,sumBy,pickBy,split,sortBy,tap,startsWith, each}  from "lodash-es"
 // import * as _ from 'lodash-es'
 
 const router = useRouter()
@@ -148,20 +174,23 @@ let race = computed(() =>
   (races.value.length && raceId.value) ?
     races.value.filter(x => x.id == raceId.value)[0] : { Name: '' })
 
-
 let raceId = ref(params.raceId)
-let bib = ref(params.bib)
+// let bib = ref(params.bib)
 
 if (params.raceId)
   loadRaceId(params.raceId)
 
-const bibSelection = ref("");
+
+const bibSelection = ref(params.bib);
 const items = ref([]);
 const entries = ref([])
 const message = ref("")
 let filteredBibObjects = ref([])
 
 let bibData = computed(() => {
+  if (!filteredBibObjects.value.length) 
+    return {}
+
   let filt = filteredBibObjects.value.filter(x => x.Bib == bibSelection.value.split(' ')[0])
   return filt.length ? filt[0] : {}
 })
@@ -225,6 +254,9 @@ const searchResults = async () => {
   return await searchResultsForBib(bibNo)
 }
 
+if (params.bib)
+  searchResults()
+
 async function searchResultsForBib(bibNo) {
   let containsOperator = '==',//"array-contains",
     _items = [];
@@ -246,8 +278,9 @@ async function searchResultsForBib(bibNo) {
     for (let i = 0; i < querySnapshot.docs.length; i++) {
       let data = querySnapshot.docs[i].data()
 
-      if (!(data.status && data.status == "hidden"))
-        _items.push(data);
+      if (!(data.status && data.status == "hidden")){      
+        _items.push(mapBibResult(data));
+      }
     };
     filteredBibObjects.value = _items
     entries.value = _items;
@@ -255,6 +288,14 @@ async function searchResultsForBib(bibNo) {
     return _items
   }
   message.value = `Not found`
+}
+
+function mapBibResult(data) {
+  data=JSON.parse(JSON.stringify(data))
+  if ('Rank' in data){
+    data['Rank'] = `${data['Rank']}`;
+  }
+  return data
 }
 
 const raceInfo = ref({})
@@ -272,8 +313,15 @@ const setBib = async (bibNo) => {
   bibSelection.value = bibNo
   // debugger
   // await searchBib()
+  router.replace(`/r/${raceId.value}/${bibNo}`)
   await searchResults()
 }
+function cancelBibSelection(){
+  bibSelection.value = ''; 
+  entries.value = [];
+  router.replace(`/r/${raceId.value}`)
+}
+
 const getFinishStatus = () => !isNaN(bibData.value.Rank) ? 'FINISHER' : 'FINISH STATUS'
 
 let klick = () => {
@@ -281,7 +329,7 @@ let klick = () => {
 }
 
 const checkResStatus = (race) => {
-  ;
+  
   if (race.status)
     return (race.status.includes('final') || race.status.includes('provisional'))
 }
@@ -308,6 +356,21 @@ async function loadRaceId(raceId) {
                               (x, k) => { console.log(">",k); return !k.includes('Other') })
 
     })
+}
+
+function getCertData(){
+  return Object.assign({
+      cert_key: [race.value.id,
+                bibData.value.Bib,
+                race.value.certificate.finisherCertificate.slice(0,8)
+              ].join('-'), 
+      race_name: race.value.Name,
+      race_date: race.value.Date,
+      cert_url: window.location.href
+      },
+      bibData.value
+    )
+
 }
 
 </script>

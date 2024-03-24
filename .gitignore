@@ -1,5 +1,4 @@
 # Logs
-.firebase
 logs
 *.log
 npm-debug.log*
@@ -20,9 +19,12 @@ dist-ssr
 !.vscode/extensions.json
 .idea
 .DS_Store
-.env
-.env.development
-.env.production
+.firebase/**
+
+.env*
+
+
+
 *.sln
 *.sw?
 .ipynb_checkpoints

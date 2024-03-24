@@ -1,72 +1,80 @@
+/** * Only certifiacte related data here */
 <template>
-
   <Card class="container bg-skyblue-300 flex content-center">
-  
-    <template #header>
-      Race Details
-      <!-- <h1 class="text-2xl font-bold mx-auto">{{ race.name }}</h1> -->
-      <img
-        :src="getPublicUrl('processed', race.id, props.race.coverPage)"
-        class="w-[30%] "
-      />
-    </template>
-    <template #content>
-        <div class="mx-auto mt-8">
-            <div v-if="props.race.status.includes('final')" class="mx-auto">
-                Official Results
-            </div>
-            <div v-else>
-                <div
-                v-if="props.race.status.includes('provisional')"
-                class="mx-auto"
-                @click="getCertificate(race, bibData)"
-                >
-                Provisional Results
-                </div>
-            </div>
-        <!-- {{ props.race.status }} -->
+    <template #content> 
+      <div>
+          <Button v-if="!cert.status || cert.status == 'E'"
+            @click="getCertificate(props.template, props.data)"
+            class="mx-auto"
+            label="Get Certificate"
+            >Get Certificate</Button
+          >
+        <span v-if="cert.status == 'E'">
+          Error: Please try later!
+        </span>
+        <div v-if="cert.status == 'R'">
+          <ProgressSpinner/>
         </div>
+        <div v-if="cert.status == 'Y'">
+          <a :href="cert.url" download="runpix_certificate.png"
+            class="p-button py-1 px-2">Download</a>
+
+          <Image :src="cert.url" class="w-full mt-4" />
+        </div>
+      </div>
     </template>
   </Card>
 </template>
 
 <script setup>
 const props = defineProps({
-    race: Object,
-    bibData: Object
-})
+  template: String, // Google doc id
+  data: Object,
+  message: String,
+});
 
 import { config } from "../config";
-import Card from 'primevue/card'
-import { getPublicUrl } from "../helpers";
-import axios from 'axios';
-    
+import { ref } from "vue";
+import Card from "primevue/card";
+import Button from "primevue/button";
+import Image from "primevue/image";
+import ProgressSpinner from "primevue/progressspinner";
+
+import axios from "axios";
+
 const GS_PREFIX = config.GS_PREFIX;
+const cert = ref({
+  status: null, // Request, Yes / No, E'
+  url: null,
+});
 
+console.log(props);
 
-function getCertificate(race,bibData){
-    console.log(race,bibData)
-    config.app.CERT_URL = config.app.CERT_URL || 'https://run-pix-admin-nqmxzlpvyq-uc.a.run.app' ;
-    const url='https://run-pix-admin-nqmxzlpvyq-uc.a.run.app/cert?cert=run_dist'
-    console.log(race.id,race.forms,bibData)
-    
-    // axios.get(`${GS_PREFIX}/certificates/${
-      axios.post(config.app.CERT_URL+'/cert?cert=run_dist', bibData)
-      .then((ret) => {
-        console.log('Upload success',ret);
-    
-              
-        message.value=`Searching faces in the uploaded image`
-        setTimeout(()=>{message.value=''},5000)
-      })
-      .catch(e=>{
-        if (e?.response?.status==422){
-          console.log('No faces found in the uploaded image')
-        } else
-          console.warn(e)
-        uploadedImage.value=null
-      });
-      
+function getCertificate(race, bibData) {
+  // const url='https://run-pix-admin-nqmxzlpvyq-uc.a.run.app/cert?cert=run_dist'
+  const url = `${config.app.CERT_URL}/api/cert/${props.template}`;
+  console.log(config.app,url, props.data);
 
+  cert.value.status = "R";
+
+  // console.log(JSON.stringify(props.data));
+
+  return axios
+    .post(url, props.data, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+    .then((ret) => {
+      console.log("Certificate generated", ret);
+      cert.value.status = "Y";
+      cert.value.url = ret.data.contentUrl;
+      console.log(cert);
+      return ret;
+    })
+    .catch((e) => {
+      cert.value.status = "E";
+      console.warn( e);
+    });
 }
 </script>

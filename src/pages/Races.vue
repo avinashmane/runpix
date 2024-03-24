@@ -111,20 +111,7 @@ NOP(fsdb);
             <!-- <Column field="Location" header="Location" sortable></Column> -->
         </DataTable>
       
-      <!-- <DataTable> -->
-        <!-- <tr v-for="r in races" class="w-full flex gap-3 mx-auto">
-          <td>
-          {{r.Name}}
-          <Button type="button" label="View" icon="pi pi-bookmark" 
-            @click="router.push(`/e/${r.id}`)" raised>
-          </Button>
-          </td>
-            <td> {{r.Date}} </td>
-            <td> {{ r.Location }}</td>
-             -->
 
-        <!-- </tr>
-      </DataTable>         -->
       </template>
     </Card>
 

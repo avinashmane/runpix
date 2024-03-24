@@ -59,6 +59,7 @@ let items= [
     />
   </div>
 </template>
+
 <style scoped>
 .p-image :deep( img) {
   box-shadow: black 1em;

@@ -42,6 +42,10 @@ config.raceInfoPanelLabels={
 
 config.api.faceMatchUpload = import.meta.env.VITE_FACEMATCHUPLOAD || "https://runpix-face-nqmxzlpvyq-uc.a.run.app" //"https://express.runpix.forthe.life" //"http://localhost:8080"//
 
+const isDev=()=>import.meta.env.MODE=='development'
+config.app.CERT_URL = isDev() ?  "http://127.0.0.1:8080" :
+                      'https://run-pix-admin-nqmxzlpvyq-uc.a.run.app' ;
+console.log('Mode: ',import.meta.env.MODE)
 
 
 //= process.env.WEB_PORT || 9980;
