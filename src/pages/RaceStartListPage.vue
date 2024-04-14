@@ -236,7 +236,7 @@ import { usePrimeVue } from "primevue/config"; // optional
 import { db, storage } from "../../firebase/config"; //storage
 import { CSVToArray } from "../helpers/index";
 import { config } from "../config";
-import {chain,cloneDeep,map,take,keys,orderBy,sumBy,pickBy,split,sortBy,tap,startsWith}  from "lodash-es";
+import {chain,cloneDeep,map,take,keys,orderBy,sumBy,pick,pickBy,split,sortBy,tap,startsWith}  from "lodash-es";
 import {getAllDocs,setDocData} from '../api'
 
 // import {
