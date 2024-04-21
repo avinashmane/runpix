@@ -218,10 +218,13 @@ import {
 } from "firebase/firestore";
 import {
   chain,
+
   cloneDeep,
   map,
+  each,
   take,
   keys,
+  groupBy,
   orderBy as _orderBy,
   sumBy,
   pickBy,
@@ -229,8 +232,11 @@ import {
   split,
   sortBy,
   tap,
+  extend,
   startsWith,
 } from "lodash-es";
+
+import _ from 'lodash-es'
 
 const GS_PREFIX = config.GS_PREFIX;
 const NOMATCH = "N/A";
@@ -646,22 +652,22 @@ function finalize_results() {
   }
 
   function groupResultsByValidCategories(results) {
-    return groupBy(results, (x) => `${x.Category}_${x.Status}`)
-      .map((o, k) => ({
-        cat: k,
-        entries: sortBy(o, "Race Time"),
-      }))
-      .filter((x) => RegExp(/^\d+K\D/).test(x.cat));
-
-    // return chain(results)
-    // .groupBy(x => `${x.Category}_${x.Status}`)
-    // .map((o, k) => ({
-    //   cat: k,
-    //   entries: sortBy(o, "Race Time")
-    // }))
-    // .filter(x => RegExp(/^\d+K\D/).test(x.cat))
-    // .tap(console.log)
-    // .value();
+    // let ret = groupBy(results, (x) => `${x.Category}_${x.Status}`)
+    // ret= each(ret,(o, k) => ({
+    //     cat: k,
+    //     entries: sortBy(o, "Race Time"),
+    //   }))
+    // ret = pickBy(ret,(x) => RegExp(/^\d+K\D/).test(x.cat));
+    // return ret
+    return chain(results)
+    .groupBy(x => `${x.Category}_${x.Status}`)
+    .map((o, k) => ({
+      cat: k,
+      entries: sortBy(o, "Race Time")
+    }))
+    .filter(x => RegExp(/^\d+K\D/).test(x.cat))
+    .tap(console.log)
+    .value();
   }
 }
 

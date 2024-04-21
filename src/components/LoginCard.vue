@@ -1,5 +1,6 @@
 <script setup>
 import { useStore } from 'vuex';
+import { useRoute } from 'vue-router';
 import {ref, reactive } from "vue";
 import {GoogleAuthProvider,signInWithPopup } from 'firebase/auth'
 import {firebaseAuth } from '../../firebase/config'
@@ -9,14 +10,15 @@ import router from "../router";
 
 const store = useStore()
 const signInState = store.state.auth.signIn
-
-// const passwordModel = ref('')
-// const emailModel= ref('')
-// const localState = reactive({
-//   disableSignIn: true,
-//   emailError: false,
-//   passwordError: false,
-// })
+const route = useRoute()
+console.log(route.query)
+const passwordModel = ref('')
+const emailModel= ref(route.query?.email||'')
+const localState = reactive({
+  disableSignIn: true,
+  emailError: false,
+  passwordError: false,
+})
 
 const signIn = () => {
   store.dispatch('signInAction', {email: emailModel.value, password: passwordModel.value}).then(() => {
@@ -74,8 +76,15 @@ const validateForm = () => {
 
 <template>
   <LoadingSpinner v-if="signInState.isLoading" />
-    
-  <!-- <form class="flex-col text-center bg-white md:w-[75%] rounded-xl shadow-lg mx-auto sm:w-full p-5 relative" @submit.prevent="signIn" @change="validateForm">
+
+  <div class="w-full mt-2 mb-2">
+    <button class="bg-blue-300 rounded-full drop-shadow-lg text-white text-md h-9 w-full opacity-40 ableSignIn" @click="signInGoogle">
+      Login with Google</button>
+  </div>
+
+
+  <form v-if="route.query.email" class="flex-col text-center bg-white w-full rounded-xl shadow-lg mx-auto sm:w-full p-5 relative" 
+    @submit.prevent="signIn" @change="validateForm">
     <h1 class="text-left text-2xl mb-10 ml-3">Login</h1>
     <div class="md:w-[65%] mx-auto my-10 sm:w-full">
       <span class="p-float-label mb-2">
@@ -94,14 +103,11 @@ const validateForm = () => {
     <button class="bg-[#2B2E4A] rounded-full drop-shadow-lg text-white text-md h-9 w-[85px] opacity-40" :class="{ 'ableSignIn': !localState.disableSignIn }" :disabled="localState.disableSignIn">
       Login</button>
     <br/>
-  </form>  -->
-  <div class="w-full">
-    <button class="bg-blue-300 rounded-full drop-shadow-lg text-white text-md h-9 w-full opacity-40 ableSignIn" @click="signInGoogle">
-      Login with Google</button>
-  </div>
+  </form> 
 </template>
 
-<style scoped lang="postcss">
+<style scoped >
+/* lang="postcss" */
 .ableSignIn {
   @apply hover:bg-indigo-300 transition ease-in-out opacity-100
 }

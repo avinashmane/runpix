@@ -1,21 +1,25 @@
 {
   "name": "vite",
-  "version": "0.1.0",
-  "notatiype1": "module",
+  "version": "1.1.0",
+  "notatype1": "module",
+  "author": {
+    "name": "Avinash Mane"
+  },
   "scripts": {
     "dev": "vite",
     "func-serve": "firebase serve --only functions -p 5001",
     "build": "vite build",
     "serve": "vite preview",
     "hosting": "firebase deploy --only hosting",
+    "test:unit": "mocha",
+    "test:e2e": "cucumber-js",
+    "test:f": "cd functions & node node_modules/mocha/bin/mocha.js --reporter spec",
+    "test:reprocess": "cd functions & pnpm exec mocha --reporter spec -f reprocess",
     "cy:open": "cypress open",
-    "ftest": "cd functions & node node_modules/mocha/bin/mocha.js --reporter spec",
-    "test_reprocess": "cd functions & pnpm exec mocha --reporter spec -f reprocess",
     "vidtest": "cd functions & pnpm exec mocha --reporter spec test/video.test.js -f video ",
     "vidmock1": "cd functions & npm exec mocha test/video.test.js -f MOCK"
   },
   "dependencies": {
-    "@google-cloud/video-intelligence": "^5.1.0",
     "add": "^2.0.6",
     "compressorjs": "^1.2.1",
     "express": "^4.18.2",
@@ -31,19 +35,27 @@
     "vuex": "^4.1.0"
   },
   "devDependencies": {
+    "@cucumber/cucumber": "^10.5.0",
     "@types/lodash-es": "^4.17.12",
     "@vitejs/plugin-vue": "^3.2.0",
     "@vue/compiler-sfc": "^3.4.10",
     "autoprefixer": "^10.4.16",
-    "cypress": "^12.17.4",
     "eslint": "^8.56.0",
     "eslint-plugin-vue": "^9.20.0",
+    "mocha": "^10.4.0",
     "open": "^9.1.0",
+    "geckodriver": "^4.3.3",
+    "selenium-webdriver": "^4.19.0",
     "postcss": "^8.4.33",
     "tailwindcss": "^3.4.1",
     "vite": "^3.2.7",
     "vite-bundle-visualizer": "^1.0.0",
     "vite-plugin-chunk-split": "^0.4.7",
     "vite-plugin-mkcert": "^1.17.2"
+  },
+  "deletedDependencies":{
+    "@google-cloud/video-intelligence": "^5.1.0",
+    "cypress": "^12.17.4",
+    "dummy": "none"
   }
 }

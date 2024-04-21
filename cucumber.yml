@@ -1,0 +1,13 @@
+default:
+  parallel: 2
+  format:
+    - html:tests/cucumber-report.html
+    - progress-bar
+  # import:   #support code
+  #   - 'tests/support/**/*.js'
+  paths:   # features
+    - 'tests/features/**/*.feature'
+  worldParameters:
+    browser: chrome
+    base_url: https://localhost:5000
+    keepBrowserOpen: True

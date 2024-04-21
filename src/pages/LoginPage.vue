@@ -68,7 +68,7 @@ let items= [
   margin: auto;
 }
 #login {
-  color: yellow;
+  color: navy;
   width: 50vw;
   margin: auto;  
 }
