@@ -5,6 +5,7 @@ import Card from 'primevue/card' ;
 import { computed,ref } from 'vue';
 import {getDateTime} from '../helpers';
 import DataTable from 'primevue/datatable';
+import DataView from 'primevue/dataview'
 import Column from 'primevue/column';
 import InputSwitch from 'primevue/inputswitch';
 import {db} from '../../firebase/config'
@@ -14,6 +15,7 @@ import InputText from 'primevue/inputtext';
 import { doc, getDoc ,updateDoc, setDoc } from 'firebase/firestore'
 import { getPublicUrl } from "../helpers/index";
 import {chain,cloneDeep,map,take,keys,orderBy,sumBy,pickBy,split,sortBy,tap,startsWith}  from "lodash-es"
+import RaceCard from '../components/RaceCard.vue';
 
 const store = useStore()
 const router = useRouter()
@@ -79,6 +81,7 @@ NOP(fsdb);
         </div>
       </template>
       <template #content>
+
         <DataTable :value="races"  stripedRows>
             <Column field="id" style="width: 20%"  class="p-1">       
               <template #body="{ data }">         
