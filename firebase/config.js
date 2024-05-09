@@ -27,15 +27,7 @@ const firebaseAuth = getAuth()
 const db = getFirestore()
 const storage = getStorage()
 // console.debug('firebaseAuth', firebaseAuth)
-getDoc(doc(db,'app/config'))
-                .then(docSnap => {
-                    if (docSnap.exists()) {
-                        config.app = Object.assign(config.app,docSnap.data())
-                        console.log("app/config loaded :"+Object.keys(config.app).length );
-                    } else {
-                        // doc.data() will be undefined in this case
-                        console.log("No app/config");
-                    }
-                })
+
+
 
 export { firebaseAuth, db, storage }

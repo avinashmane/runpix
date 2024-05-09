@@ -1,6 +1,6 @@
 import { signInWithEmailAndPassword,GoogleAuthProvider, signInWithRedirect,signInWithPopup, createUserWithEmailAndPassword, signOut , updatePassword, EmailAuthProvider, reauthenticateWithCredential } from "firebase/auth";
-import { collection, doc, getDocs, getDoc, setDoc  } from "firebase/firestore"; 
-
+import { collection, doc, getDocs, getDoc, setDoc, onSnapshot  } from "firebase/firestore"; 
+import { config } from "../config";
 import { firebaseAuth, db } from '../../firebase/config';
 
 export const getUser = () => {
@@ -117,6 +117,25 @@ export const getRaces = () => {
             return {}
         }) 
 }
+
+export const getRacesAsync = (callback) => {
+    try{
+        const racesRef = collection(db, "races");
+        return onSnapshot(racesRef,docSnap=> {
+            let dat= docSnap.docs.map(x=>{
+                        let o=x.data();
+                        o['id']=x.id;
+                        return o})
+            console.log(`loading ${dat.length} races`)
+            callback(dat);
+        })
+    }catch(error) {
+            // doc.data() will be undefined in this case
+            console.debug("No such document!",error);
+            return {}
+    }
+}
+
 
 export const getAllDocs = (path) => {
     const racesRef = collection(db, path);
@@ -236,3 +255,32 @@ export async function deleteCollection(db, collectionPath, batchSize) {
     });
   }
 //end delete collection  
+
+/**
+ * Realtime updates
+ */
+let subscriptions={}
+subscriptions['config']=onSnapshot(doc(db,'app/config'),
+                    docSnap => {
+                        if (docSnap.exists()) {
+                            config.app = Object.assign(config.app,docSnap.data())
+                            console.log("app/config loaded :"+Object.keys(config.app).length );
+                        } else {
+                            // doc.data() will be undefined in this case
+                            console.log("No app/config");
+                        }
+                    })
+
+function subscribetoUserProfile(email){        
+    const path=`users/${email}`            
+    return onSnapshot(doc(db,path),
+                    docSnap => {
+                        if (docSnap.exists()) {
+                            config.app = Object.assign(config.app,docSnap.data())
+                            console.log(`${path} loaded`+Object.keys(config.app).length );
+                        } else {
+                            // doc.data() will be undefined in this case
+                            console.log(`Error loading ${path}`);
+                        }
+                    })
+}

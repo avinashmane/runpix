@@ -90,7 +90,7 @@ const DEBUG_MODE = defaultFor("DEBUG_MODE",2)
 const debug = DEBUG_MODE>2 ? functions.logger.debug : ()=>{}
 const log= DEBUG_MODE>1 ? functions.logger.log: ()=>{}
 const error=  functions.logger.error
-
+const JSS=JSON.stringify
 // Since this code will be running in the Cloud Functions environment
 // we call initialize Firestore without any arguments because it
 // detects authentication from the environment.
@@ -695,8 +695,10 @@ exports.scanVideo = async function (gcsUri) {
   //   frames: 2
   // }]
   const raw_detections = await detectVideoText(gcsUri)
-  const detections = lazy.videocr.videoDetectionFilter(raw_detections)
-  log(detections)
+  // printannotations(raw_detections);
+  const detections = lazy.videocr.videoDetectionFilter(raw_detections, /^\d*$/)
+  log(`scanVideo(${gcsUri})`,detections.map(x=>x.text))
+    
   return updFSVideoData( raceId, videoPath, detections) 
 };
 
@@ -736,22 +738,21 @@ const detectVideoText = async function (gcsUri) {
   // const gcsUri = 'GCS URI of the video to analyze, e.g. gs://my-bucket/my-video.mp4';
 
   const request = {
-      inputUri: gcsUri,
-      features: ['TEXT_DETECTION'],
+    inputUri: gcsUri,
+    features: ['TEXT_DETECTION'],
   };
   // Detects text in a video
   const [operation] = await lazy.videoClient.annotateVideo(request);
-  console.log(`Waiting for operation to complete...`,request);
+  // console.log(`Waiting for operation to complete...`, request);
   try {
     // Gets annotations for video
-    const results = await operation.promise();
-    const textAnnotations = results[0].annotationResults[0].textAnnotations;
-  } catch (err) {
-    console.error(`>> ${gcsUri}>>`,err);
-  }
+    const results = await operation.promise()
+    const textAnnotations = results[0]?.annotationResults?.[0]?.textAnnotations;
 
-  // printannotations(textAnnotations);
-  return textAnnotations
+    return textAnnotations
+  } catch (err) {
+    console.error(`>> ${gcsUri}>>`, err);
+  }
 }
 
 function printannotations(textAnnotations) {

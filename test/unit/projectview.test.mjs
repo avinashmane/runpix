@@ -1,9 +1,9 @@
 import { mount } from '@vue/test-utils'
-import ProjectView from '../../src/views/ProjectView.vue'
+import BackButton from '../../src/components/BackButton.vue'
 
 describe('ProjectView.vue', () => {
   it('renders project details', () => {
-    const wrapper = mount(ProjectView)
+    const wrapper = mount(BackButton)
     expect(wrapper.text()).toContain('Project Details')
   })
 })

@@ -1,8 +1,10 @@
 Feature: Selenium testing using Selenium official web page
+    # base_url is defined in cucumber.yml
+    # prerequisite vite start
 
     Scenario: Basic website check
-        Given I have visited path "/login?token=asdasdasd"
-        When There is a title on the page as "localhost"
+        Given I have visited path "/login?email=avinashmane@yahoo.com"
+        When There is a title on the page as "Run PiX"
         When I clicked on text "Project Info"
         Then input "name" has value "Ashish's test project"
 

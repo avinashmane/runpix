@@ -1,15 +1,14 @@
 <template>
 
-  <div class="container mx-auto">
-    <div class="w-full text-center justify-center flex-col">
       <Card>
         <template #title > 
-          <span @click="klick">Race id {{raceId}}             </span>
+            <BackButton/>
+            <span @click="klick">Race id {{raceId}} {{ route.params?.mode }}</span>
         </template>
 
         <template #content>
           
-          <tr v-if="option!='Info'">
+          <tr >
             <td class="p-inputgroup-addon w-sm" @click="klick">
                 Waypoint
             </td>
@@ -19,59 +18,32 @@
                   placeholder="Select a Waypoint" class="md:w-14rem" />   
               </td>
           </tr>
-        </template>
 
-      </Card>
-      <div class="w-full my-2">
-        <SelectButton v-model="option" :options="options"/>
-      </div>
-
-      <Card>
-          <template #content>
-
-            <race-info-panel v-if="option=='Info'" :waypoint="waypoint"/>
-            <router-link to="/e" class="text-xl">
-              <Button raised icon="pi pi-chevron-left" class="p-2"/> 
-            </router-link>
-
-            <!-- <RaceStartList v-if="option=='Start List'" :raceId="raceId" :race="race"/> -->
-
-            <div v-if="option=='Record'">
-              <Camera :waypoint="waypoint" :raceId="raceId" 
-              :race="race"  /> 
-              <!-- :bibs="bibs" -->
-              <geo-loc/>
+            <div>
+                <CameraVideo v-if="route.params?.mode=='video'" 
+                    :waypoint="waypoint" :raceId="raceId" 
+                    :race="race"  /> 
+                <Camera v-else :waypoint="waypoint"  
+                    :race="race" :raceId="raceId" /> 
+                <geo-loc/>
             </div>
-            <RaceLog v-if="option=='Provisional'" :waypoint="waypoint" :raceId="raceId" :race="race"/>
-
-
-            <!-- <RaceImages :waypoint="waypoint" v-if="option=='Images'"
-                        :bibRegex="race.bibPattern" :raceId="raceId"/> -->
-            <!-- <router-link :to="'/e/'+raceId+'/i'"><Button>Images</Button></router-link> -->
         
           </template>
 
-          <!-- <template #footer>
-            <router-link to="/races">
-              <Button name="races" >Races</Button>
-            </router-link>
-            <Button name="create" @click="klick">Check</Button>
-          </template> -->
-    
       </Card>       
-    </div>
-  </div>
+
 </template>
 
 <script setup>
 import { useStore } from 'vuex';
-// import Camera from "../components/old_Camera.vue";
 import Camera from "../components/Camera.vue";
+import CameraVideo from "../components/CameraVideo.vue";
 import GeoLoc from "../components/GeoLoc.vue";
-import RaceLog from "../components/RaceLogCard.vue";
+// import RaceLog from "../components/RaceLogCard.vue";
 // import RaceStartList from "../components/RaceStartListCard.vue";
-import RaceImages from "../components/RaceImagesCard.vue";
-import RaceInfoPanel from "../components/RaceInfoPanel.vue";
+// import RaceImages from "../components/RaceImagesCard.vue";
+// import RaceInfoPanel from "../components/RaceInfoPanel.vue";
+import BackButton from '../components/BackButton.vue'
 
 import Card from 'primevue/card';
 

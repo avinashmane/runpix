@@ -12,7 +12,7 @@ fail-zero: true
 # fgrep and grep are mutually exclusive
 # fgrep: 'something'
 # file:
-  # - 'tests/unit/mock.spec.js'
+  # - 'test/unit/mock.spec.js'
   # - '/path/to/some/other/file'
 forbid-only: false
 forbid-pending: false
@@ -40,12 +40,13 @@ reporter-option: # array, not object
   - 'baz=quux'
 # require: '@babel/register'
 retries: 1
-slow: '75'
+slow: 75
 sort: false
 spec:
-  - 'tests/unit/**/*.spec.js' # the positional arguments!
-  # - 'tests/unit/mock.spec.js' # the positional arguments!
-timeout: '5000' # same as "timeout: '2s'"
+  # - 'test/unit/**/*.spec.js' # the positional arguments!
+  # - 'functions/test/**/*.test.js' # the positional arguments!
+  # - 'test/unit/mock.spec.js' # the positional arguments!
+timeout: 5000 # same as "timeout: '2s'"
 # timeout: false # same as "timeout: 0"
 trace-warnings: true # node flags ok
 ui: 'bdd'

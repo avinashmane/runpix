@@ -7,13 +7,12 @@
     </div>
 
     <div class="flex flex-col w-full">
-      <div class="text-sm">
+      <div class="text-sm ml-2 text-left">
         {{ race.Name }} 
       </div>
 
     <div class="w-full flex flex-row justify-left" >
-
-      <div class="text-xs flex flex-col w-full" @click="router.push(`/e/${race.id}`)">
+      <div class="text-xs flex flex-col w-full ml-2 text-left" @click="router.push(`/e/${race.id}`)">
         <div>{{ race.Date }}</div>
         <small>
           {{ race.Location }}</small>
@@ -23,13 +22,17 @@
 
       <div class="flex flex-col gap-1  p-0">
 
-        <Button v-if="props.menu.includes('photos') && race?.photoStatus?.includes('avail')" label="Photos"
-          :pt="{ label: { class: 'text-sm' } }" @click="router.push(`/p/${race.id}`)" />
+        <a v-if="race.linkPhotos" :href="race.linkPhotos" class="p-button p-button-label h-2">Photos</a>
+        <Button v-if="!race.linkPhotos && props.menu.includes('photos') && race?.photoStatus?.includes('avail')" label="Photos"
+          :pt="smallButton" @click="router.push(`/p/${race.id}`)" />
         <Button
           v-if="props.menu.includes('results') && (race?.status?.includes('final') || race?.status?.includes('provisional'))"
-          label="Results" size="small" :pt="{ label: { class: 'text-sm' } }" @click="router.push(`/r/${race.id}`)" />
+          label="Results" size="small" :pt="smallButton" @click="router.push(`/r/${race.id}`)" />
+        <Button
+          v-if="props.menu.includes('edit')"
+          label="Edit" size="small" :pt="smallButton" @click="router.push(`/e/${race.id}`)" />
 
-        <Button v-if="!props.menu" label="Race" :pt="{ label: { class: 'text-sm' } }"
+        <Button v-if="!props.menu" label="Race" :pt="smallButton"
           @click="router.push(`/e/${race.id}`)" />
 
       </div>
@@ -49,8 +52,9 @@ const props = defineProps({
 import { getPublicUrl } from "../helpers/index";
 import { useRouter } from 'vue-router';
 import defaultRaceImage from '../assets/race_image.png'
+import {ref} from 'vue'
 const router = useRouter()
-
+const smallButton = ref({ label: { class: 'text-sm' } })
 </script>
-
-<style scoped></style>
+<style scoped>
+</style>

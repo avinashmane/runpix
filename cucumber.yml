@@ -1,12 +1,12 @@
 default:
   parallel: 2
   format:
-    - html:tests/cucumber-report.html
+    - html:test/cucumber-report.html
     - progress-bar
   # import:   #support code
-  #   - 'tests/support/**/*.js'
+  #   - 'test/support/**/*.js'
   paths:   # features
-    - 'tests/features/**/*.feature'
+    - 'test/features/**/*.feature'
   worldParameters:
     browser: chrome
     base_url: https://localhost:5000

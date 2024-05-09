@@ -1,7 +1,8 @@
 <script setup>
 import LoginCard from "../components/LoginCard.vue";
 import Message from "../components/Message.vue";
-import Menu from 'primevue/menu';
+// import Menu from 'primevue/menu';
+import RacesCard from "../components/RacesCard.vue";
 import Image from 'primevue/image';
 import {useStore} from "vuex";
 
@@ -44,7 +45,9 @@ let items= [
 <template>
 
   <div class="flex flex-col items-center">
-    <!-- <Menu :model="items" /> -->
+  
+    <RacesCard menu="['photos', 'results']"/>
+
     <div class="container mx-auto">
       <router-link v-for="i in items" :to="i.to">
         <Image :src="i.img" :alt="i.label"/>

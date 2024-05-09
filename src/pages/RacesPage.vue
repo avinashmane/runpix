@@ -1,3 +1,86 @@
+<template>
+  <div class="container mx-auto">
+    
+    <Card class="w-full text-center justify-center flex-col rounded">
+
+      <template #content>
+        <RacesCard menu="['edit', 'results']" :nolist="nolist"/>
+
+      
+        <!-- <DataTable :value="races"  stripedRows>
+            <Column field="id" style="width: 20%"  class="p-1">       
+              <template #body="{ data }">         
+                <img class="w-20 rounded-full drop-shadow object-cover aspect-square"
+                  :src="getPublicUrl('thumbs',data?.id,data?.coverPage)"
+                  @click="router.push(`/e/${data.id}`)"/>  
+              </template>
+            </Column>
+            <Column field="Name" header="Name" sortable  class="p-1">
+              <template #body="{ data }">
+                <div class="container" @click="router.push(`/e/${data.id}`)">
+                  <small>
+                    {{data.id}}
+                  </small>
+                  <div>{{data.Name}}</div>
+                </div>
+              </template>
+            </Column>
+            <Column field="Date" header="Date Location" sortable  class="p-1">
+              <template #body="{ data }">
+                <div class="flex flex-row  ">
+                <Button @click="router.push(`/e/${data.id}`)" icon="pi pi-flag" class="rounded-full aspect-square w-10"/>
+                <span class="text-sm">
+                  <div>{{ data.Date }}</div>
+                  <div>{{data.Location}}</div>
+                </span>
+              </div>
+              </template>
+            </Column>
+        </DataTable> -->
+      
+
+      </template>
+    </Card>
+
+    <TabView>
+      <TabPanel header="Process">
+          <InputSwitch v-model="nolist"/> 
+          <p>
+            Mark old races as "nolist"
+          </p>
+      </TabPanel>
+      <TabPanel header="Create">
+          <p>
+            <div class="flex gap-5 mx-5">
+                <!-- <label for="newRaceId">Race Id</label> -->
+                <Button type="button" @click="createNewRace"
+                  label="Create"></Button>
+                <InputText id="newRaceId" v-model="newRaceId" aria-describedby="raceId-help" class="w-1/3 border"/>
+
+            </div>
+            <small id="username-help">Enter your id for the Race.  Only a-z0-9. All lowercase. No space </small>
+          </p>
+      </TabPanel>
+      <TabPanel header="Record">
+          <p>
+            <ol>
+              <li>Edit the information of the race</li>
+              <li>Start the race</li>
+              <li>Record the timing</li>
+              <li>Close the races</li>
+              <li>Finalize the results</li>
+              <li>Upload Photos</li>
+              <li>Publish the Photos link</li>
+            </ol>   
+            
+          </p>
+      </TabPanel>
+  </TabView>
+
+
+  </div>
+</template>
+
 <script setup>
 import { useStore } from 'vuex';
 import { useRouter, useLink } from 'vue-router'
@@ -15,7 +98,7 @@ import InputText from 'primevue/inputtext';
 import { doc, getDoc ,updateDoc, setDoc } from 'firebase/firestore'
 import { getPublicUrl } from "../helpers/index";
 import {chain,cloneDeep,map,take,keys,orderBy,sumBy,pickBy,split,sortBy,tap,startsWith}  from "lodash-es"
-import RaceCard from '../components/RaceCard.vue';
+import RacesCard from '../components/RacesCard.vue';
 
 const store = useStore()
 const router = useRouter()
@@ -71,88 +154,3 @@ function NOP() {}
 NOP(fsdb);
 </script>
 
-<template>
-  <div class="container mx-auto">
-    
-    <Card class="w-full text-center justify-center flex-col rounded">
-      <template #header>
-        <div id="header flex">
-          <h1 @dblclick="klick" class="text-xl text-center">Races</h1> 
-        </div>
-      </template>
-      <template #content>
-
-        <DataTable :value="races"  stripedRows>
-            <Column field="id" style="width: 20%"  class="p-1">       
-              <template #body="{ data }">         
-                <img class="w-20 rounded-full drop-shadow object-cover aspect-square"
-                  :src="getPublicUrl('thumbs',data?.id,data?.coverPage)"
-                  @click="router.push(`/e/${data.id}`)"/>  
-              </template>
-            </Column>
-            <Column field="Name" header="Name" sortable  class="p-1">
-              <template #body="{ data }">
-                <div class="container" @click="router.push(`/e/${data.id}`)">
-                  <small>
-                    {{data.id}}
-                  </small>
-                  <div>{{data.Name}}</div>
-                </div>
-              </template>
-            </Column>
-            <Column field="Date" header="Date Location" sortable  class="p-1">
-              <template #body="{ data }">
-                <div class="flex flex-row  ">
-                <Button @click="router.push(`/e/${data.id}`)" icon="pi pi-flag" class="rounded-full aspect-square w-10"/>
-                <span class="text-sm">
-                  <div>{{ data.Date }}</div>
-                  <div>{{data.Location}}</div>
-                </span>
-              </div>
-              </template>
-            </Column>
-            <!-- <Column field="Location" header="Location" sortable></Column> -->
-        </DataTable>
-      
-
-      </template>
-    </Card>
-
-    <TabView>
-      <TabPanel header="Process">
-          <InputSwitch v-model="nolist"/> 
-          <p>
-            Mark old races as "nolist"
-          </p>
-      </TabPanel>
-      <TabPanel header="Create">
-          <p>
-            <div class="flex gap-5 mx-5">
-                <!-- <label for="newRaceId">Race Id</label> -->
-                <Button type="button" @click="createNewRace"
-                  label="Create"></Button>
-                <InputText id="newRaceId" v-model="newRaceId" aria-describedby="raceId-help" class="w-1/3 border"/>
-
-            </div>
-            <small id="username-help">Enter your id for the Race.  Only a-z0-9. All lowercase. No space </small>
-          </p>
-      </TabPanel>
-      <TabPanel header="Record">
-          <p>
-            <ol>
-              <li>Edit the information of the race</li>
-              <li>Start the race</li>
-              <li>Record the timing</li>
-              <li>Close the races</li>
-              <li>Finalize the results</li>
-              <li>Upload Photos</li>
-              <li>Publish the Photos link</li>
-            </ol>   
-            
-          </p>
-      </TabPanel>
-  </TabView>
-
-
-  </div>
-</template>

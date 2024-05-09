@@ -13,9 +13,10 @@ import ImageReviewPage from "../pages/ImageReviewPage.vue";
 import PhotosPage from "../pages/PhotosPage.vue";
 import RaceLog from "../pages/RaceLogPage.vue";
 import RaceStartList from "../pages/RaceStartListPage.vue";
-import Races from "../pages/Races.vue";
+import Races from "../pages/RacesPage.vue";
 import Race from "../pages/Race.vue";
 import RaceAdmin from "../pages/RaceAdmin.vue";
+import RaceEntry from "../pages/RaceEntry.vue";
 import NotFoundPage from "../pages/exceptions/NotFoundPage.vue";
 
 import {
@@ -50,6 +51,11 @@ const routes = [
         children: [{
             path: ':raceId',
             component: Race,
+          },
+          {
+            path: ':raceId/entry/:mode',
+            alias: ':raceId/entry',
+            component: RaceEntry,
           },
           {
             path: ':raceId/images',

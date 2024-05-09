@@ -10,11 +10,13 @@ const config={
     databaseURL: `https://${projectId}.firebaseio.com`,
   }
 
-  const log=(msg)=>console.log(`${new Date().toISOString()} : ${msg}`)
-  const GS_URL_PREFIX='https://storage.googleapis.com/run-pix.appspot.com/'
+const DEBUG=1
+const GS_URL_PREFIX='https://storage.googleapis.com/run-pix.appspot.com/'
+const MAX_FILES = 5;
+
+const log=(msg)=> (DEBUG) ? console.log(`${new Date().toISOString()} : ${msg}`) : {}
+const JSS=JSON.stringify
 const {assert} = require('chai')
-// const open = require('open')
-// import open, {openApp, apps} from 'open';
 const { firebaseConfig } = require('firebase-functions');
 const functions = require('firebase-functions');
 const { storageBucket } = require('firebase-functions/params');
@@ -24,7 +26,7 @@ const test = require('firebase-functions-test')(config,
 let admin=null,
     app=null;
 
-describe('List all video files', function ( ){
+xdescribe('List all video files - not useful', function ( ){
 
   admin= admin ||  require('firebase-admin')
   app = app || admin.initializeApp();
@@ -34,7 +36,7 @@ describe('List all video files', function ( ){
 
   let filenames=[123,234];
 
-  before('Before: list files',async function (){
+  before(`Before: list files ${bucketName}`,async function (){
     this.timeout(10000)
     return bucket.getFiles().then(data=>{
       const [files] = data
@@ -42,17 +44,18 @@ describe('List all video files', function ( ){
                               t:o.metadata.contentType,
                               s:o.metadata.size}))
       console.log(`${filenames.length} files found`)
+      assert(filenames.length>5,'min 5 files found')
+      assert.isArray(filenames)
     })
    // 'files' will be an array containing information about each file in the bucket.
   })
 
-  // describe('ddd',function (){     
-  filenames.forEach(function (file){
-    console.log(file)
-      it(`processing ${file}`, function () {
+
+  filenames.slice(0,MAX_FILES).forEach(function (file){
+    // console.log(file)
+      it(`log test ${file}`, function () {
         log(`file ${file}`)
     })
-    // })
 
   })
 
@@ -66,42 +69,60 @@ describe('List all video files', function ( ){
 })
 
 
-describe('OCR video test suite', function () {
+describe('OCR video basic tests', function () {
 
   var indexModule = require('../index.js'); // Works for both ESM and CommonJS
   var videocrModule = require('../videoocr.js'); // Works for both ESM and CommonJS
-  this.timeout(5000); 
-
+  this.timeout(20000); 
+  
   before(function () {
+
     // testModule = require("../index.js")
     // console.log("before", testModule,testModule.value )
   });
 
-  it('Create and save annotations from video',async function (done){
-    this.skip()
+  it('indexModule.scanVideo() mp4',async function (){
     
-    // indexModule.scanVideo('gs://run-pix-videos/test/VID_20240310_074051.mp4').then(x=>{
-    indexModule.scanVideo('gs://run-pix.appspot.com/uploadvid/testrun/20230305_072443_cf4cc23.mp4').then(x=>{
-      console.log('scanVideo()',x);
-      done()
+    return indexModule.scanVideo('gs://run-pix.appspot.com/uploadvid/testrun/20230305_072443_cf4cc23.mp4').then(x=>{
+      log('scanVideo()',x);
+      
     })
     .catch(console.error)
     
     // testModule.detectText('gs://run-pix-videos/test/VID_20240310_074051.mp4')
   })
 
-  it('Read metadata from video',async function (done) {
-    this.skip()
+  it('indexModule.scanVideo() laptop webm',async function (){
+    // indexModule.scanVideo('gs://run-pix-videos/test/VID_20240310_074051.mp4').then(x=>{
+    return indexModule.scanVideo('gs://run-pix.appspot.com/uploadvid/testrun/2024-05-08T04:00:12.112Z~VENUE~userData.email~vid_0.webm').then(x=>{
+      log('scanVideo()',x);
+    })
+    .catch(console.error)
+    
+    // testModule.detectText('gs://run-pix-videos/test/VID_20240310_074051.mp4')
+  })
+  
+
+  it('indexModule.scanVideo() mobile MI12pro webm',async function (){
+    // indexModule.scanVideo('gs://run-pix-videos/test/VID_20240310_074051.mp4').then(x=>{
+    return indexModule.scanVideo('gs://run-pix.appspot.com/uploadvid/testrun/2024-05-08T06:10:08.601Z~VENUE~avinashmane$gmail.com~vid_0.webm').then(x=>{
+      log('scanVideo()',x);
+    })
+    .catch(console.error)
+    
+    // testModule.detectText('gs://run-pix-videos/test/VID_20240310_074051.mp4')
+  })
+  it('indexModule.getImageMetadata()',async function () {
     indexModule.getImageMetadata('gs://run-pix-videos','test/VID_20240310_074051.mp4')
     .then(res=>{
       console.log(res);
-      done()
+      assert.isObject(res)
     })
     .catch(console.error)
 
   })
 
-  it('Read annotations',async function (){
+  it('indexModule.readFile+videocrModule.videoDetectionFilter',async function (){
       // videocr.
       let res=JSON.parse(await indexModule.readFile('test/out/textAnnotations.json'))
       console.log(videocrModule.videoDetectionFilter(res.textAnnotations))
@@ -112,7 +133,7 @@ describe('OCR video test suite', function () {
 /**
  * MOCH Run processing
  */
-describe('MOCK race-vid2firestore mychoice24mar', function () {
+xdescribe('MOCK run race-vid2firestore mychoice24mar', function () {
   var indexModule = require('../index.js'); // Works for both ESM and CommonJS
   var videocrModule = require('../videoocr.js'); // Works for both ESM and CommonJS
   this.timeout(100000); 

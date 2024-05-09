@@ -93,8 +93,3 @@ https://firebase.google.com/docs/functions/callable
 * recording 
 https://codepen.io/aeewhite/pen/BjzbOL
 
-# TESTING
-
-## setup
-
-avinashmaneATyahooDOTcomWITHtestAdminUser

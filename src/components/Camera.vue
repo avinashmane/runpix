@@ -10,9 +10,7 @@
         </li>
       </ul>
     </div>
-    <!-- <div id="logoverlay" class="absolute bottom-0 left-[50%] text-xl">
-      overlay
-    </div> -->
+
     <div v-if="camera.perm">
       <video id="gum" playsinline autoplay muted v-if="camera.perm">
         <p>
@@ -155,10 +153,7 @@
     canvas.width = 480;
     canvas.height = 360;
 
-    // navigator.mediaDevices
-    //   .getUserMedia(constraints)
-    //   .then(handleMediaSuccess)
-    //   .catch(handleError);
+    
     await init(constraints);
     getQuery()
   }

@@ -11,13 +11,13 @@
     "build": "vite build",
     "serve": "vite preview",
     "hosting": "firebase deploy --only hosting",
-    "test:unit": "mocha",
+    "test:unit": "pnpm exec mocha test/unit/*.test.*js",
     "test:e2e": "cucumber-js",
     "test:f": "cd functions & node node_modules/mocha/bin/mocha.js --reporter spec",
     "test:reprocess": "cd functions & pnpm exec mocha --reporter spec -f reprocess",
     "cy:open": "cypress open",
     "vidtest": "cd functions & pnpm exec mocha --reporter spec test/video.test.js -f video ",
-    "vidmock1": "cd functions & npm exec mocha test/video.test.js -f MOCK"
+    "vidtest:mobile": "cd functions & npm exec mocha functions/test/video.test.js -f mobile"
   },
   "dependencies": {
     "add": "^2.0.6",
@@ -39,21 +39,23 @@
     "@types/lodash-es": "^4.17.12",
     "@vitejs/plugin-vue": "^3.2.0",
     "@vue/compiler-sfc": "^3.4.10",
+    "@vue/test-utils": "^2.4.6",
     "autoprefixer": "^10.4.16",
     "eslint": "^8.56.0",
     "eslint-plugin-vue": "^9.20.0",
-    "mocha": "^10.4.0",
-    "open": "^9.1.0",
     "geckodriver": "^4.3.3",
-    "selenium-webdriver": "^4.19.0",
+    "mocha": "^10.4.0",
+    "nyc": "^15.1.0",
+    "open": "^9.1.0",
     "postcss": "^8.4.33",
+    "selenium-webdriver": "^4.19.0",
     "tailwindcss": "^3.4.1",
     "vite": "^3.2.7",
     "vite-bundle-visualizer": "^1.0.0",
     "vite-plugin-chunk-split": "^0.4.7",
     "vite-plugin-mkcert": "^1.17.2"
   },
-  "deletedDependencies":{
+  "deletedDependencies": {
     "@google-cloud/video-intelligence": "^5.1.0",
     "cypress": "^12.17.4",
     "dummy": "none"

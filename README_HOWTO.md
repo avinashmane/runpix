@@ -22,3 +22,11 @@
 
 
 * /races/{raceId}/photoStatus : "face,available" 
+
+
+
+# TESTING
+
+## setup
+
+avinashmaneATyahooDOTcomWITHtestAdminUser

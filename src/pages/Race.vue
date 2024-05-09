@@ -115,8 +115,14 @@ const menuItems = [
       icon: 'pi pi-pencil',
       command: () => { router.push(`/e/${raceObj.value?.id}/edit`)    ; }
     },
-    { label: 'Start List', icon: 'pi pi-clock', 
+    { label: 'Start List', icon: 'pi pi-list', 
       command: () => { router.push(`/e/${raceObj.value?.id}/bibs`)    ; }
+    },
+    { label: 'Enter Bibs', icon: 'pi pi-hashtag', 
+      command: () => { router.push(`/e/${raceObj.value?.id}/entry`)    ; }
+    },
+    { label: 'Record Video', icon: 'pi pi-video', 
+      command: () => { router.push(`/e/${raceObj.value?.id}/entry/video`)    ; }
     },
     { label: 'Provisional Timing', icon: 'pi pi-clock', 
       command: () => { router.push(`/e/${raceObj.value?.id}/log`)    ; }

@@ -100,7 +100,7 @@ function videoDetectionFilter(dat,pattern=/^\d*$/){
 
 
 function filterTexts(annotations,pattern){
-    return annotations.filter(x=>pattern.test(x.text));
+    return annotations?.filter(x=>pattern.test(x.text));
 }
 
 function seg2txt(seg,text){

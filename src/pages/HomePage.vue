@@ -1,20 +1,11 @@
 <script setup>
 import { useStore } from "vuex";
-import { computed } from 'vue';
+import RacesCard from "../components/RacesCard.vue";
 import Image from 'primevue/image';
-import DataView from 'primevue/dataview'
 import Panel from 'primevue/panel'
-import RaceCard from "../components/RaceCard.vue";
-import {orderBy} from 'lodash-es'
 const store = useStore()
 store.dispatch('getRacesAction')
-const races = computed(() => orderBy(
-      store.state.datastore.races
-        .filter(race=> !race?.status?.includes('nolist')),
-      ["Date"],['desc'])
-  // .filter(x => new Date(x.Date).getFullYear() == new Date().getFullYear())
-  // .filter(x => checkResStatus(x))
-)
+
 const signInState = store.state.auth.signIn
 const userData = store.state.auth.userDetails.userData
 const dispKeys = { 'displayName': 'Name', 'email': 'eMail' }//"uid":"uid",
@@ -40,24 +31,12 @@ let items = [
 
 <template>
   <div class="rounded bg-white shadow-lg m-2 p-2">
-    <div class="w-full text-center max-w-lg">
+    <div class="w-full text-center ">
       <h1 class="text-xl">Home </h1>
+      <RacesCard menu="['photos', 'results']"/>
     </div>
-    <DataView :value="races" :sort-field="Date" :sort-order="-1"
-    :pt=" {
-      root: {class:'bg-transparent'},
-      content: { class: 'border-primary text-lg text-primary-700' },
-                  title: 'text-xl'
-                  }">
-      <template #list="slotProps">
-        <div class="grid grid-nogutter ">
-          <div v-for="(race, index) in slotProps.items" :key="index" class="col-12">
-            <RaceCard :race="race" :menu="['photos', 'results']" />
-          </div>
-        </div>
-      </template>
-    </DataView>
   </div>
+
   <Panel header="Menu" toggleable :pt="{
                   root: {class: 'mx-2 mb-4'},
                   header: (options) => ({
