@@ -8,18 +8,8 @@ import {useStore} from "vuex";
 
 const store = useStore()
 const signInState = store.state.auth.signIn
-// let items= [
-// 				{
-// 					label: 'Results',
-// 					icon: 'pi pi-clock',
-// 					to: '/r'
-// 				},
-// 				{
-// 					label: 'Photos',
-// 					icon: 'pi pi-images',
-// 					to: '/p'
-// 				},
-//   ]
+store.dispatch('getRacesAction')
+
 
 let items= [
 				{

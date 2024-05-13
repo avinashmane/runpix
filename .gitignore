@@ -12,6 +12,8 @@ functions/test/master
 functions/test/out
 dist
 dist-ssr
+coverage/**
+.nyc_output/
 *.local
 .vercel
 # Editor directories and files

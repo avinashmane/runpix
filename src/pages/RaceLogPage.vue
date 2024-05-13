@@ -172,7 +172,7 @@
     <template #footer>
       <Button @click="router.back()" icon="pi pi-chevron-left"></Button>
       <Button @click="finalize_results">Finalize</Button>
-      <Button @click="klick">popup</Button>
+      <!-- <Button @click="klick">popup</Button> -->
       <!-- {{  race  }} -->
       <div v-if="totalFinalizedEntries">
         {{ processedFinalizedEntries }} / {{ totalFinalizedEntries }} entries processed
@@ -604,7 +604,7 @@ function finalize_results() {
         Race: x.waypoint,
         Gender: x.gender,
         Category:
-          x.status == "valid" ? `${x.waypoint} - ${x.gender}` : `Other - ${x.status}`,
+          x.status == "valid" ? `${x.waypoint} - ${getGender(x)}` : `Other - ${x.status}`,
         "Start Time": startTime,
         "Race Time": period(x.timestamp),
         "Finish Time":
@@ -674,6 +674,23 @@ function finalize_results() {
 function getBibRegExp() {
   return race.value?.bibPattern ? RegExp(race.value?.bibPattern) : false;
 }
+
+function getGender(entry) {
+  let gender = entry?.gender?.trim()
+  if( /Manoj/i.test(entry.name)) 
+    console.log(entry.name, entry.gender,gender)
+  // Doc: Gender not mentioned is considered as male
+  if (["Male","Female"].includes(gender))
+    return gender
+  else
+  {
+    console.log('default to Male', entry)
+    return "Male" 
+  }
+  
+}
+
+
 </script>
 
 <style scoped>

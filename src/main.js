@@ -17,7 +17,12 @@ import VueSocialSharing from 'vue-social-sharing'
 
 
 const app = createApp(App)
-// app.config.devtools = true
+
+if (import.meta.env.MODE === 'development') {
+    app.config.devtools = true
+}
+app.config.devtools = true
+app.config.performance = true
 
 app.use(store)
     .use(VueGtag, {

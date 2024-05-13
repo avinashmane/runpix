@@ -33,11 +33,10 @@
             </tr>
 
             <tr  v-for="(lbl,fld) in links" >
-            <!-- {{ lnk }} -->
               <td > {{ lbl }} 
                 <span v-if="fld=='linkPhotos' && raceObj?.[fld] ">
                   <Tag v-if="raceObj?.photoStatus?.includes('avail')" value="Available"/>
-                  <Tag v-else value="Unavailable"/>
+                  <!-- <Tag v-else value="Unavailable"/> -->
                 </span>
               </td>
               <td>
