@@ -4,10 +4,21 @@ import Button from "primevue/button"
 import InputText from 'primevue/inputtext';
 import SvgText from "../components/SvgText.vue"
 import { ref } from "vue";
+import {useUserStore}  from '@/stores/index.js'
+import { CSVToArray } from "../helpers";
+const userStore = useUserStore()
 
 </script>
 
 <template>
+
+  {{ userStore.profile }}
+  {{ userStore.roles }}
+  <br/>{{ userStore.checkAccess('race','mychoice',"any") }}
+  <br/>{{ userStore.checkAccess('race','werun',"any") }}
+  <br/>{{ userStore.checkAccess('race','mychoice',"any") }}
+  <br/>{{ userStore.checkAccess('race','test',"any") }}
+
   <div id="testzone" class="container mx-auto">
     <SvgText bottom="testAvinash" 
             radius="250" 

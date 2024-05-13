@@ -2,13 +2,15 @@ import {
     getRaces, getDocData,
     getRacesAsync
  } from "../api"; 
- 
+
+const sub={}
 const getRacesAction = async (context) => {
  //    context.commit("beginRequestUser");
     try {
         // const response = await getRaces();
         // if (response) context.commit("getRacesMutation", response);
-        const unsub = getRacesAsync((data)=>context.commit("getRacesMutation", data))
+        sub['getRacesMutation'] = sub['getRacesMutation'] || 
+            getRacesAsync((data)=>context.commit("getRacesMutation", data))
      //    else context.commit("failRequestUser", 'Could not complete request!!');
     } catch (error) {
      //    context.commit("failRequestUser", error);

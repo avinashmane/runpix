@@ -15,7 +15,7 @@
 import { ref, onMounted, reactive } from 'vue'
 import Button from 'primevue/button';
 import InputSwitch from 'primevue/inputswitch';
-import {getDateTime} from "../helpers"
+import {getDateTime,debug} from "../helpers"
 // import ToggleButton from 'primevue/togglebutton';
 
 let loc=ref(new Date())
@@ -49,7 +49,7 @@ let GPS = reactive({
     },
     
     startGPS() {
-        // console.debug(this)
+        // debug(this)
         this.timer = setInterval(getLoc, this.milliseconds); //setting the loop with time interval
     },
     stopGPS() {
@@ -70,7 +70,7 @@ function getLoc(){
     navigator.geolocation.getCurrentPosition(success, error, GPS.options);
 }
 function success(pos) {
-    // console.debug(GPS)
+    // debug(GPS)
     const crd = pos.coords;
     //Object.fromEntries(Object.entries(crd).filter(([_, v]) => v!=null ));
     GPS.loc={latitude: crd.latitude, 
@@ -87,7 +87,7 @@ function success(pos) {
 } 
 
 function error(err) {
-    // console.debug(GPS)
+    // debug(GPS)
     GPS.loc= Object.assign(GPS.loc||{loc:undefined},
                             {'signal':'N/A-error'});
     loc.status = 'E'
@@ -98,11 +98,11 @@ function toggleGPS(){
     // geoLocPerm=!geoLocPerm
     if(!geoLocPerm.value){
         if (GPS.timer==false){ 
-            console.debug('starting',GPS.loc)
+            debug('starting',GPS.loc)
             GPS.startGPS()
         } else console.error(GPS.timer)
     } else{
-        console.debug('stopping',geoLocPerm)
+        debug('stopping',geoLocPerm)
         GPS.stopGPS()
     }
 }

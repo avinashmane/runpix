@@ -121,6 +121,7 @@ import { orderBy as _orderBy }  from "lodash-es"
 import { db, storage } from "../../firebase/config" //storage
 import { config } from "../config"
 import { collection,query,doc,limit, orderBy ,onSnapshot,getDocs, updateDoc } from "firebase/firestore";
+import {debug} from "../helpers"
 
 let props = defineProps({
   race: Object,
@@ -289,7 +290,7 @@ const tsOptions = {
 const formatDate = (value) => {
   if (!value) return '--:--:--'
   try {
-    // console.debug(value)
+    // debug(value)
     value=new Date(cloneDeep(value))//-new Date(props.race.timestamp.start)
     return value.toLocaleString('en-US',tsOptions)
   }
@@ -308,7 +309,7 @@ function period(ts){
     return '00:00:00'
   }
   try {
-    // console.debug(diffTime)
+    // debug(diffTime)
     // let diffTime = Math.abs(new Date().valueOf() - new Date('2021-11-22T18:30:00').valueOf());
     let days_float = diffTime / (24*60*60*1000);
     let days = days_float<0 ? Math.floor(days_float) : Math.floor(days_float)
@@ -335,7 +336,7 @@ let pad= (x,n=2) => ('00'+x).slice(-n)
 const visible = ref(false)
 const entryToEdit = ref(null)
 function toggleDialog  (i){
-  console.debug(`toggleDialog: ${i}`)
+  debug(`toggleDialog: ${i}`)
   if (entryToEdit) {
     entryToEdit.value=i
     visible.value=true
@@ -367,9 +368,9 @@ function submitChange(){
     let path=`races/${props.raceId}/readings/${payload.id}`
     delete payload.id
     // debugger
-    // console.debug(typeof payload.timestamp, payload.timestamp)
+    // debug(typeof payload.timestamp, payload.timestamp)
     payload.timestamp=new Date(payload.timestamp).toISOString()
-    console.debug(`Saving ${JSON.stringify(payload)}`)
+    debug(`Saving ${JSON.stringify(payload)}`)
     
     updateDoc(doc(db,path),payload)
 

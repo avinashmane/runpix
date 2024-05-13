@@ -1,3 +1,4 @@
+const debug=console.debug
 
 function getDateTime(datetime) {
     let date=datetime? new Date(datetime) : new Date()
@@ -102,4 +103,4 @@ const  getPublicUrl = (folder,raceId,file) =>{
 	}
 }
 	
-export {CSVToArray,getPublicUrl,getDateTime,getLocalDateTime}
+export {CSVToArray,getPublicUrl,getDateTime,getLocalDateTime,debug}

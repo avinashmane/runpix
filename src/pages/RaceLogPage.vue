@@ -235,7 +235,7 @@ import {
   extend,
   startsWith,
 } from "lodash-es";
-
+import {debug} from "../helpers"
 import _ from 'lodash-es'
 
 const GS_PREFIX = config.GS_PREFIX;
@@ -485,7 +485,7 @@ const tsOptions = {
 const formatDate = (value) => {
   if (!value) return "--:--:--";
   try {
-    // console.debug(value)
+    // debug(value)
     value = new Date(cloneDeep(value)); //-new Date(props.race.timestamp.start)
     return value.toLocaleString("en-US", tsOptions);
   } catch (e) {
@@ -503,7 +503,7 @@ function period(ts) {
   }
 
   try {
-    // console.debug(diffTime)
+    // debug(diffTime)
     // let diffTime = Math.abs(new Date().valueOf() - new Date('2021-11-22T18:30:00').valueOf());
     let days_float = diffTime / (24 * 60 * 60 * 1000);
     let days = days_float < 0 ? Math.floor(days_float) : Math.floor(days_float);
@@ -532,7 +532,7 @@ let pad = (x, n = 2) => ("00" + x).slice(-n);
 const visible = ref(false);
 const entryToEdit = ref(null);
 function toggleDialog(i) {
-  console.debug(`toggleDialog: ${i}`);
+  debug(`toggleDialog: ${i}`);
   if (entryToEdit) {
     entryToEdit.value = i;
     visible.value = true;
@@ -562,9 +562,9 @@ function submitChange() {
     let path = `races/${raceId}/readings/${payload.id}`;
     delete payload.id;
     // debugger
-    // console.debug(typeof payload.timestamp, payload.timestamp)
+    // debug(typeof payload.timestamp, payload.timestamp)
     payload.timestamp = new Date(payload.timestamp).toISOString();
-    console.debug(`Saving ${JSON.stringify(payload)}`);
+    debug(`Saving ${JSON.stringify(payload)}`);
 
     updateDoc(doc(db, path), payload);
   } else {
@@ -597,7 +597,7 @@ function finalize_results() {
       let startTime = race.value?.timestamp.start
         ? new Date(race.value?.timestamp.start).toTimeString()
         : "-";
-      // console.debug(typeof x.timestamp)
+      // debug(typeof x.timestamp)
       return {
         Bib: x.bib,
         Name: x.name,

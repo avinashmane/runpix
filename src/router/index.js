@@ -22,6 +22,18 @@ import NotFoundPage from "../pages/exceptions/NotFoundPage.vue";
 import {
     firebaseAuth
 } from '../../firebase/config';
+import { debug } from "../helpers";
+const nextIfLogin=(next,ifLogged,notLogged)=>{
+    firebaseAuth.onAuthStateChanged(user => {
+        // debugger
+        // debug('user',user,ifLogged,notLogged)
+        if (user) {
+            next(ifLogged);
+        } else {
+            next(notLogged);
+        }
+    });
+}
 
 const routes = [
     // dynamic segments start with a colon
@@ -29,20 +41,10 @@ const routes = [
         path: "/e",
         name: 'Events',
         component: Races,
-        beforeEnter: (to, from, next) => {
-            firebaseAuth.onAuthStateChanged(user => {
-                if (user) {
-                    next();
-                } else {
-                    next('/login');
-                }
-            });
+        beforeEnter: (to, from, next) =>{ 
+            nextIfLogin(next,null,'/login')
         },
-        // children: [  {
-        //     path: '/e/:raceId',
-        //     name: "Event",
-        //     component: Race,
-        // },]
+
     },
     {
         path: '/e',
@@ -105,6 +107,7 @@ const routes = [
     },
     {
         path: "/testpage",
+        alias: '/test',
         name: 'TestPage',
         component: TestPage
     },
@@ -113,13 +116,7 @@ const routes = [
         name: 'HomePage',
         component: HomePage,
         beforeEnter: (to, from, next) => {
-            firebaseAuth.onAuthStateChanged(user => {
-                if (user) {
-                    next();
-                } else {
-                    next('/login');
-                }
-            });
+            nextIfLogin(next,null,'/login')
         }
     },
     {
@@ -127,31 +124,22 @@ const routes = [
         name: 'ProfilePage',
         component: ProfilePage,
         beforeEnter: (to, from, next) => {
-            firebaseAuth.onAuthStateChanged(user => {
-                if (user) {
-                    next();
-                } else {
-                    next('/login');
-                }
-            });
+            nextIfLogin(next,null,'/login')
         }
     },
     {
         patch: "/",
-        redirect: "/home"
+        redirect: "/home",
+        beforeEnter: (to, from, next) => {
+            nextIfLogin(next,null,'/login')
+        }
     },
     {
         path: "/login",
         name: 'LoginPage',
         component: LoginPage,
         beforeEnter: (to, from, next) => {
-            firebaseAuth.onAuthStateChanged(user => {
-                if (user) {
-                    next('/home');
-                } else {
-                    next();
-                }
-            });
+            nextIfLogin(next,'/home',)
         }
     },
     {
@@ -159,13 +147,7 @@ const routes = [
         name: 'RegisterPage',
         component: RegisterPage,
         beforeEnter: (to, from, next) => {
-            firebaseAuth.onAuthStateChanged(user => {
-                if (user) {
-                    next('/home');
-                } else {
-                    next();
-                }
-            });
+            nextIfLogin(next,'/home',)
         }
     },
     {

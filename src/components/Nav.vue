@@ -2,20 +2,26 @@
 import { firebaseAuth } from '../../firebase/config';
 import { useStore } from "vuex";
 import { ref,watchEffect, computed } from "vue";
+import { useUserStore } from '../stores';
 // import Breadcrumb from "primevue/breadcrumb";
-
+const userStore =  useUserStore()
 const store = useStore()
+
 const userState = computed(() => store.state.auth.userDetails)
 
 const firebaseUser = () => firebaseAuth.onAuthStateChanged(user => {
-  // console.warn(`firebaseAuth.onAuthStateChanged ${JSON.stringify(user)}`)
+  console.warn(`firebaseAuth.onAuthStateChanged ${JSON.stringify(user)}`)
   if (user) {
+    userStore.login(user)
     store.commit('successRequestUser', user)
   } else {
+    userStore.logout()
     store.commit('failRequestUser', 'Fail to get user')
   }
 });
+
 watchEffect(firebaseUser)
+
 let site= computed(()=>{
   if (document.location.href.toLowerCase().search("fitness.forthe.life")!=-1) 
     return "Fitness.ForThe.life"
@@ -25,16 +31,6 @@ let site= computed(()=>{
   return 'RUN PiX'
   })
 
-// bread crumbs  WIP
-// const items=ref([{
-//   '/':{label:'Home'},
-//   'e':{label:'Events'},
-//   'p':{label:'Photos'}
-// }
-// ])
-
-// const home = ref({ icon: 'pi pi-home', url: 'https://primevue.org/' });
-// const items = ref([{ icon: 'pi pi-sitemap' }, { icon: 'pi pi-book' }, { icon: 'pi pi-wallet' }, { icon: 'pi pi-shopping-bag' }, { icon: 'pi pi-calculator' }]);
 
 </script>
 

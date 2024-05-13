@@ -1,18 +1,10 @@
 <script setup>
 import { onMounted, reactive, ref } from 'vue'
 import Dropdown from 'primevue/dropdown';
-import { useStore } from 'vuex';
 
 defineProps({
   msg: String
 })
-
-const store = useStore()
-const countExample = store.state.countExample
-
-const increment = () => {
-  store.dispatch('incrementAction')
-};
 
 
 </script>
@@ -22,8 +14,7 @@ const increment = () => {
   <h1 class="test-color">{{ msg }}</h1>
   <div id="container">
 
-<!-- <script src="js/main.js" async></script> -->
-  <button type="button" @click="increment">count is: <p v-text="countExample.count" /></button>
+
   </div>
 
 </template>

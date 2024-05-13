@@ -36,7 +36,7 @@ let items= [
 
   <div class="flex flex-col items-center">
   
-    <RacesCard menu="['photos', 'results']"/>
+    <RacesCard :menu="['photos', 'results']"/>
 
     <div class="container mx-auto">
       <router-link v-for="i in items" :to="i.to">

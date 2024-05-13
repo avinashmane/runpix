@@ -9,6 +9,7 @@ import Toast from 'primevue/toast';
 import Dropdown from 'primevue/dropdown';
 // import FileUpload from 'primevue/fileupload';
 import { useRoute } from 'vue-router';
+import {debug} from "../helpers"
 
 const UPLOADS_FOLDER = 'uploads';
 
@@ -86,7 +87,7 @@ async function createImage(file_i,i) {
     var reader = new FileReader();
     reader.onload = function(event) {
       const imageUrl = event.target.result;
-      console.debug(event)
+      debug(event)
         files.value[i]=imageUrl;
     }
     console.log(reader.readAsDataURL(file_i))

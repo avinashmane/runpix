@@ -1,6 +1,7 @@
 import { signInWithEmailAndPassword,GoogleAuthProvider, signInWithRedirect,signInWithPopup, createUserWithEmailAndPassword, signOut , updatePassword, EmailAuthProvider, reauthenticateWithCredential } from "firebase/auth";
 import { collection, doc, getDocs, getDoc, setDoc, onSnapshot  } from "firebase/firestore"; 
 import { config } from "../config";
+import {debug} from "../helpers"
 import { firebaseAuth, db } from '../../firebase/config';
 
 export const getUser = () => {
@@ -15,6 +16,7 @@ export const getUserObservable = () => {
     try {
         firebaseAuth.onAuthStateChanged(
             (user) => {
+                debug('firebaseAuth.onAuthStateChanged()')
                 return user;
             }
         );
@@ -26,12 +28,12 @@ export const getUserObservable = () => {
 export const reAuthenticate = (password) => reauthenticateWithCredential(firebaseAuth.currentUser, EmailAuthProvider.credential(firebaseAuth.currentUser.email, password))
     .then(
         (user) => {
-            console.debug(user);
+            debug(user);
             return user;
         }
     ).catch(
         (error) => {
-            console.debug(error);
+            debug(error);
             throw error;
         }
     );
@@ -66,7 +68,7 @@ export const signInGoogle = () => {
     provider.addScope('email');
     // signInWithRedirect(firebaseAuth, provider)
     return signInWithPopup(firebaseAuth, provider).then((userCredential) => {
-        console.debug(`logging in ${userCredential.user.email}`)
+        debug(`logging in ${userCredential.user.email}`)
         return userCredential.user;
     })
     .catch((error) => {
@@ -98,7 +100,7 @@ export const changePassword = (password) => {
             return true;
         })
         .catch((error) => {
-            console.debug(error);
+            debug(error);
             throw error;
         })
 }
@@ -113,10 +115,25 @@ export const getRaces = () => {
             return dat;
         }).catch((error) => {
             // doc.data() will be undefined in this case
-            console.debug("No such document!",error);
+            debug("No such document!",error);
             return {}
         }) 
 }
+
+export const getDocAsync = async (path,callback) => {
+    try{
+        const docRef = doc(db, path);
+        return onSnapshot(docRef,docSnap=> {
+            let dat= docSnap.data();
+            callback(dat);
+        })
+    }catch(error) {
+            // doc.data() will be undefined in this case
+            debug(`No document at ${path}`,error);
+            return {}
+    }
+}
+
 
 export const getRacesAsync = (callback) => {
     try{
@@ -131,7 +148,7 @@ export const getRacesAsync = (callback) => {
         })
     }catch(error) {
             // doc.data() will be undefined in this case
-            console.debug("No such document!",error);
+            debug("No such document!",error);
             return {}
     }
 }
@@ -144,7 +161,7 @@ export const getAllDocs = (path) => {
             return dat;
         }).catch((error) => {
             // doc.data() will be undefined in this case
-            console.debug("No such Collection!",error);
+            debug("No such Collection!",error);
             return {}
         }) 
 }
@@ -153,14 +170,14 @@ export const  getDocData = async (path) => {
     // debugger
     console.log(`getDocData(): ${path}`)
     const docRef = doc(db, path);
-    // console.debug(docRef)
+    // debug(docRef)
     return await getDoc(docRef).then((docSnap)=> {
             let dat= docSnap.data()
-            // console.debug(dat)
+            // debug(dat)
             return dat;
         }).catch((error) => {
             // doc.data() will be undefined in this case
-            console.debug("No such document!",error);
+            debug("No such document!",error);
             return {}
         }) 
 }
@@ -198,11 +215,11 @@ export const setDocData = async (path,payload,merge) => {
                 return ret;
             }).catch((error) => {
                 // doc.data() will be undefined in this case
-                console.debug("Error in setDocData()",error);
+                debug("Error in setDocData()",error);
                 throw Error("Error in setDocData()")
             }) 
         }else{
-            console.debug("Error in setDocData()",error);
+            debug("Error in setDocData()",error);
             throw Error("Error in setDocData()") 
         }
 }

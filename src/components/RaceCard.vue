@@ -25,7 +25,10 @@
 
 <div class="flex flex-col gap-1 p-0">
 
-          <a v-if="race.linkPhotos" :href="race.linkPhotos" class="p-button p-button-label text-sm mx-auto h-2">Photos</a>
+          <a v-if="race.linkPhotos" :href="race.linkPhotos" 
+            class="p-button p-button-label text-sm mx-auto h-2">
+            <Button label="Photos" :pt="smallButton"/>
+          </a>
           <Button v-if="!race.linkPhotos && props.menu.includes('photos') && race?.photoStatus?.includes('avail')"
             label="Photos" :pt="smallButton" @click="router.push(`/p/${race.id}`)" />
           <Button

@@ -1,5 +1,6 @@
 <script >
 import { ref, onMounted } from 'vue'
+import {debug} from "../helpers"
 import Button from 'primevue/button';
 // example from 
 
@@ -24,7 +25,7 @@ let cam =  {
   startbutton : null,
 }
 let showViewLiveResultButton= function() {
-    console.debug('showViewLiveResultButton')
+    debug('showViewLiveResultButton')
     if (window.self !== window.top) {
       // Ensure that if our document is in a frame, we get the user
       // to first open it in its own tab or window. Otherwise, it
@@ -40,7 +41,7 @@ let showViewLiveResultButton= function() {
   }
 
 function startup() {
-    console.debug('startup')
+    debug('startup')
     if (showViewLiveResultButton()) {
       return;
     }

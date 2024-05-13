@@ -7,6 +7,7 @@ import {firebaseAuth } from '../../firebase/config'
 import InputText from 'primevue/inputtext';
 import LoadingSpinner from './LoadingSpinner.vue';
 import router from "../router";
+import {debug} from "../helpers"
 
 const store = useStore()
 const signInState = store.state.auth.signIn
@@ -35,7 +36,7 @@ const signInGoogle = () => {
       store.dispatch('getUserAction')
       router.push('/home')
     } else {
-      console.debug('error in dispatch')
+      debug('error in dispatch')
     }
   })
 }
@@ -62,7 +63,7 @@ const validateForm = () => {
 //     let x=signInWithPopup(firebaseAuth, provider)
 //     // signInWithRedirect(firebaseAuth, provider)
 //     .then((userCredential) => {
-//         console.debug(`logging in ${userCredential.user.email}`)
+//         debug(`logging in ${userCredential.user.email}`)
 //         return userCredential.user;
 //     })
 //     .catch((error) => {

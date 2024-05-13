@@ -78,12 +78,12 @@ import { doc, getDoc ,updateDoc, setDoc } from 'firebase/firestore'
 import {db} from '../../firebase/config'
 
 import {chain,cloneDeep,map,take,keys,orderBy,sumBy,pickBy,split,sortBy,tap,startsWith} from 'lodash-es'
-import { getLocalDateTime  } from '../helpers';
+import { getLocalDateTime ,debug } from '../helpers';
 import { config } from '../config';
 
 // let js=(x)=>JSON.parse(JSON.stringify(x))
 let getArr=(x,sep=',')=> (x && typeof x ==  "string" )? x.split(sep): x 
-let joinArr=(x,sep=",")=>{//console.debug(x);
+let joinArr=(x,sep=",")=>{//debug(x);
       let ret = (x && x instanceof Array) ? x.filter((v, i, arr) => arr.indexOf(v) === i)
         .map(x=>typeof x ==  "string"?x.toUpperCase():String(x).toUpperCase()).join(sep) : x
       return ret
@@ -140,7 +140,7 @@ let flagOff=(e,a)=>{
       userId: store.state.auth.userDetails.userData.email
     }
   );
-  console.debug(ts)
+  debug(ts)
   editable.value=false;
 }
 
@@ -157,14 +157,14 @@ let saveChanges=(e)=>{
   if(!UpdValues.Waypoints) UpdValues.Waypoints=['VENUE','END']
   if(!UpdValues.Distances) UpdValues.Distances=['5K','10K']
 
-  // console.debug(`races/${raceId}`,JSON.stringify(UpdValues))
+  // debug(`races/${raceId}`,JSON.stringify(UpdValues))
   updateDoc(doc(db,`races/${raceId}`),UpdValues)
 
   editable.value=false;
 }
 
 let klick=() => { 
-  // console.debug(value.value.map(x=>x.value).join('/'))
+  // debug(value.value.map(x=>x.value).join('/'))
   debugger;
 }
 

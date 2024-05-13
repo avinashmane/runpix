@@ -119,10 +119,12 @@ import axios from 'axios';
 import Compressor from 'compressorjs';
 import { db, storage } from "../../firebase/config" 
 import {chain,cloneDeep,map,take,keys,orderBy,sumBy,pickBy,split,sortBy,tap,startsWith}  from "lodash-es"
+import {debug} from "../helpers"
+
 // wakesup the backend
 fetch(config.api.faceMatchUpload+'/api/faceapi',{headers: {mode: "cors", "Referer": "https://runpix.web.app" }}) //call the fetch function passing the url of the API as a parameter
-.then(function(x) {console.log(`/api/faceapi: Status: ${x.status}`)})
-.catch(function(e) {console.log(e) });
+  .then(function(x) {console.log(`/api/faceapi: Status: ${x.status}`)})
+  .catch(function(e) {console.log(e) });
 
 const store = useStore()
 store.dispatch('getRacesAction')
@@ -360,7 +362,7 @@ let dialogHeader=computed(()=>
           '')
 
 function toggleDialog  (i){
-  console.debug(`toggleDialog: ${i}`)
+  debug(`toggleDialog: ${i}`)
   if (entryToEdit) {
     entryToEdit.value=i
     visible.value=true

@@ -4,12 +4,13 @@ import {ref, reactive } from "vue";
 import InputText from 'primevue/inputtext';
 import Button from 'primevue/button';
 import LoadingSpinner from './LoadingSpinner.vue';
+import {debug} from "../helpers"
 
 const store = useStore()
 const changePasswordState = store.state.auth.changePassword
 const errorMessage = changePasswordState.errorMessage
 
-console.debug(errorMessage)
+debug(errorMessage)
 
 const oldPasswordModel = ref('')
 const newPasswordModel = ref('')
@@ -34,7 +35,7 @@ const validateForm = () => {
 }
 
 const changePassword = () => {
-  console.debug('changePassword')
+  debug('changePassword')
   store.dispatch('changePasswordAction', {
     oldPassword: oldPasswordModel.value,
     newPassword: newPasswordModel.value,

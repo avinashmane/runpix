@@ -27,7 +27,7 @@
         <div class="flex flex-row w-full ">
           <img
           :src="getPublicUrl('processed', race.id, race.coverPage)"
-          class="w-[20%] "
+          class="w-[20%] h-[20%] mr-2 rounded-full"
           />
           <div>
             <div class=" w-full">{{ getFinishStatus() }}</div>

@@ -2,7 +2,10 @@ import { createApp } from 'vue'
 import App from './App.vue'
 import './index.css'
 import router from './router'
-import store from './store';
+
+import store from './store'; //vuex to be removed
+import { createPinia } from 'pinia' ; // move to pinia
+
 import PrimeVue from 'primevue/config';
 import Button from 'primevue/button';
 import ToastService from 'primevue/toastservice';
@@ -17,12 +20,12 @@ import VueSocialSharing from 'vue-social-sharing'
 
 
 const app = createApp(App)
+const pinia = createPinia()
 
 if (import.meta.env.MODE === 'development') {
     app.config.devtools = true
+    app.config.performance = true
 }
-app.config.devtools = true
-app.config.performance = true
 
 app.use(store)
     .use(VueGtag, {
@@ -32,6 +35,7 @@ app.use(store)
     })
     .use(VueSocialSharing)
     .use(router)
+    .use(pinia)
     // PrimeVUE
     .use(PrimeVue,{
         locale: {

@@ -93,6 +93,7 @@ import { db, storage } from "../../firebase/config"
 // import { ref as dbRef, getDownloadURL } from "firebase/storage";
 import { collection,query,doc, onSnapshot, updateDoc,getDocs } from "firebase/firestore";
 import { config } from '../config';
+import {debug} from "../helpers"
 
 const GS_PREFIX=config.GS_PREFIX
 const store = useStore()
@@ -156,7 +157,7 @@ const entryToEdit = ref(null)
 let diaTexts=ref('')
 
 function toggleDialog  (i){
-  console.debug(`toggleDialog: ${i}`)
+  debug(`toggleDialog: ${i}`)
   if (entryToEdit) {
     entryToEdit.value=i
     visible.value=true
@@ -171,17 +172,17 @@ function submitChange(e){
   if (diaTexts.value){
     let arr=diaTexts.value.split(',')
     let imagePath=images.value[entryToEdit.value].imagePath
-    console.debug(entryToEdit,arr)
+    debug(entryToEdit,arr)
     return updateDoc(doc(db,imgNode(raceId,imagePath)),{texts:arr}) 
   } else {
-    console.debug('diaText entry blank "${diaText.value}"')
+    debug('diaText entry blank "${diaText.value}"')
   }
   
 }
 
 function setCoverPage(e){
   let imagePath=images.value[entryToEdit.value].imagePath
-  console.debug(entryToEdit,imagePath)
+  debug(entryToEdit,imagePath)
   return updateDoc(doc(db,`races/${raceId}`),{coverPage:imagePath}) 
   
   
@@ -192,7 +193,7 @@ const imageData = ref({})
 
 
 function setStatus(x,imgPath){
-  // console.debug(x,imgPath)
+  // debug(x,imgPath)
   return updateDoc(doc(db,imgNode(raceId,imgPath)),{status:x})  
 }
 
