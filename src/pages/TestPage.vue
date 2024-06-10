@@ -4,16 +4,26 @@ import Button from "primevue/button"
 import InputText from 'primevue/inputtext';
 import SvgText from "../components/SvgText.vue"
 import { ref } from "vue";
-import {useUserStore}  from '@/stores/index.js'
 import { CSVToArray } from "../helpers";
+import Toast from 'primevue/toast';
+import { useToast } from 'primevue/usetoast';
+import {useUserStore}  from '@/stores/index.js'
 const userStore = useUserStore()
+
+const toast = useToast();
+
+const show = () => {
+    toast.add({ severity: 'info', summary: 'Info', detail: 'Message Content', life: 3000 });
+};
 
 </script>
 
 <template>
 
-  {{ userStore.profile }}
-  {{ userStore.roles }}
+  <!-- {{ userStore.profile }} -->
+  <!-- {{ userStore.roles }} -->
+  <Toast/>
+  <Button label="toast" @click='show()'>Show</Button>
   <br/>{{ userStore.checkAccess('race','mychoice',"any") }}
   <br/>{{ userStore.checkAccess('race','werun',"any") }}
   <br/>{{ userStore.checkAccess('race','mychoice',"any") }}

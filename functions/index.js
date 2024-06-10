@@ -13,81 +13,20 @@ let lazy={ // modules to be lazy loaded
   Video:null// video intelligence
 } 
 
-
-const sharp = require('sharp')
-// Firebase setup
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
-// const { encode } = require('pluscodes')
+const sharp = require('sharp')
+const exifr = require('exifr');
+
 let _ = require('lodash');
+const { DEBUG_MODE, GS_URL_PREFIX, JPEG_EXTENSION, RUNTIME_OPTION, UPLOADS_FOLDER, META_KEYS, bibRegex, NOTIMING_WAYPOINTS, testData, PROCESSED_FOLDER, THUMBNAILS_FOLDER, WATERMARK_PATH, NOTFOUND, RESIZE_OPTION, JPG_OPTIONS, THUMBSIZE_OPTION, THUMB_JPG_OPTIONS } = require('./settings');
 
 // Node.js core modules
-// const ExifReader = require('exif-reader');
-const exifr = require('exifr');
 
 // Vision API
 const vision = require('@google-cloud/vision');
 
-/* ~~~~~~~~~~~~ 2. config ~~~~~~~~~~~~~ */
-// options for triggers
-const defaultFor= (OPTION,default_)=>{
-  let cfg 
-  try {
-    if (process.env[OPTION]) 
-      cfg= JSON.parse(process.env[OPTION]) 
-    else
-      cfg= default_
-  } catch (e) {debug(e)}
-  // console.debug(">>>",OPTION,process.env[OPTION],cfg)
-  return cfg
-}
-
-
-const RUNTIME_OPTION = defaultFor("RUNTIME_OPTION",{
-                          ScanImages: {
-                            vision: true ,
-                            disabled : false
-                          }
-                        })
-
-const testData = 'test/annotations_data.json';
-  // Where we'll config
-const UPLOADS_FOLDER = 'uploads';
-const PROCESSED_FOLDER = 'processed';
-// File extension for the created JPEG files.
-const THUMBNAILS_FOLDER = 'thumbs';
-const NOTFOUND = 'notfound'
-
-const GS_URL_PREFIX="https://storage.googleapis.com/run-pix.appspot.com/"
-const JPEG_EXTENSION = '.jpg';
-const WATERMARK_PATH = (x) =>  `ref/watermark/${x}.png`
-const bibRegex = /^[A-Z]{0,1}[0-9]{3,5}$/;
-
-const RESIZE_OPTION = defaultFor("RESIZE_OPTION", {
-                  width: 3072,
-                  height: 3072,
-                  fit: sharp.fit.inside,
-                  position: sharp.strategy.entropy
-                })
-const THUMBSIZE_OPTION = defaultFor("THUMBSIZE_OPTION",{
-                  width: 400,
-                  height: 300,
-                  fit: sharp.fit.inside,
-                  position: sharp.strategy.entropy
-                })
-const JPG_OPTIONS = defaultFor("JPG_OPTIONS",{quality: 60, progressive: true})
-const THUMB_JPG_OPTIONS = defaultFor("JPG_OPTIONS",{quality: 30, progressive: true})
-            
-const NOTIMING_WAYPOINTS = defaultFor("NOTIMING_WAYPOINTS", ['VENUE','venue','general'])
-const META_KEYS=['ImageHeight','ImageWidth','ExifVersion', 'DateCreated', 'WhiteBalance', 'FocalLength', 'DigitalCreationTime', 
-              'DateTimeOriginal', 'OffsetTimeOriginal', 'CreateDate', 'SubSecTimeOriginal', 'ModifyDate', 
-              'ApproximateFocusDistance', 'OriginalDocumentID', 'format', "ShutterSpeedValue",
-              'Artist', 'ExposureCompensation', "ImageUniqueID", 'Lens', "FocalLengthIn35mmFormat",
-              'Make',"Model", 'ExposureTime', 'LensModel', 'PreservedFileName', 'Flash', 'ISO',"latitude","longitude"]    
-
-const DEBUG_MODE = defaultFor("DEBUG_MODE",2)
-
-const debug = DEBUG_MODE>2 ? functions.logger.debug : ()=>{}
+const debug = DEBUG_MODE>2 ? functions.logger.debug : ()=>{};
 const log= DEBUG_MODE>1 ? functions.logger.log: ()=>{}
 const error=  functions.logger.error
 const JSS=JSON.stringify
@@ -101,17 +40,22 @@ if(admin.apps.length==0) {
   admin.firestore().doc('app/config').onSnapshot(snap=>cfg=snap.data())
 }
 
-// functions.storage.bucket('run-pix.appspot.com')
+
 let watermarks={}; //key="raceId" : watermark sharp image
 
 let race_cfg={};
-const getRaceCfg= (race) =>  { 
-  if (!race_cfg[race])
-    return admin.firestore().doc(`races/${race}`)
-        .onSnapshot(snap=>{race_cfg[race]=snap.data();
-          return race_cfg[race] 
-        })
-  return race_cfg[race]
+const getRaceCfg= async (race) =>  { 
+  if (race_cfg.hasOwnProperty(race)) 
+    return race_cfg[race] 
+  admin.firestore().doc(`races/${race}`)
+    .onSnapshot(snap=>{
+      race_cfg[race]=snap.data();
+      debug(`load ${race}`,race_cfg[race])
+      return race_cfg[race] 
+    })
+  // function below waits 3 seconds
+  return await new Promise(resolve => setTimeout(resolve, 1000))
+                        .then(()=> race_cfg[race])
 }
 
 
@@ -119,10 +63,10 @@ const getRaceCfg= (race) =>  {
  
  const express = require('express');
  const exphbs = require('express-handlebars');
-const { cleanForFS, getNormalSize, getpathfromGcsUri } = require('./utils');
-// const { assert } = require('chai');
+ const { cleanForFS, getNormalSize, getpathfromGcsUri } = require('./utils');
+
  const app = express();
-//  const firebaseUser = require('./firebaseUser');
+ const firebaseUser = require('./firebaseUser');
  
  app.engine('handlebars', exphbs.engine({defaultLayout: 'main'}));
  app.set('view engine', 'handlebars');
@@ -151,6 +95,15 @@ const { cleanForFS, getNormalSize, getpathfromGcsUri } = require('./utils');
     return renderImage(res, req, p, );
     
  });
+
+ app.get('/race/:raceId', async (req, res) => {
+  // @ts-ignore
+  //test link http://localhost:5000/race/werun2023
+  const _raceObj = await getRaceCfg(req.params.raceId)
+  // console.log(req.params.raceId, _raceObj)
+  res.send( _raceObj)
+  
+});
  
  app.get('*', function(req, res){
   res.send(`Error finding the resource for the URL ${req.url}
@@ -192,7 +145,7 @@ async function mapParams(params){
   }
   
   // let race =  await firebaseGet(`races/${p.raceId}`);
-  let race =  getRaceCfg(p.raceId);
+  let race =  await getRaceCfg(p.raceId);
   p.Name = race.Name
   p.Location = race.Location
   p.raceDate = (race.Date && race.Date.length>10) ? race.Date.substring(0,10) : race.Date
@@ -212,6 +165,7 @@ exports.api = functions.https.onRequest(app);
 
 // Listen for changes in all documents in the 'users' collection and all subcollections
 exports.imageUpdate = functions.firestore
+    // .document('races/{raceId}/images/{imagePath}')
     .document('races/{raceId}/images/{imagePath}')
     .onUpdate((change, context) => {
       /**
@@ -226,10 +180,12 @@ exports.imageUpdate = functions.firestore
        * if old.status='active' new.status="updOrientation:90":
        *    turn the thumb & processed
        */
-       if (RUNTIME_OPTION.imageUpdate && RUNTIME_OPTION.imageUpdate.disabled) {
-          log(`Function is disabled due to RUNTIME_OPTION.imageUpdate.disabled=${RUNTIME_OPTION.imageUpdate.disabled}`);
-          return null;
-        }
+      if (getRaceCfg()?.processing?.scanImages){
+        debug(context.params,change.before.data(),change.after.data())
+      } else {
+        log(`Function is disabled due to races/${context.params.raceId}/images/{imagePath}!=true`);
+        return null;
+      }
       // If we set `/users/marie/incoming_messages/134` to {body: "Hello"} then
       // context.params.userId == "marie";
       // context.params.messageCollectionId == "incoming_messages";
@@ -273,19 +229,34 @@ exports.ScanImages = functions.runWith({
   // Ignore images not in uploads
   } else if (! object?.name?.startsWith(`${UPLOADS_FOLDER}/`) && 
       ! object?.name?.startsWith(`test/`)) {  
-    // Exit if this is triggered on a file that is not an image.
-    if (!object?.contentType?.startsWith('image/')) {
-      log(`Ignoring upload "${object.name}"  is not an image.`);
-      return null;
+    // if this is triggered on a file that is an image.
+    if (object?.contentType?.startsWith('image/')) {
+
+      await processImage(object);
+
+    } else if (object?.contentType?.startsWith('video/')){
+
+      await this.scanVideo(object)
+
+    } else {
+
+      log(`Ignoring upload "${object.name}"  is not an image/video.`);
+
     }
     // log(`Ignoring upload "${object.name}" because not in ${UPLOADS_FOLDER}/.`);
     return null;
   }
 
-  var [folder, raceId, waypoint, userId, date, gps, fileName] = parseObjName(object.name)
+  // log('all done')
+  return null;
 
-  if (raceId=='default')
-    debug(object,folder, raceId, waypoint, userId, date, gps,"file", fileName)
+});
+
+async function processImage(object) {
+  var [folder, raceId, waypoint, userId, date, gps, fileName] = parseObjName(object.name);
+
+  if (raceId == 'default')
+    debug(object, folder, raceId, waypoint, userId, date, gps, "file", fileName);
 
   const detections = await getAIdetections(object);
 
@@ -293,56 +264,54 @@ exports.ScanImages = functions.runWith({
   try {
 
     /** get metadata from the filename race_wpt_user_timestamp */
-    var {attrs,imagePath} = await compressImage(raceId,object.name, object.bucket, {});
+    var { attrs, imagePath } = await compressImage(raceId, object.name, object.bucket, {});
 
-    attrs=META_KEYS.reduce((a,x)=>{if(x in attrs)
-                                      a[x]=attrs[x];
-                                  return a},{})
+    attrs = META_KEYS.reduce((a, x) => {
+      if (x in attrs)
+        a[x] = attrs[x];
+      return a;
+    }, {});
 
     // log("open waypointation codes")
     // var pluscode=encode({  latitude: attrs.latitude,longitude: attrs.longitude})
     log(`AI results on image "${object.name}"`, detections.length);
-    let texts=[];    
+    let texts = [];
     // get ISO Date for correct part TODO /// for time readings
-    let readingDate = getIsoDate(attrs,date)
+    let readingDate = getIsoDate(attrs, date);
 
     for (let i = 0; i < detections.length; i++) {
-      let d=detections[i]
+      let d = detections[i];
       // only if it looks like a bib
       if (d.description && d.description.match(bibRegex)) {
-        try{
+        try {
 
-          let score = processBounding(d.boundingPoly, getImageHeight(attrs))
+          let score = processBounding(d.boundingPoly, getImageHeight(attrs));
 
           // if its not a  non-timing waypoint record timing
-          if (NOTIMING_WAYPOINTS.includes(waypoint)==false){ 
-            await updFSReadings(raceId, userId, d.description, 
-                      readingDate, score, 
-                      waypoint, attrs, imagePath )
+          if (NOTIMING_WAYPOINTS.includes(waypoint) == false) {
+            await updFSReadings(raceId, userId, d.description,
+              readingDate, score,
+              waypoint, attrs, imagePath);
           }
           // add only new texts in all cases
-          if(texts.indexOf(d.description)==-1)
+          if (texts.indexOf(d.description) == -1)
             texts.push(d.description);
-        } 
+        }
         catch (e) {
-          error('error updFSReadings',e)
+          error('error updFSReadings', e);
         }
       }
     }
 
     // trim attributions TODO
     // Saving Image data in firestore.. referred image should be jpg
-    log(`updating firestore on image data`)
-    await updFSImageData(raceId,fileName, detections, texts, attrs)
+    log(`updating firestore on image data`);
+    await updFSImageData(raceId, fileName, detections, texts, attrs);
 
   } catch (e) {
     error(`Error in image processing "${object.name}"`, e);
   }
-
-  // log('all done')
-  return null;
-
-});
+}
 
 async function getAIdetections(object) {
   let data;
@@ -671,16 +640,22 @@ function getImageHeight(meta){
 /**
  * Video OCR
  * 
- * 
- * 
  * scanVideo:  gets text annotations from GCS video to firestore
  * @param {*} gcsUri 
  */
 lazy.videocr=require('./videoocr')
   
-exports.scanVideo = async function (gcsUri) {
-  
+exports.scanVideo = async function (storageObject) {
+  let gcsUri = storageObject
   try{
+    if (typeof storageObject=== 'object') {
+      gcsUri = `gs://${storageObject?.bucket}/${storageObject?.name}`
+      /**
+      bucket; // The Storage bucket that contains the file.
+      name; // File path in the bucket.
+      contentType; // File content type.
+      */
+    } 
     var [bucket,raceId,videoPath] = gcsUri.split(/\//,).splice(-3)
   } catch (e) {
     console.error(`error parsing ${gcsUri}`,e)
@@ -792,6 +767,11 @@ async function getVideoMetadata(bucket,filePath,metadataReqd=true) {
   
 }
 
+exports.testHttp = functions.https.onRequest(async (req, res)=>{
+  console.log("testHttp",req.query?.raceId)
+  res.send(await getRaceCfg(req.query?.raceId))
+
+});
 /**
  * Exports for testing
  */

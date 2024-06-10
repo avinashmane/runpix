@@ -120,8 +120,9 @@ const props = defineProps({
   race: Object,
   // bibs: Object,
 })
-const UPLOADS_FOLDER = 'uploads';
-const UPLOADVIDS_FOLDER = 'uploadvid'
+const UPLOADS_FOLDER = config.storage.uploads;
+const UPLOADVIDS_FOLDER = config.storage.uploadvid
+
 const userData = store.state.auth.userDetails.userData
 
 /**

@@ -33,10 +33,12 @@ res=_.chain(allEntries.value).filter(checkBib).groupBy("bib").map((x,k)=>_.chain
 ### current 
 
 
-* Certification link from result (WIP)
-* router replace for event
+* toast DONE
+* Certification link from result (WIP) DONE
+* router replace for event DONE
+
 * lodash tree shaking (gone bad since _.chain does not work)
-import {chain,cloneDeep,map,take,keys,orderBy,sumBy,pickBy,split,sortBy,tap,startsWith} as _ from 'lodash-es'
+import {chain,cloneDeep,map,take,keys,orderBy,sumBy,pickBy,split,sortBy,tap,startsWith} as _ from 'lodash-es'  problematic
 
 * rename API as /image as /api/facematch
 

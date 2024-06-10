@@ -15,6 +15,7 @@ config.images.limit_pics = 5000
 
 config.GS_PREFIX = "https://storage.googleapis.com/run-pix.appspot.com/"
 config.storage.uploads =  "uploads"
+config.storage.viduploads =  "viduploads"
 config.storage.faceUploads =  "faceuploads"
 
 // format usable for data table
@@ -50,6 +51,10 @@ console.log('Mode: ',import.meta.env.MODE)
 
 
 //= process.env.WEB_PORT || 9980;
-
+// import { getDocAsync } from "./api";
+// const config_substription=getDocAsync("app/webconfig",(x)=>{
+//   console.log("app/webconfig",x)
+//   // config=Object.assign(config,x)
+// })
 // module.exports = config;
 export {config}

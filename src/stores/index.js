@@ -27,7 +27,7 @@ export const useUserStore = defineStore('UserStore', () => {
             await getDocAsync(`users/${profile.value.email}`,
                 (profileInfoInFireStore) => { 
                     roles.value = profileInfoInFireStore?.roles
-                    debug("refresh roles",roles.value)
+                    // debug("refresh roles",roles.value)
                     profile.value = assign(profile.value,
                                         omit(profileInfoInFireStore, ["roles"]))
                 })
@@ -50,8 +50,10 @@ export const useUserStore = defineStore('UserStore', () => {
         try {
             // debugger
             // debug(roles)
+            if (!roles?.value)   // if roles not defined...no access
+                return false
             if (/^test/i.test(objId))   // Anything test...all access granted
-                return true
+                return true                
             if (objType == 'race') {
                 if (checkAnyRegex(roles.value.admin, objId)) {
                     // check access to 
@@ -74,11 +76,9 @@ export const useUserStore = defineStore('UserStore', () => {
 
             return false
         } catch (e) {
-            debugger
-            throw e
+            // debugger
+            console.error( e)
         }
-
-
     }
 
     async function getUserProfile() {

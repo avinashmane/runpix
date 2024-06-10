@@ -2,26 +2,54 @@
 
 run-pix.web.app
 
-This project was created with [Vite](https://vitejs.dev/).
-
-This is a simple app using Firebase Auth to authenticate users, and using Vuex to manage state.
-
-You can see the full application at [vue-ts-firebase-example](https://github.com/Chia1104/vue-ts-firebase-example)
 
 ## Reference
 
-### Attributes
-* Races
-    * Date: ISODate
-    * Location,
-    * Name,
-    * Course: [5k,10k]
-    * Waypoints: [venue,general,start,end,5k,10k]   # Waypoints can be common to both routes
-                                    # venue, general skipped for timing
-    * photoStatus: [published]
-    * raceStatus: [open|closed|archived] # used for timing
+### FireStore
 
+## Root
 
+* config
+
+## Races
+
+* Date: ISODate
+* Location,
+* Name,
+* Course: ["5","10"]
+* Waypoints: [venue,general,start,end,5k,10k]   
+    Waypoints can be common to both routes
+
+    **venue, general skipped for timing**
+* bibPattern
+* photoStatus: "published" #string
+* coverPage: imagePath in /processed/RaceId/images
+* status: [open|closed|archived] # used for timing
+* linkFeedback
+* linkOrg
+* linkPhotos
+* linkReg
+* linkResults
+* timestamp:
+    * modify
+    * start
+    * result
+* processing
+    * scanImages
+    * scanVideos
+* certificate
+    * finisherCertificate: Google Slides Document ID
+
+## users 
+
+* roles
+    * admin : race_regex
+    * director : race_regex
+    * photos : race_regex
+    * timing : race_regex
+* 
+
+* email id
 ### Hierarchy
 * Event/Race : My Choice  
     * Course/Distance : 10k

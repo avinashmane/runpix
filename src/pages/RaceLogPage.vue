@@ -1,4 +1,5 @@
 <template>
+  <Toast/>
   <Card class="bg-white">
     <template #title> Provisional Timing {{ raceId }} </template>
     <template #content>
@@ -172,7 +173,7 @@
     <template #footer>
       <Button @click="router.back()" icon="pi pi-chevron-left"></Button>
       <Button @click="finalize_results">Finalize</Button>
-      <!-- <Button @click="klick">popup</Button> -->
+      <Button :label="toast" @click='showToast()' @dblclick="klick">Toast</Button>
       <!-- {{  race  }} -->
       <div v-if="totalFinalizedEntries">
         {{ processedFinalizedEntries }} / {{ totalFinalizedEntries }} entries processed
@@ -276,7 +277,7 @@ const startTime = computed(() => {
   }
 });
 let unsubscribe_readings;
-
+let toastNewUpdates
 // fetch bibs
 const unsubscribe_bibs = onSnapshot(
   query(collection(raceDoc, "bibs")),
@@ -290,10 +291,33 @@ const unsubscribe_bibs = onSnapshot(
         querySnapshot.forEach(mapReading);
 
         allEntries.value = addStatusFields(allEntries.value);
+
+        if (toastNewUpdates)
+          toastBib(querySnapshot)
+        else
+          toastNewUpdates=true
       }
     );
   }
 );
+
+function toastBib(querySnapshot){
+  querySnapshot.docChanges().forEach(change => {
+      const data=change.doc.data()
+      if (change.type === 'added') {
+        showToast(`${data.bib} @ ${data.waypoint}`,period(data.timestamp))
+        console.log('New  ', data);
+      }
+      if (change.type === 'modified') {
+        showToast(`CHG ${data.bib} @ ${data.waypoint}`,period(data.timestamp),"info")
+        console.log('Modified  ', data);
+      }
+      if (change.type === 'removed') {
+        showToast(`REM ${data.bib} @ ${data.waypoint}`,period(data.timestamp),"warning")
+        console.log('Removed  ', data);
+      }
+    });
+}
 
 let entries = computed(() => {
   let ret = cloneDeep(allEntries.value)
@@ -690,6 +714,17 @@ function getGender(entry) {
   
 }
 
+/** Toast */
+import Toast from 'primevue/toast';
+import { useToast } from 'primevue/usetoast';
+
+const toast = useToast();
+
+const showToast = (summary,mesg,severity) => {
+    toast.add({ severity: severity||'success', 
+                summary: summary||'Bib missing', 
+                detail: mesg||'Message Content', life: 3000 });
+};
 
 </script>
 

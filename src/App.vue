@@ -18,9 +18,6 @@ const callback = (response) => {
   </div>
   <Footer  />
 
-  <!-- Login  
-  class="md:min-h-full" for Router view
-  <GoogleLogin :callback="callback"/> -->
 </template>
 
 <style scoped>

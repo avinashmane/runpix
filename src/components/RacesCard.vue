@@ -1,5 +1,5 @@
 <template>
-    <h1 @dblclick="klick" class="text-xl text-center">Races</h1> 
+    <h1 @dblclick="klick" class="text-center">Races</h1> 
     <DataView :value="races" :sort-field="Date" :sort-order="-1" :pt="{
         root: { class: 'bg-transparent' },
         content: { class: 'border-primary text-lg text-primary-700' },

@@ -1,3 +1,21 @@
+<template>
+
+    <Paginator v-model:first="first" v-model:rows="rows" :totalRecords="images.length" template="FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
+      currentPageReportTemplate="{first}-{last} of {totalRecords}" />
+    <div class="flex flex-wrap bg-gray-200 justify-evenly">      
+      <div v-for="i in range(first,rows,images.length)" :key="i" class="thumb">
+        <a v-if="images[i]" :href="getURI(i)">
+          <Image v-if="images[i].imagePath"  
+          :src="'https://storage.googleapis.com/run-pix.appspot.com/thumbs/'+raceId+'/'+images[i].imagePath.replace('.png','.jpg')"/>
+          <!-- <ImageReviewCard  v-bind:raceId="raceId" v-bind:imagePath="images[i].imagePath"/> -->
+          <small v-for="t of images[i].textAnnotations">{{t.description}} /</small>
+        </a>
+      </div>
+    </div>
+
+    <Button @click="">⭕</Button>
+</template>
+
 <script setup>
 import { computed,  ref } from 'vue' 
 import { useStore } from 'vuex';
@@ -95,23 +113,6 @@ function getURI(i){
 }
 </script>
     
-<template>
-    <Paginator v-model:first="first" v-model:rows="rows" :totalRecords="images.length" template="FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
-      currentPageReportTemplate="{first}-{last} of {totalRecords}" />
-    <div class="flex flex-wrap bg-gray-200 justify-evenly">      
-      <div v-for="i in range(first,rows,images.length)" :key="i" class="thumb">
-        <a v-if="images[i]" :href="getURI(i)">
-          <Image v-if="images[i].imagePath"  
-          :src="'https://storage.googleapis.com/run-pix.appspot.com/thumbs/'+raceId+'/'+images[i].imagePath.replace('.png','.jpg')"/>
-          <!-- <ImageReviewCard  v-bind:raceId="raceId" v-bind:imagePath="images[i].imagePath"/> -->
-          <small v-for="t of images[i].textAnnotations">{{t.description}} /</small>
-        </a>
-      </div>
-    </div>
-
-    <Button @click="">⭕</Button>
-</template>
-
 <style scoped>
 .thumb ::v-deep( img) {
   max-width: 10em;

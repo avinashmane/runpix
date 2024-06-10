@@ -288,16 +288,16 @@ subscriptions['config']=onSnapshot(doc(db,'app/config'),
                         }
                     })
 
-function subscribetoUserProfile(email){        
-    const path=`users/${email}`            
-    return onSnapshot(doc(db,path),
-                    docSnap => {
-                        if (docSnap.exists()) {
-                            config.app = Object.assign(config.app,docSnap.data())
-                            console.log(`${path} loaded`+Object.keys(config.app).length );
-                        } else {
-                            // doc.data() will be undefined in this case
-                            console.log(`Error loading ${path}`);
-                        }
-                    })
-}
+// function subscribetoUserProfile(email){        
+//     const path=`users/${email}`            
+//     return onSnapshot(doc(db,path),
+//                     docSnap => {
+//                         if (docSnap.exists()) {
+//                             config.app = Object.assign(config.app,docSnap.data())
+//                             console.log(`${path} loaded`+Object.keys(config.app).length );
+//                         } else {
+//                             // doc.data() will be undefined in this case
+//                             console.log(`Error loading ${path}`);
+//                         }
+//                     })
+// }

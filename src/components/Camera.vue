@@ -94,11 +94,11 @@
   import { getDateTime  } from "../helpers"
   import {db,  storage  } from "../../firebase/config"
   import { doc, getDoc ,updateDoc, setDoc } from 'firebase/firestore'
-  import { ref as stoRef,  uploadBytes,  uploadString   } from "firebase/storage";
+  import { ref as stoRef,  uploadBytes,  uploadString  } from "firebase/storage";
   import {  useStore  } from "vuex";
   const store = useStore()
   const captureCount = store.state.captureCount
-
+  import { config } from '../config';
   
   const props = defineProps({
     raceId: String,
@@ -106,8 +106,8 @@
     race: Object,
     // bibs: Object,
   })
-  const UPLOADS_FOLDER = 'uploads';
-  const UPLOADVIDS_FOLDER = 'uploadvid'
+  const UPLOADS_FOLDER = config.storage.uploads;
+  const UPLOADVIDS_FOLDER = config.storage.uploadvid
   
   const userData = store.state.auth.userDetails.userData
 

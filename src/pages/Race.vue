@@ -49,35 +49,45 @@
         </template>
 
         <template #footer>
-          <Button name="races" label="Races" raised icon="pi pi-chevron-left" 
-              @click="router.push('/e')"></Button>
+          <div class="flex justify-around  my-2">
 
           <a v-if="raceObj?.linkPhotos" :href = "raceObj?.linkPhotos">
-                <Button name="photos" label="Photos" raised icon="pi pi-images" class="" >
+                <Button name="photos" raised icon="pi pi-images" class="" >
                 </Button> 
           </a>
           
-          <div v-if="userStore.checkAccess('race',raceObj?.id,'update')" 
-            class="flex justify-around w-full my-2">
-            <Button name="edit" label="Edit" raised icon="pi pi-pencil" class=""
-            :to="`/e/${raceObj.id}/edit`" />
-            <Button name="startlist" label="Start List" raised icon="pi pi-list" class=""
-            :to="`/e/${raceObj.id}/bibs`" />
-            <Button name="provisional" label="Provisional Timing" raised icon="pi pi-clock" class=""
-            :to="`/e/${raceObj.id}/log`" />
-          </div>
-          <div v-if="userStore.checkAccess('race',raceObj?.id,'timing')" 
-            class="flex justify-around w-2/3">
-            <Button name="entry" label="Enter Bibs" raised icon="pi pi-hashtag" class=""
+
+            <RouterLink 
+              v-if="userStore.checkAccess('race',raceObj?.id,'update')"
+              v-for="(icon,path) in {edit:'pi-pencil',
+                        bibs:'pi-list',log:'pi-clock'}"
+              :to="`/e/${raceObj.id}/${path}`">
+              <Button :name="path" raised :icon="'pi '+icon" class="bg-cyan-200"/>
+            </RouterLink> 
+            
+          <!-- </div> -->
+
+            <RouterLink v-if="userStore.checkAccess('race',raceObj?.id,'timing')"
+              v-for="(icon,path) in {entry:'pi-hashtag',
+                        'entry/video':'pi-video'}"
+              :to="`/e/${raceObj.id}/${path}`">
+              <Button :name="path" raised :icon="'pi '+icon" class="bg-sky-300"/>
+            </RouterLink> 
+            <!-- <Button name="entry" label="Enter Bibs" raised icon="pi pi-hashtag" class=""
             :to="`/e/${raceObj.id}/entry`" />
             <Button name="record" label="Record Video" raised icon="pi pi-video" class=""
-            :to="`/e/${raceObj.id}/entry/video`" />
-          </div>
-          <div v-if="userStore.checkAccess('photos',raceObj?.id,'timing')"
-            class="flex justify-around w-1/3">
-            <Button name="upload" label="Upload Images" raised icon="pi pi-bolt" class=""
-            :to="`/e/${raceObj.id}/images`" />
+            :to="`/e/${raceObj.id}/entry/video`" /> -->
+
+
+            <RouterLink v-if="userStore.checkAccess('photos',raceObj?.id,'timing')"
+            :to="`/e/${raceObj.id}/images`" >
+            <Button name="upload" labe raised icon="pi pi-bolt" class="bg-sky-400"
+            />
+          </RouterLink>
           </div>          
+          <Button name="races" label="Races" raised 
+              icon="pi pi-chevron-left" 
+              @click="router.push('/e')"></Button>
           <SplitButton v-if="checkAccessEventRole(raceObj?.id)" :label="raceObj?.id"  
                :model="menuItems" raised/>
 

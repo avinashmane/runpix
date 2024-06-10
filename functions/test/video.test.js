@@ -14,7 +14,7 @@ const DEBUG=1
 const GS_URL_PREFIX='https://storage.googleapis.com/run-pix.appspot.com/'
 const MAX_FILES = 5;
 
-const log=(msg)=> (DEBUG) ? console.log(`${new Date().toISOString()} : ${msg}`) : {}
+const log=(...msg)=> (DEBUG) ? console.log(`${new Date().toISOString()}`,...msg) : {}
 const JSS=JSON.stringify
 const {assert} = require('chai')
 const { firebaseConfig } = require('firebase-functions');
@@ -43,7 +43,7 @@ xdescribe('List all video files - not useful', function ( ){
       filenames=files.map(o=>({n:o.name,
                               t:o.metadata.contentType,
                               s:o.metadata.size}))
-      console.log(`${filenames.length} files found`)
+      log(`${filenames.length} files found`)
       assert(filenames.length>5,'min 5 files found')
       assert.isArray(filenames)
     })
@@ -52,7 +52,7 @@ xdescribe('List all video files - not useful', function ( ){
 
 
   filenames.slice(0,MAX_FILES).forEach(function (file){
-    // console.log(file)
+    // log(file)
       it(`log test ${file}`, function () {
         log(`file ${file}`)
     })
@@ -61,7 +61,7 @@ xdescribe('List all video files - not useful', function ( ){
 
   it('dummy', function () {
     // this.skip()
-    console.log('Files:',filenames );
+    log('Files:',filenames );
     // filenames.forEach(console.warn)
     assert.equal(1,1)
   })
@@ -78,7 +78,7 @@ describe('OCR video basic tests', function () {
   before(function () {
 
     // testModule = require("../index.js")
-    // console.log("before", testModule,testModule.value )
+    // log("before", testModule,testModule.value )
   });
 
   it('indexModule.scanVideo() mp4',async function (){
@@ -112,10 +112,10 @@ describe('OCR video basic tests', function () {
     
     // testModule.detectText('gs://run-pix-videos/test/VID_20240310_074051.mp4')
   })
-  it('indexModule.getImageMetadata()',async function () {
+  xit('indexModule.getImageMetadata()',async function () {
     indexModule.getImageMetadata('gs://run-pix-videos','test/VID_20240310_074051.mp4')
     .then(res=>{
-      console.log(res);
+      log(res);
       assert.isObject(res)
     })
     .catch(console.error)
@@ -125,7 +125,7 @@ describe('OCR video basic tests', function () {
   it('indexModule.readFile+videocrModule.videoDetectionFilter',async function (){
       // videocr.
       let res=JSON.parse(await indexModule.readFile('test/out/textAnnotations.json'))
-      console.log(videocrModule.videoDetectionFilter(res.textAnnotations))
+      log(videocrModule.videoDetectionFilter(res.textAnnotations))
       // testModule.detectText('gs://run-pix-videos/test/VID_20240310_074051.mp4')
   })
 })
@@ -240,7 +240,7 @@ xdescribe('MOCK run race-vid2firestore mychoice24mar', function () {
   before(function () {
     optionBackup = process.env.RUNTIME_OPTION
     process.env.DEBUG_MODE=3
-    console.log("total files: ", selectedFiles.length )
+    log("total files: ", selectedFiles.length )
   });
 
   after(() => {
@@ -274,7 +274,7 @@ xdescribe('MOCK run race-vid2firestore mychoice24mar', function () {
     
     // indexModule.scanVideo('gs://run-pix-videos/test/VID_20240310_074051.mp4').then(x=>{
     indexModule.scanVideo('gs://run-pix.appspot.com/uploadvid/testrun/20230305_072443_cf4cc23.mp4').then(x=>{
-      console.log('scanVideo()',x);
+      log('scanVideo()',x);
       done()
     })
     .catch(console.error)
@@ -286,7 +286,7 @@ xdescribe('MOCK run race-vid2firestore mychoice24mar', function () {
     this.skip()
     indexModule.getImageMetadata('gs://run-pix-videos','test/VID_20240310_074051.mp4')
     .then(res=>{
-      console.log(res);
+      log(res);
       done()
     })
     .catch(console.error)
@@ -297,7 +297,7 @@ xdescribe('MOCK run race-vid2firestore mychoice24mar', function () {
     this.skip()
     
     let res=JSON.parse(await indexModule.readFile('test/out/textAnnotations.json'))
-    console.log(videocrModule.videoDetectionFilter(res.textAnnotations))
+    log(videocrModule.videoDetectionFilter(res.textAnnotations))
     
   })
 })

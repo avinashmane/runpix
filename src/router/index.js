@@ -17,11 +17,13 @@ import Races from "../pages/RacesPage.vue";
 import Race from "../pages/Race.vue";
 import RaceAdmin from "../pages/RaceAdmin.vue";
 import RaceEntry from "../pages/RaceEntry.vue";
+import TestFunctions from "../pages/TestFunctions.vue";
 import NotFoundPage from "../pages/exceptions/NotFoundPage.vue";
 
 import {
     firebaseAuth
 } from '../../firebase/config';
+
 import { debug } from "../helpers";
 const nextIfLogin=(next,ifLogged,notLogged)=>{
     firebaseAuth.onAuthStateChanged(user => {
@@ -110,6 +112,12 @@ const routes = [
         alias: '/test',
         name: 'TestPage',
         component: TestPage
+    },
+    {
+        path: "/testfunction",
+        alias: '/testfn',
+        name: 'TestPage',
+        component: TestFunctions
     },
     {
         path: "/home",

@@ -8,9 +8,10 @@ export async function uploadFile(file, props) {
 	// track status and upload file
 	file.status = 'loading'
 
-
 	let timestamp = new Date(file.file.lastModified).toISOString()
-	let uploadPath = `${config.storage.uploads}/${props.raceId}/${timestamp}~${props.waypoint}~${props.user}~${file.file.name}`
+	let uploadLoc = (file.file.type.split("/")[0]=='video') ? config.storage.viduploads : config.storage.uploads
+	let uploadPath = `${uploadLoc}/${props.raceId}/${timestamp}~${props.waypoint}~${props.user}~${file.file.name}`
+	debugger;
 
 	// console.log(file.file.name);
 	let response = await uploadFiletoGCS(uploadPath, file.file);
@@ -31,11 +32,12 @@ export async function uploadFiletoGCS(uploadPath, file) {
 	const storageRef=dbRef(storage, uploadPath);
 
 	// 'file' comes from the Blob or File API
-	return await uploadBytes(storageRef, file, metadata).then((snapshot) => {
-		console.log(`Uploaded ${snapshot.ref.fullPath}`,);
-		return snapshot.name
-		// debugger;
-	}).catch(console.error);
+	return await uploadBytes(storageRef, file, metadata)
+		.then((snapshot) => {
+			console.log(`Uploaded ${snapshot.ref.fullPath}`,);
+			return snapshot.name
+			// debugger;
+		}).catch(console.error);
 }
 
 
