@@ -15,7 +15,7 @@ config.images.limit_pics = 5000
 
 config.GS_PREFIX = "https://storage.googleapis.com/run-pix.appspot.com/"
 config.storage.uploads =  "uploads"
-config.storage.viduploads =  "viduploads"
+config.storage.viduploads =  "uploadvid"
 config.storage.faceUploads =  "faceuploads"
 
 // format usable for data table
@@ -42,7 +42,8 @@ config.raceInfoPanelLabels={
   linkFeedback: 'Feedback link',
 }
 
-config.api.faceMatchUpload = import.meta.env.VITE_FACEMATCHUPLOAD || "https://runpix-face-nqmxzlpvyq-uc.a.run.app" //"https://express.runpix.forthe.life" //"http://localhost:8080"//
+config.api.faceMatchUpload = import.meta.env.VITE_FACEMATCHUPLOAD 
+    || "https://runpix-face-nqmxzlpvyq-uc.a.run.app" //"https://express.runpix.forthe.life" //"http://localhost:8080"//
 
 const isDev=()=>import.meta.env.MODE=='development'
 config.app.CERT_URL = isDev() ?  import.meta.env.VITE_CERT_URL :

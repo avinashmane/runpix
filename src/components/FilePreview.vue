@@ -6,7 +6,7 @@
       :src="file.url" 
       :alt="file.file.name" 
       :title="file.file.name" />
-    <small v-else> {{ file.file.name }}</small>
+    <small v-else class="break-all text-sm"> {{ file.file.name }}</small>
 		<span class="status-indicator loading-indicator" v-show="file.status == 'loading'">In Progress</span>
 		<span class="status-indicator success-indicator" v-show="file.status == true">Uploaded</span>
 		<span class="status-indicator failure-indicator" v-show="file.status == false">Error</span>

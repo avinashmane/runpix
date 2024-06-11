@@ -3,7 +3,7 @@
   
   <div class="container mx-auto gap-3">
     <h1 @dblclick="klick()">Photos</h1>
-    
+    {{ photoStatus }}
     <form @submit="searchImages" class="gap-2 mx-2">
       <Dropdown v-model="raceId" :options="races" optionLabel="Name" optionValue="id" @change="onChangeEvent"
                         placeholder="Select a race" class="md:w-14rem w-full" />   
@@ -121,31 +121,26 @@ import { db, storage } from "../../firebase/config"
 import {chain,cloneDeep,map,take,keys,orderBy,sumBy,pickBy,split,sortBy,tap,startsWith}  from "lodash-es"
 import {debug} from "../helpers"
 
-// wakesup the backend
-fetch(config.api.faceMatchUpload+'/api/faceapi',{headers: {mode: "cors", "Referer": "https://runpix.web.app" }}) //call the fetch function passing the url of the API as a parameter
-  .then(function(x) {console.log(`/api/faceapi: Status: ${x.status}`)})
-  .catch(function(e) {console.log(e) });
-
 const store = useStore()
 store.dispatch('getRacesAction')
 
 const route = useRoute();  
 const router = useRouter()
-const races =  computed(() => 
-                orderBy(store.state.datastore.races
+const races =  computed(() =>{ 
+                const races=orderBy(store.state.datastore.races
                   .filter(r=>(r.photoStatus && (r.photoStatus.indexOf("available")>=0) )),
                   "Date","desc")
-                );
-  
-let raceId = ref("")
-if(route.params.raceId){
-  console.log(route.params.raceId)
-  raceId.value=route.params.raceId
-}
+                  if(races.find(x=>x.id==raceId.value)?.photoStatus.includes("face")){
+                    apiCall(config.api.faceMatchUpload + '/api/faceapi');
+                  }
+                return races
+                });
+const photoStatus = computed(()=> races.value.find(x=>x.id==raceId.value)?.photoStatus)
 
-const bibSelection = ref("");
-if (route.params.bib)
-  bibSelection.value=route.params.bib
+let raceId = ref(route.params.raceId || "")
+
+const bibSelection = ref(route.params.bib || "");
+
 const message = ref("")
 let filteredBibObjects=ref([])
 
@@ -393,6 +388,19 @@ function getMorePhotos(){
                Math.min(...allImages.value.map(x=>x.dist).filter(x=>x>maxDistAmongDisplayedPics))*100))+1;
   
 }
+
+function apiCall(url) {
+  fetch(url, {
+    headers: {
+      mode: "cors",
+      "Referer": "https://runpix.web.app"
+    }
+  }) //call the fetch function passing the url of the API as a parameter
+    .then(function (x) { console.log(`/api/faceapi: Status: ${x.status}`); })
+    .catch(function (e) { console.log(e); });
+}
+
+
 </script>
 
 <style>

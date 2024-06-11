@@ -34,9 +34,11 @@ const testData = 'test/annotations_data.json';
 exports.testData = testData;
 // Where we'll config
 const UPLOADS_FOLDER = 'uploads';
-exports.UPLOADS_FOLDER = UPLOADS_FOLDER;
+const UPLOADVID_FOLDER = 'uploadvid';
 const PROCESSED_FOLDER = 'processed';
+exports.UPLOADS_FOLDER = UPLOADS_FOLDER;
 exports.PROCESSED_FOLDER = PROCESSED_FOLDER;
+exports.UPLOADVID_FOLDER = 'uploadvid';
 // File extension for the created JPEG files.
 const THUMBNAILS_FOLDER = 'thumbs';
 exports.THUMBNAILS_FOLDER = THUMBNAILS_FOLDER;

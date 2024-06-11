@@ -1,11 +1,11 @@
 <template>
-  <!-- <div id="app"> -->
+
   <Dropdown
     v-model="waypoint"
     :options="Waypoints"
     editable
     placeholder="Select a Waypoint"
-    class="w-1/3"
+    class="w-1/3 m-1 px-2"
   />
 
   <DropZone class="drop-area m-2" @files-dropped="addFiles" #default="{ dropZoneActive }">
@@ -35,6 +35,7 @@
     </label>
     
     <ul class="image-list" v-show="files.length">
+    <!-- <small v-for="file of files">{{JSON.stringify(file)}}</small> -->
       <FilePreview
         v-for="file of files"
         :key="file.id"
@@ -46,9 +47,9 @@
   </DropZone>
   <div class="m-2 flex justify-evenly">
     <Button @click.prevent="uploadFiles(files)" class="">Upload</Button>
-    <Button @click="files = []" class="">Clear all</Button>
+    <Button @click="removeAllFiles()" class="">Clear all</Button>
   </div>
-  <!-- </div> -->
+
 </template>
 
 <script setup>
@@ -85,8 +86,10 @@ const Waypoints = ref(props.waypoints);
 
 function onInputChange(e) {
   addFiles(e.target.files);
+  // console.debug(files)
   e.target.value = null; // reset so that selecting the same file again will still cause it to fire this change
 }
+
 // Uploader
 import createUploader from "../helpers/file-uploader";
 const { uploadFiles } = createUploader({
@@ -94,6 +97,17 @@ const { uploadFiles } = createUploader({
   waypoint: waypoint.value,
   user: userData?.email?.replace("@", "$"),
 });
+
+function removeAllFiles(){
+  // unallocating all blobs
+  files.value.forEach(file=>{
+    if(file.url) {
+			URL.revokeObjectURL(file.url); //console.log(file.url);
+    }})
+  files.value=[]
+  // const all = files.value
+  // all.forEach(removeFile)
+}
 </script>
 
 <style>

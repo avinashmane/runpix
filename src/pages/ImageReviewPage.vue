@@ -2,7 +2,7 @@
   <BackButton/>
   <h1 class="text-xl text-center">Uploads for {{ raceId }}</h1>
 
-  <div class="my-2">
+  <div class="m-1">
     <Button  :label="upload ? 'Image review' : 'Bulk Upload'" @click="upload = !upload" />
   </div>
   <Upload v-if="upload" 

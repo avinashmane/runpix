@@ -1,7 +1,6 @@
 import { storage } from "../../firebase/config"
 import {  ref as dbRef, uploadBytes } from "firebase/storage";
 import { config } from "../config"
-// const UPLOADS_FOLDER = 'uploads';
 
 export async function uploadFile(file, props) {
 	

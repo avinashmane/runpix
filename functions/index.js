@@ -19,7 +19,7 @@ const sharp = require('sharp')
 const exifr = require('exifr');
 
 let _ = require('lodash');
-const { DEBUG_MODE, GS_URL_PREFIX, JPEG_EXTENSION, RUNTIME_OPTION, UPLOADS_FOLDER, META_KEYS, bibRegex, NOTIMING_WAYPOINTS, testData, PROCESSED_FOLDER, THUMBNAILS_FOLDER, WATERMARK_PATH, NOTFOUND, RESIZE_OPTION, JPG_OPTIONS, THUMBSIZE_OPTION, THUMB_JPG_OPTIONS } = require('./settings');
+const { DEBUG_MODE, GS_URL_PREFIX, JPEG_EXTENSION, RUNTIME_OPTION, UPLOADS_FOLDER, UPLOADVID_FOLDER, META_KEYS, bibRegex, NOTIMING_WAYPOINTS, testData, PROCESSED_FOLDER, THUMBNAILS_FOLDER, WATERMARK_PATH, NOTFOUND, RESIZE_OPTION, JPG_OPTIONS, THUMBSIZE_OPTION, THUMB_JPG_OPTIONS } = require('./settings');
 
 // Node.js core modules
 
@@ -223,12 +223,13 @@ exports.ScanImages = functions.runWith({
     memory: "1GB", // Ensure the function has enough memory and time
   }).storage.object().onFinalize(async (object) => {
 
-  if (RUNTIME_OPTION.ScanImages && RUNTIME_OPTION.ScanImages.disabled) {
+  if (RUNTIME_OPTION?.ScanImages?.disabled) {
         log(`Function is disabled due to RUNTIME_OPTION.ScanImages.disabled=${RUNTIME_OPTION.ScanImages.disabled}`);
         return null;
   // Ignore images not in uploads
-  } else if (! object?.name?.startsWith(`${UPLOADS_FOLDER}/`) && 
-      ! object?.name?.startsWith(`test/`)) {  
+  } else if ( object?.name?.startsWith(`${UPLOADS_FOLDER}/`) ||
+        object?.name?.startsWith(`${UPLOADVID_FOLDER}/`) ||
+       object?.name?.startsWith(`test/`)) {  
     // if this is triggered on a file that is an image.
     if (object?.contentType?.startsWith('image/')) {
 
@@ -243,11 +244,9 @@ exports.ScanImages = functions.runWith({
       log(`Ignoring upload "${object.name}"  is not an image/video.`);
 
     }
-    // log(`Ignoring upload "${object.name}" because not in ${UPLOADS_FOLDER}/.`);
-    return null;
   }
 
-  // log('all done')
+  log('all done')
   return null;
 
 });
@@ -716,10 +715,11 @@ const detectVideoText = async function (gcsUri) {
     inputUri: gcsUri,
     features: ['TEXT_DETECTION'],
   };
-  // Detects text in a video
-  const [operation] = await lazy.videoClient.annotateVideo(request);
-  // console.log(`Waiting for operation to complete...`, request);
   try {
+    // Detects text in a video
+    const [operation] = await lazy.videoClient.annotateVideo(request);
+    // console.log(`Waiting for operation to complete...`, request);
+    
     // Gets annotations for video
     const results = await operation.promise()
     const textAnnotations = results[0]?.annotationResults?.[0]?.textAnnotations;

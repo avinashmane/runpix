@@ -11,21 +11,19 @@ const config={
 
 const GS_URL_PREFIX='https://storage.googleapis.com/run-pix.appspot.com/'
 const {assert} = require('chai')
-// const open = require('open')
-// import open, {openApp, apps} from 'open';
+
 const { firebaseConfig } = require('firebase-functions');
 const functions = require('firebase-functions');
 const { storageBucket } = require('firebase-functions/params');
 const test = require('firebase-functions-test')(config,
     'c:/i/auth/run-pix-092258e3cb1b.json');
-// console.debug(test)
+
 // Mock functions config values
 // test.mockConfig(config);//{ stripe: { key: '23wr42ewr34' }}
 // const key = functions.config().stripe.key;
   
 // process.env.FIREBASE_CONFIG=config.storageBucket
   
-
 // after firebase-functions-test has been initialized
 describe('Storage_tests', function () {
   let myFunctions,
@@ -33,7 +31,7 @@ describe('Storage_tests', function () {
   
   this.timeout(10000); // A very long environment setup.
     
-  before((done) => {
+  before(function () {
     //save old settings
     optionBackup = process.env.RUNTIME_OPTION
     // disable image recognition
@@ -51,11 +49,11 @@ describe('Storage_tests', function () {
     // catch(e){console.warn(JSON.stringify(e).substring(0,100))}
     // console.log(storageBucket)
 
-    console.debug(`Functions available :>>`,Object.keys(myFunctions))
-    done()
+    // console.debug(`Functions available :>>`,Object.keys(myFunctions))
+    
   });
 
-  after(() => {
+  after(function () {
     // Do cleanup tasks.
     console.debug("cleaning up")
     test.cleanup();
@@ -64,14 +62,14 @@ describe('Storage_tests', function () {
     // admin.database().ref('messages').remove();
   });
 
-  describe('storage_ScanImages_tests', () => {
+  describe('storage_ScanImages_tests', function () {
     // set the bucket
     it("ScanImages defined?",function (){
 
       assert.isDefined(myFunctions)
     })
 
-    it('ScanImages_JPG image', async function () {
+    it('ScanImages_JPG image',  function () {
       this.timeout(20000); // A very long environment setup.
       process.env.RUNTIME_OPTION=JSON.stringify({scanImages:{vision:false}})
 
@@ -89,10 +87,26 @@ describe('Storage_tests', function () {
                   //  name:'uploads/mychoice23feb/2023-02-12T01:28:29.364Z^venue^avinashmane$gmail.com^20230212_065828.jpg',
                    contentType: 'image/jpeg'};
                   //  https://storage.googleapis.com/run-pix.appspot.com/uploads/mychoice23mar/2022-01-13T12%3A23%3A36.476Z%5Estart%5Eavinashmane%40gmail.com%5E9955-3Certificate.png             
-      await wrapped(data_JPEG)
+      wrapped(data_JPEG)
 
     })
-    it('ScanImages PNG image', async function () {
+
+    it('ScanImages_MP4 video', function () {
+      this.timeout(90000); // A very long environment setup.
+      // process.env.RUNTIME_OPTION=JSON.stringify({scanImages:{vision:false}})
+
+      const wrapped = test.wrap(myFunctions.ScanImages);
+      const blob = {bucket: config.storageBucket,
+        name: 'uploads/testrun/2024-06-10T13:03:05.743Z~VENUE~avinashmane$gmail.com~1000046782.mp4', 
+        // name: 'uploads/testrun/2021-01-07T11:38:51.535Z~VENUE~avinashmane$gmail.com~Img 0060-1.m4v', 
+                   contentType: 'video/mp4'};
+                  //  https://storage.googleapis.com/run-pix.appspot.com/uploads/mychoice23mar/2022-01-13T12%3A23%3A36.476Z%5Estart%5Eavinashmane%40gmail.com%5E9955-3Certificate.png             
+      return wrapped(blob).then(console.log)
+      
+    })
+
+
+    it('ScanImages PNG image', function () {
       this.timeout(20000); // A very long environment setup.
       process.env.RUNTIME_OPTION=JSON.stringify({scanImages:{vision:false}})
       
@@ -105,10 +119,10 @@ describe('Storage_tests', function () {
                       name: 'uploads/mychoice23mar/2023-03-14T13:01:08.206Z^venue^avinashmane$gmail.com^capture.png',
                       contentType: 'image/png'};// PNG captured for the stream
 
-      await wrapped(data_PNG)
-
+      return wrapped(data_PNG)
+      
     })
-    it('ScanImages_reprocess image', async function () {
+    it('ScanImages_reprocess image', function () {
       this.timeout(20000); // A very long environment setup.
       process.env.RUNTIME_OPTION=JSON.stringify({scanImages:{vision:false}})
 
@@ -118,7 +132,7 @@ describe('Storage_tests', function () {
       const data_JPEG = {bucket: config.storageBucket,
                   name: 'uploads/werun2024/2024-03-17T05:49:48.000Z~VENUE~avinashmane$gmail.com~1Z2A2506.jpg', 
                    contentType: 'image/jpeg'};
-      await wrapped(data_JPEG)
+      wrapped(data_JPEG)
 
     })
 
@@ -141,10 +155,10 @@ describe('Storage_tests', function () {
 
   });
 
-  describe('firestore_imageUpdate_tests', () => {
+  describe('firestore_imageUpdate_tests', function () {
     // Test Case: setting messages/11111/original to 'input' should cause 'INPUT' to be written to
     // messages/11111/uppercase
-    it('shoud process logical deletion of images', () => {
+    it('should process logical deletion of images', function () {
       // [START assertOnline]
       // Create a DataSnapshot with the value 'input' and the reference path 'messages/11111/original'.
       fsPath='/races/mychoice23apr/images/2022-12-08T07:41:48.652Z~venue~avinashmane$gmail.com~Screenshot 2022-12-08 at 13-11-41 Athlete Heatmaps Strava.png'
@@ -190,7 +204,7 @@ function openURI (URI) {
 // myFunctions.ScanImages({},{params:data_JPEG})
 // wrapped(data_PNG);
 // after firebase-functions-test has been initialized
-describe('general_tests', () => {
+describe('general_tests', function () {
   it("timeout",async function () {
     console.debug("started",now())
     await sleep(1500,console.warn,"sleep complete")

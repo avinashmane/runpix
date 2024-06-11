@@ -1,10 +1,17 @@
 /**
  * Include for video OCR related functions
  */
+const { DEBUG_MODE } = require('./settings');
 
 let _ = require('lodash');
-
+const WRITE_FILE=false
+const _console=1 ? console : functions.logger
+const debug = DEBUG_MODE>2 ? _console.debug : ()=>{};
+const log= DEBUG_MODE>1 ? _console.log: ()=>{}
 // console.warn("videocr")
+
+const mapNano=(x)=>(x.nanos / 1e6).toFixed(0)
+
 
 async function detectText(gcsUri) {
     // [START video_detect_text]
@@ -25,47 +32,37 @@ async function detectText(gcsUri) {
     // Detects text in a video
     const [operation] = await video.annotateVideo(request);
     const results = await operation.promise();
-    console.log('Waiting for operation to complete...');
+    log('Waiting for operation to complete...');
     // Gets annotations for video
     const textAnnotations = results[0].annotationResults[0].textAnnotations;
     
-    writeFile('test/out/textAnnotations.json', 
+    if(WRITE_FILE) writeFile('test/out/textAnnotations.json', 
                 JSON.stringify({inputUri: gcsUri, 
                                 textAnnotations: textAnnotations}, 
                     null, 2))
                 .then(x=>
-                    console.warn('file written',x));
+                    log('file written',x));
 
     textAnnotations.forEach(textAnnotation => {
-    console.log(`Text ${textAnnotation.text} occurs at:`);
-    textAnnotation.segments.forEach(segment => {
-        const time = segment.segment;
-        console.log(
-        ` Start: ${time.startTimeOffset.seconds || 0}.${(
-            time.startTimeOffset.nanos / 1e6
-        ).toFixed(0)}s`
-        );
-        console.log(
-        ` End: ${time.endTimeOffset.seconds || 0}.${(
-            time.endTimeOffset.nanos / 1e6
-        ).toFixed(0)}s`
-        );
-        console.log(` Confidence: ${segment.confidence}`);
-        segment.frames.forEach(frame => {
-        const timeOffset = frame.timeOffset;
-        console.log(
-            `Time offset for the frame: ${timeOffset.seconds || 0}` +
-            `.${(timeOffset.nanos / 1e6).toFixed(0)}s`
-        );
-        console.log('Rotated Bounding Box Vertices:');
-        frame.rotatedBoundingBox.vertices.forEach(vertex => {
-            console.log(`Vertex.x:${vertex.x}, Vertex.y:${vertex.y}`);
+        log(`Text ${textAnnotation.text} occurs at:`);
+        textAnnotation.segments.forEach(segment => {
+            const time = segment.segment;
+            log( ` Start: ${time.startTimeOffset.seconds || 0}.${mapNano(time.startTimeOffset)}s`);
+            log( ` End: ${time.endTimeOffset.seconds || 0}.${mapNano(time.endTimeOffset)}s`            );
+            log(` Confidence: ${segment.confidence}`);
+            segment.frames.forEach(frame => {
+                const timeOffset = frame.timeOffset;
+                log(`Time offset for the frame: ${timeOffset.seconds || 0}` +
+                    `.${mapNano(timeOffset.nanos)}s`);
+                log('Rotated Bounding Box Vertices:');
+                frame.rotatedBoundingBox.vertices.forEach(vertex => {
+                    log(`Vertex.x:${vertex.x}, Vertex.y:${vertex.y}`);
+                });
+            });
         });
-        });
-    });
     });
 }
-
+            
 const fs = require('fs');
 const util = require('util');
 const writeFile = util.promisify(fs.writeFile);

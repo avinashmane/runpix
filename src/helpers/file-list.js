@@ -14,7 +14,10 @@ export default function () {
 
 	function removeFile(file) {
 		const index = files.value.indexOf(file)
-
+		// remove blob errors
+		if(file.url) {
+			URL.revokeObjectURL(file.url); //console.log(file.url);
+		}
 		if (index > -1) files.value.splice(index, 1)
 	}
 
@@ -24,8 +27,11 @@ export default function () {
 class UploadableFile {
 	constructor(file) {
 		this.file = file
+		// this.lastModified = file.lastModified
 		this.id = `${file.name}-${file.size}-${file.lastModified}-${file.type}`
-		this.url = URL.createObjectURL(file)
+		// create data url only for images
+		this.url = file.type.includes("image") ? URL.createObjectURL(file) : ''
 		this.status = null
+		// console.debug(this.file)
 	}
 }
