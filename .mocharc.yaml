@@ -43,6 +43,7 @@ retries: 1
 slow: 75
 sort: false
 spec:
+  - none
   # - 'test/unit/**/*.spec.js' # the positional arguments!
   # - 'functions/test/**/*.test.js' # the positional arguments!
   # - 'test/unit/mock.spec.js' # the positional arguments!

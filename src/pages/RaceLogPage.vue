@@ -701,8 +701,8 @@ function getBibRegExp() {
 
 function getGender(entry) {
   let gender = entry?.gender?.trim()
-  if( /Manoj/i.test(entry.name)) 
-    console.log(entry.name, entry.gender,gender)
+  // if( /Manoj/i.test(entry.name)) 
+  //   console.log(entry.name, entry.gender,gender)
   // Doc: Gender not mentioned is considered as male
   if (["Male","Female"].includes(gender))
     return gender

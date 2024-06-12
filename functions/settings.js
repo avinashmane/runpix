@@ -34,7 +34,6 @@ const testData = 'test/annotations_data.json';
 exports.testData = testData;
 // Where we'll config
 const UPLOADS_FOLDER = 'uploads';
-const UPLOADVID_FOLDER = 'uploadvid';
 const PROCESSED_FOLDER = 'processed';
 exports.UPLOADS_FOLDER = UPLOADS_FOLDER;
 exports.PROCESSED_FOLDER = PROCESSED_FOLDER;

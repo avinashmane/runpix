@@ -1,9 +1,10 @@
 {
-  "name": "RUNPiXfunctions",
+  "name": "RUNPiX_functions",
   "description": "PNG->JPG using Firebase Function",
   "dependencies": {
     "@google-cloud/functions-framework": "^3.3.0",
     "@google-cloud/vision": "^2.1.2",
+    "@google-cloud/video-intelligence": "^5.2.0",
     "child-process-promise": "^2.2.1",
     "cookie-parser": "^1.4.6",
     "exif-reader": "^1.1.0",
@@ -19,7 +20,6 @@
     "sharp": "^0.31.3"
   },
   "devDependencies": {
-    "@google-cloud/video-intelligence": "^5.2.0",
     "chai": "^4.3.10",
     "chai-http": "^4.4.0",
     "eslint": "^6.8.0",

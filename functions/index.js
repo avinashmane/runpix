@@ -17,19 +17,33 @@ const functions = require('firebase-functions');
 const admin = require('firebase-admin');
 const sharp = require('sharp')
 const exifr = require('exifr');
+// const { finalize_results } = require('./raceTiming');
+const raceTiming = require('./raceTiming') //stack
 
-let _ = require('lodash');
-const { DEBUG_MODE, GS_URL_PREFIX, JPEG_EXTENSION, RUNTIME_OPTION, UPLOADS_FOLDER, UPLOADVID_FOLDER, META_KEYS, bibRegex, NOTIMING_WAYPOINTS, testData, PROCESSED_FOLDER, THUMBNAILS_FOLDER, WATERMARK_PATH, NOTFOUND, RESIZE_OPTION, JPG_OPTIONS, THUMBSIZE_OPTION, THUMB_JPG_OPTIONS } = require('./settings');
+// let _ = require('lodash'); //stack
+const { DEBUG_MODE, GS_URL_PREFIX, JPEG_EXTENSION, RUNTIME_OPTION, UPLOADS_FOLDER, 
+  UPLOADVID_FOLDER, META_KEYS, bibRegex, NOTIMING_WAYPOINTS, testData, PROCESSED_FOLDER, 
+  THUMBNAILS_FOLDER, WATERMARK_PATH, NOTFOUND, RESIZE_OPTION, JPG_OPTIONS, THUMBSIZE_OPTION, 
+  THUMB_JPG_OPTIONS } = require('./settings');
+const { cleanForFS, getNormalSize, parseObjName , getIsoDate , addSeconds, log, debug, error
+  } = require('./utils');
 
 // Node.js core modules
 
 // Vision API
 const vision = require('@google-cloud/vision');
 
-const debug = DEBUG_MODE>2 ? functions.logger.debug : ()=>{};
-const log= DEBUG_MODE>1 ? functions.logger.log: ()=>{}
-const error=  functions.logger.error
 const JSS=JSON.stringify
+// firestore settor/gettors
+const doc=(path)=>admin.firestore().doc(path)
+const get=(path,callback)=>doc(path).get().then(x=>callback(x.data())) 
+const getCol=(path,callback)=>admin.firestore().collection(path).get()
+                        .then(snap=>{
+                            let arr=[]
+                            snap.forEach(doc=>arr.push(callback(doc)))
+                            return arr;
+                        })
+
 // Since this code will be running in the Cloud Functions environment
 // we call initialize Firestore without any arguments because it
 // detects authentication from the environment.
@@ -39,7 +53,6 @@ if(admin.apps.length==0) {
   admin.firestore().settings({ ignoreUndefinedProperties: true });
   admin.firestore().doc('app/config').onSnapshot(snap=>cfg=snap.data())
 }
-
 
 let watermarks={}; //key="raceId" : watermark sharp image
 
@@ -63,8 +76,7 @@ const getRaceCfg= async (race) =>  {
  
  const express = require('express');
  const exphbs = require('express-handlebars');
- const { cleanForFS, getNormalSize, getpathfromGcsUri } = require('./utils');
-
+ 
  const app = express();
  const firebaseUser = require('./firebaseUser');
  
@@ -96,12 +108,21 @@ const getRaceCfg= async (race) =>  {
     
  });
 
+ app.post('/race/:raceId/results', async (req, res) => {
+  // @ts-ignore
+  //test link http://localhost:5000/race/werun2023
+  const _ret = await save_result(req.params.raceId, req.query)
+  console.log(req.params.raceId, _ret)
+  res.status(200).send(_ret)
+  
+});
+
  app.get('/race/:raceId', async (req, res) => {
   // @ts-ignore
   //test link http://localhost:5000/race/werun2023
   const _raceObj = await getRaceCfg(req.params.raceId)
   // console.log(req.params.raceId, _raceObj)
-  res.send( _raceObj)
+  res.status(200).send( _raceObj)
   
 });
  
@@ -164,10 +185,9 @@ exports.api = functions.https.onRequest(app);
 /* ~~~~~~~~~~~~ 4. Firestore functions  ~~~~~~~~~~~~~ */
 
 // Listen for changes in all documents in the 'users' collection and all subcollections
-exports.imageUpdate = functions.firestore
-    // .document('races/{raceId}/images/{imagePath}')
-    .document('races/{raceId}/images/{imagePath}')
-    .onUpdate((change, context) => {
+exports.timingUpdate = functions.firestore
+    .document('races/{raceId}/videos/{videoPath}')
+    .onWrite((change, context) => {
       /**
        * check the type of update (delete/update/create)
        * if old.status='active' new.status="inactive":
@@ -180,21 +200,48 @@ exports.imageUpdate = functions.firestore
        * if old.status='active' new.status="updOrientation:90":
        *    turn the thumb & processed
        */
-      if (getRaceCfg()?.processing?.scanImages){
-        debug(context.params,change.before.data(),change.after.data())
-      } else {
-        log(`Function is disabled due to races/${context.params.raceId}/images/{imagePath}!=true`);
-        return null;
+      const debug = functions.logger.debug
+      
+      // // Get an object with the current document value.
+      const raceId = context.params.raceId
+      const videoPath = context.params.videoPath
+      // // If the document does not exist, it has been deleted.
+      const document = change.after.exists ? change.after.data() : null;
+      // // Get an object with the previous document value (for update or delete)
+      const oldDocument = change.before.data();
+
+      var [ignore, ignore_, waypoint, userId, date, gps, fileName] = parseObjName(videoPath);
+      // // perform desired operations ...
+      if (document) { // add or update
+        // bib "124"
+        // imagePath "processed/testrun/2023-03-12T02:28:48.000Z~VENUE~avinashmane$gmail.com~20230312_075846.jpg"
+        // score 0
+        // timestamp "2023-03-13T02:28:00.000Z"
+        // userId "avinashmane$gmail.com"
+        // waypoint "VENUE" 
+        document.textAnnotations.forEach((textAnn)=>{
+          let  timestamp = addSeconds(document.timestamp, textAnn.secStart)
+          
+          updFSReadings(raceId, userId, textAnn.text, timestamp?.toISOString(), textAnn.confidence, 
+            textAnn.waypoint, {}, videoPath )
+        }) 
+        
+      } else { /// deletions
+
+        oldDocument.textAnnotations.forEach((textAnn)=>{
+          
+          let timestamp = addSeconds(oldDocument.timestamp, textAnn.secStart);
+          
+          delFSReadings(raceId,textAnn.text,timestamp.toISOString())
+        })
       }
-      // If we set `/users/marie/incoming_messages/134` to {body: "Hello"} then
-      // context.params.userId == "marie";
-      // context.params.messageCollectionId == "incoming_messages";
-      // context.params.messageId == "134";
-      // ... and ...
-      // change.after.data() == {body: "Hello"}
-      debug(context.params)
-      // console.debug(change)
-      return {change,context}
+      // if (true || getRaceCfg()?.processing?.scanImages){
+      //   debug(context.params,change?.before?.data(),change?.after?.data())
+      // } else {
+      //   debug(`Function is disabled due to races/${context.params.raceId}/images/{imagePath}!=true`);
+      //   return null;
+      // }
+      return true
     });
 
 
@@ -246,7 +293,7 @@ exports.ScanImages = functions.runWith({
     }
   }
 
-  log('all done')
+  // log('all done')
   return null;
 
 });
@@ -562,6 +609,26 @@ async function updFSReadings(raceId, userId, bibStr, timestamp, score,
   // log(x)
 }
 
+async function delFSReadings(raceId, bibStr, timestamp) {
+
+  let x = await admin.firestore()
+    .collection('races').doc(cleanForFS(raceId))
+    .collection("readings").doc(cleanForFS([timestamp, bibStr].join("_")))
+    .delete()
+    .then((x) => {
+      log({
+        op: "delete",
+        bib: bibStr,
+        timestamp: timestamp,
+      })
+      return x
+    })
+    .catch((error) => {
+      error("Error deleting document: ", error);
+      return error
+    });
+}
+
 async function firebaseGet(path) {
   var docRef = admin.firestore().doc(path);
   return docRef.get().then((doc) => {
@@ -574,57 +641,6 @@ async function firebaseGet(path) {
   }).catch((error) => {
       error("Error getting document:", error);
   });
-}
-
-function getIsoDate(metadata,date){
-  let isoDate;
-  try{
-    ['DateTimeOriginal','DateCreated','CreatedDate']
-    .forEach (x => {
-      if (metadata.hasOwnProperty(x) && metadata[x] && metadata[x].length>0 ) {
-        isoDate=metadata[x].toISOString()
-        return isoDate
-      }
-    })
-  } catch (e) {
-    debug(e)
-  }
-  
-  return isoDate || date
-}
-
-function parseObjName(name) {
-  // uploads/race/wpt~time~user~waypoint
-  // uploads/mychoice23mar/2022-01-13T12:23:36.476Z~start~avinashmane@gmail.com~9955-3Certificate.png
-  var raceId='default', 
-      waypoint='general',
-      userId='unknown', 
-      date='nodate',
-      gps='',
-      folder,
-      fileName;
-      
-  try {
-    name=name.charAt(0)=='/'?name.substring(1):name;
-
-    var names = name.split(/[\/^~]/g)
-    if (names.length==7) 
-      [folder,raceId, date, waypoint, userId, gps, fileName]=names
-    else if (names.length==6) 
-      [folder,raceId, date, waypoint, userId, fileName]=names
-    else if (names.length==5) 
-      [folder,raceId, date,userId, fileName]=names
-    else if (names.length==4) 
-      [folder,raceId, userId,fileName]=names
-    else if (names.length==3) 
-      [folder,raceId, fileName]=names
-  } catch (e) {
-    error('error',e)
-  }
-
-  fileName=name.split('/').pop()
-
-  return [folder, raceId,waypoint,  userId, date, gps, fileName]
 }
 
 function getImageHeight(meta){
@@ -655,7 +671,10 @@ exports.scanVideo = async function (storageObject) {
       contentType; // File content type.
       */
     } 
+    
     var [bucket,raceId,videoPath] = gcsUri.split(/\//,).splice(-3)
+    var [ignore, ignore_, waypoint, userId, date, gps, fileName] = parseObjName(videoPath);
+
   } catch (e) {
     console.error(`error parsing ${gcsUri}`,e)
   }
@@ -671,19 +690,20 @@ exports.scanVideo = async function (storageObject) {
   const raw_detections = await detectVideoText(gcsUri)
   // printannotations(raw_detections);
   const detections = lazy.videocr.videoDetectionFilter(raw_detections, /^\d*$/)
-  log(`scanVideo(${gcsUri})`,detections.map(x=>x.text))
+  log(`scanVideo(${gcsUri}).text`,detections.map(x=>x.text))
     
-  return updFSVideoData( raceId, videoPath, detections) 
+  return await updFSVideoData( raceId, videoPath, detections, date, waypoint) 
 };
 
 
-async function updFSVideoData(raceId, videoPath, detections, metadata) {
-
+async function updFSVideoData(raceId, videoPath, detections, timestamp, waypoint, metadata) {
   let payload={
     videoPath: videoPath,
     textAnnotations: detections,
+    waypoint: waypoint,
+    timestamp: timestamp || new Date().toISOString()
     }
-  payload.timestamp = new Date().toISOString()
+  
   if (metadata) 
     payload.metadata = metadata
   
@@ -730,51 +750,59 @@ const detectVideoText = async function (gcsUri) {
   }
 }
 
-function printannotations(textAnnotations) {
-  textAnnotations.forEach(textAnnotation => {
-    console.log(`Text ${textAnnotation.text} occurs at:`);
-    textAnnotation.segments.forEach(segment => {
-      const time = segment.segment;
-      console.log(
-        ` Start: ${time.startTimeOffset.seconds || 0}.${(
-          time.startTimeOffset.nanos / 1e6
-        ).toFixed(0)}s`
-      );
-      console.log(
-        ` End: ${time.endTimeOffset.seconds || 0}.${(
-          time.endTimeOffset.nanos / 1e6
-        ).toFixed(0)}s`
-      );
-      console.log(` Confidence: ${segment.confidence}`);
-      segment.frames.forEach(frame => {
-        const timeOffset = frame.timeOffset;
-        console.log(
-          `Time offset for the frame: ${timeOffset.seconds || 0}` +
-          `.${(timeOffset.nanos / 1e6).toFixed(0)}s`
-        );
-        // console.log('Rotated Bounding Box Vertices:');
-        // frame.rotatedBoundingBox.vertices.forEach(vertex => {
-        //   console.log(`Vertex.x:${vertex.x}, Vertex.y:${vertex.y}`);
-        // });
-      });
-    });
-  });
-}
-
-async function getVideoMetadata(bucket,filePath,metadataReqd=true) {
-  // Downloads the file into a buffer in memory.
-  //not possible
-  
-}
-
 exports.testHttp = functions.https.onRequest(async (req, res)=>{
-  console.log("testHttp",req.query?.raceId)
+  log("testHttp",req.query?.raceId)
   res.send(await getRaceCfg(req.query?.raceId))
 
 });
+
+
+async function save_result(raceId, options) {
+  const race = await getRaceCfg(raceId)
+  const bibs = await getCol(`/races/${raceId}/bibs`,
+    doc => (Object.assign({ id: doc.id }, doc.data())))
+  const data = await getCol(`/races/${raceId}/readings`,
+    doc => raceTiming.mapReading(doc, bibs))
+  
+  
+  const allEntries = raceTiming.addStatusFields(data,
+    race?.timestamp?.start)
+  
+  const ret = raceTiming.finalize_results(allEntries, race)
+
+  let stats={
+    bibs :bibs.length,
+    readings: data.length,
+    results: ret.length,
+    savedResults: 0
+  }
+  // Save all entries
+  ret.docs.forEach((category) => {
+    log(`saving ${category.entries.length} entries for ${category.cat}`);
+    category.entries.forEach((x) => {
+      try {
+        // console.log(`${x.Rank} ${x.Name} ${x['Race Time']}`)
+        doc(`races/${raceId}/result/${x.Bib}`)
+          .set(x)
+          .then(x=> {stats.savedResults++})
+          .catch(console.error)
+
+      } catch (e) {
+        console.error("error saving", e);
+      }
+    });
+  });
+
+  // update /races
+  doc(`races/${raceId}`).update({
+    "timestamp.result": new Date().toISOString(),
+    stats: stats
+  });
+  return stats
+}
 /**
  * Exports for testing
  */
 exports.readFile = lazy.videocr.readFile
 exports.imageresult = lazy.videocr.imageresult;
-exports.parseObjName = parseObjName;
+// exports.admin = admin
