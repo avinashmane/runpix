@@ -21,6 +21,7 @@
   },
   "dependencies": {
     "add": "^2.0.6",
+    "axios": "^1.7.7",
     "compressorjs": "^1.2.1",
     "express": "^4.18.2",
     "firebase": "^9.23.0",
@@ -37,6 +38,8 @@
   },
   "devDependencies": {
     "@cucumber/cucumber": "^10.5.0",
+    "@genkit-ai/ai": "^0.5.13",
+    "@genkit-ai/vertexai": "^0.5.13",
     "@types/lodash-es": "^4.17.12",
     "@vitejs/plugin-vue": "^3.2.0",
     "@vue/compiler-sfc": "^3.4.10",

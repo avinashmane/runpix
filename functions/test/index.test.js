@@ -1,22 +1,16 @@
 /**
  * Online tests
  */
-
-const projectId='run-pix'
-const config={
-    projectId:`${projectId}`,
-    storageBucket: `${projectId}.appspot.com`,
-    databaseURL: `https://${projectId}.firebaseio.com`,
-  }
+const {cfg,debug,projroot} = require ("./commonTest")
 
 const GS_URL_PREFIX='https://storage.googleapis.com/run-pix.appspot.com/'
 const {assert} = require('chai')
 
-const { firebaseConfig } = require('firebase-functions');
+// const { firebaseConfig } = require('firebase-functions');
 const functions = require('firebase-functions');
 const { storageBucket } = require('firebase-functions/params');
-const test = require('firebase-functions-test')(config,
-    'c:/i/auth/run-pix-092258e3cb1b.json');
+const test = require('firebase-functions-test')(cfg.firebaseConfig,
+    cfg.service_account);
 
 // Mock functions config values
 // test.mockConfig(config);//{ stripe: { key: '23wr42ewr34' }}
@@ -25,11 +19,11 @@ const test = require('firebase-functions-test')(config,
 // process.env.FIREBASE_CONFIG=config.storageBucket
   
 // after firebase-functions-test has been initialized
-describe('Storage_tests', function () {
+describe('index.test.js', function () {
   let myFunctions,
       optionBackup;
   
-  this.timeout(10000); // A very long environment setup.
+  this.timeout(40000); // A very long environment setup.
     
   before(function () {
     //save old settings
@@ -42,20 +36,16 @@ describe('Storage_tests', function () {
       }
     })
     process.env.DEBUG_MODE=3
-    // Require index.js and save the exports inside a namespace called myFunctions.
-    // This includes our cloud functions, which can now be accessed at myFunctions.makeUppercase
-    // and myFunctions.addMessage
+    
     myFunctions= require('../index.js')
-    // catch(e){console.warn(JSON.stringify(e).substring(0,100))}
-    // console.log(storageBucket)
-
-    // console.debug(`Functions available :>>`,Object.keys(myFunctions))
+    
+    debug(`Functions available :>>`,Object.keys(myFunctions))
     
   });
 
   after(function () {
     // Do cleanup tasks.
-    console.debug("cleaning up")
+    debug("cleaning up")
     test.cleanup();
     process.env.RUNTIME_OPTION=optionBackup
     // Reset the database.
@@ -101,7 +91,7 @@ describe('Storage_tests', function () {
         // name: 'uploads/testrun/2021-01-07T11:38:51.535Z~VENUE~avinashmane$gmail.com~Img 0060-1.m4v', 
                    contentType: 'video/mp4'};
                   //  https://storage.googleapis.com/run-pix.appspot.com/uploads/mychoice23mar/2022-01-13T12%3A23%3A36.476Z%5Estart%5Eavinashmane%40gmail.com%5E9955-3Certificate.png             
-      return wrapped(blob).then(console.log)
+      return wrapped(blob).then(debug)
       
     })
 
@@ -172,23 +162,14 @@ describe('Storage_tests', function () {
       // Wrap the makeUppercase function
       const wrapped = test.wrap(myFunctions.imageUpdate);
       // Call the wrapped function with the snapshot you constructed.
-      // console.debug(wrapped)
       let {change, context} = wrapped(changeReq)
       if( change.before.exists) 
-        console.debug("before",change.before.data())
+        debug("before",change.before.data())
       if( change.after.exists) 
-        console.debug("after",change.after.data())
+        debug("after",change.after.data())
 
-      console.warn("104>>>>>>",context)
+      debug("104>>>>>>",context)
       return 
-      // .then((x) => {
-      //   console.debug(x)
-      //   return admin.firestore().doc(fsPath).get().then((createdSnap) => {
-      //     // Assert that the value is the uppercased version of our input.
-      //     assert.equal(createdSnap.data(), 'INPUT');
-      //   });
-      // });
-      // [END assertOnline]
     })
   });
 
@@ -206,9 +187,9 @@ function openURI (URI) {
 // after firebase-functions-test has been initialized
 describe('general_tests', function () {
   it("timeout",async function () {
-    console.debug("started",now())
+    debug("started",now())
     await sleep(1500,console.warn,"sleep complete")
-    console.debug("ended",now())
+    debug("ended",now())
 
   })
 })
@@ -236,7 +217,7 @@ async function sleep(secs,fn, ...args) {
 //     const [files] = await bucket.getFiles();
 //     filenames=files.map(o=>o.name)
 //     // 'files' will be an array containing information about each file in the bucket.
-//     console.log('Files:', );
+//     debug('Files:', );
 //     done()
 //     // debugger
 //     return true
@@ -244,7 +225,7 @@ async function sleep(secs,fn, ...args) {
 
 //   filenames.forEach(function (x){
 //     it('processing ${x}',function () {
-//       console.log(`file ${x}`)
+//       debug(`file ${x}`)
 //     })
 //   })
 
@@ -259,14 +240,14 @@ async function sleep(secs,fn, ...args) {
 
 //   before(function () {
 //     // testModule = require("../index.js")
-//     // console.log("before", testModule,testModule.value )
+//     // debug("before", testModule,testModule.value )
 //   });
 
 //   it('Create and save annotations from video',async function (done){
 //     this.skip()
     
 //     indexModule.scanVideo('gs://run-pix-videos/test/VID_20240310_074051.mp4').then(x=>{
-//       console.log('scanVideo()',x);
+//       debug('scanVideo()',x);
 //       done()
 //     })
 //     .catch(console.error)
@@ -278,7 +259,7 @@ async function sleep(secs,fn, ...args) {
 //     this.skip()
 //     indexModule.getImageMetadata('gs://run-pix-videos','test/VID_20240310_074051.mp4')
 //     .then(res=>{
-//       console.log(res);
+//       debug(res);
 //       done()
 //     })
 //     .catch(console.error)
@@ -288,7 +269,7 @@ async function sleep(secs,fn, ...args) {
 //   it('Read annotations',async function (){
 //       // videocr.
 //       let res=JSON.parse(await indexModule.readFile('test/out/textAnnotations.json'))
-//       console.log(videocrModule.videoDetectionFilter(res.textAnnotations))
+//       debug(videocrModule.videoDetectionFilter(res.textAnnotations))
 //       // testModule.detectText('gs://run-pix-videos/test/VID_20240310_074051.mp4')
 //   })
 // })

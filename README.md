@@ -47,6 +47,7 @@ This project was created with [Vite](https://vitejs.dev/).
 * cd functions
 * C:\m\runpix>set CLOUDSDK_PYTHON=c:\sw\py310nb_env\python.exe
 * C:\m\runpix>gcloud functions deploy ScanImages --memory 1024mb
+
 ### Vercel
 You can go here, [deployment](https://firebase-auth-vite.vercel.app/).
 

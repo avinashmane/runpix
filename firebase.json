@@ -13,5 +13,16 @@
           "destination": "/index.html"
         }
       ]
+    },
+    "functions": {
+
+      "ignore": [
+        "test/**",
+        "*/.*",
+        "**/node_modules/**"
+      ],
+      "runtime": "nodejs18"
+  
     }
+      
 }

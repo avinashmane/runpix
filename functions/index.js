@@ -17,14 +17,13 @@ const functions = require('firebase-functions');
 const admin = require('firebase-admin');
 const sharp = require('sharp')
 const exifr = require('exifr');
-// const { finalize_results } = require('./raceTiming');
+const {debounce}  = require('lodash'); //stack
+const {processActivity} = require("./virtualRaces")
 const raceTiming = require('./raceTiming') //stack
-
-// let _ = require('lodash'); //stack
 const { DEBUG_MODE, GS_URL_PREFIX, JPEG_EXTENSION, RUNTIME_OPTION, UPLOADS_FOLDER, 
   UPLOADVID_FOLDER, META_KEYS, bibRegex, NOTIMING_WAYPOINTS, testData, PROCESSED_FOLDER, 
   THUMBNAILS_FOLDER, WATERMARK_PATH, NOTFOUND, RESIZE_OPTION, JPG_OPTIONS, THUMBSIZE_OPTION, 
-  THUMB_JPG_OPTIONS } = require('./settings');
+  THUMB_JPG_OPTIONS,settings } = require('./settings');
 const { cleanForFS, getNormalSize, parseObjName , getIsoDate , addSeconds, log, debug, error
   } = require('./utils');
 
@@ -69,7 +68,8 @@ const getRaceCfg= async (race) =>  {
   // function below waits 3 seconds
   return await new Promise(resolve => setTimeout(resolve, 1000))
                         .then(()=> race_cfg[race])
-}
+};
+exports.getRaceCfg = getRaceCfg;
 
 
 /* ~~~~~~~~~~~~ 3. HTTPS functions  ~~~~~~~~~~~~~ */
@@ -78,7 +78,9 @@ const getRaceCfg= async (race) =>  {
  const exphbs = require('express-handlebars');
  
  const app = express();
+exports.app = app;
  const firebaseUser = require('./firebaseUser');
+const { renderImage } = require('./express');
  
  app.engine('handlebars', exphbs.engine({defaultLayout: 'main'}));
  app.set('view engine', 'handlebars');
@@ -117,35 +119,11 @@ const getRaceCfg= async (race) =>  {
   
 });
 
- app.get('/race/:raceId', async (req, res) => {
-  // @ts-ignore
-  //test link http://localhost:5000/race/werun2023
-  const _raceObj = await getRaceCfg(req.params.raceId)
-  // console.log(req.params.raceId, _raceObj)
-  res.status(200).send( _raceObj)
-  
-});
- 
  app.get('*', function(req, res){
   res.send(`Error finding the resource for the URL ${req.url}
   <br/>
   Data: ${JSON.stringify(req.params)}` , 404);
 });
-
-function renderImage(res, req, p, ) {
-  // preview URL same is image URL
-  if (p.imageUrl) p.previewUrl= p.imageUrl
-
-  return res.render('image', p)//{
-  //   imageUrl: p.imageUrl,
-  //   previewUrl: p.imageUrl,
-  //   bibNo: p.bibNo,
-  //   raceId: p.raceId,
-  //   pageUrl: p.pageUrl,
-  //   raceOrg: p.raceOrg
-  //   params: JSON.stringify(req.params),
-  // });
-}
 
 /**
  * Map parameters and also read race from firebase
@@ -184,23 +162,11 @@ async function mapParams(params){
 exports.api = functions.https.onRequest(app);
 /* ~~~~~~~~~~~~ 4. Firestore functions  ~~~~~~~~~~~~~ */
 
-// Listen for changes in all documents in the 'users' collection and all subcollections
+// Listen for changes in all documents in the 'races' collection and all subcollections
 exports.timingUpdate = functions.firestore
     .document('races/{raceId}/videos/{videoPath}')
     .onWrite((change, context) => {
-      /**
-       * check the type of update (delete/update/create)
-       * if old.status='active' new.status="inactive":
-       *    delete all reading entries
-       *    delete thumb/and processed images
-       * if old.status='active' new.status="updBib":
-       *    update new readings with bib for each texts
-       *    reprocess bib
-       *    status=active
-       * if old.status='active' new.status="updOrientation:90":
-       *    turn the thumb & processed
-       */
-      const debug = functions.logger.debug
+
       
       // // Get an object with the current document value.
       const raceId = context.params.raceId
@@ -235,7 +201,7 @@ exports.timingUpdate = functions.firestore
           delFSReadings(raceId,textAnn.text,timestamp.toISOString())
         })
       }
-      // if (true || getRaceCfg()?.processing?.scanImages){
+      // if (getRaceCfg()?.processing?.scanImages){
       //   debug(context.params,change?.before?.data(),change?.after?.data())
       // } else {
       //   debug(`Function is disabled due to races/${context.params.raceId}/images/{imagePath}!=true`);
@@ -243,6 +209,27 @@ exports.timingUpdate = functions.firestore
       // }
       return true
     });
+
+  exports.readingsToResult = functions.firestore
+  .document('races/{raceId}/readings/{time_bib}')
+  .onWrite((change, context) => {
+  
+    // // Get an object with the current document value.
+    const raceId = context.params.raceId
+    // const time_bib = context.params.time_bib
+    // // If the document does not exist, it has been deleted.
+    // const document = change.after.exists ? change.after.data() : null;
+    // // Get an object with the previous document value (for update or delete)
+    // const oldDocument = change.before.data();
+
+    if (getRaceCfg()?.processing?.readingsToResult!==false){
+      debounced_save_result(raceId,)
+    } else {
+      debug(`Function is disabled due to races/${raceId}/processing?.readingsToResult!=true`);
+      return null;
+    }
+    return true
+  });
 
 
 /* ~~~~~~~~~~~~ 5. Storage functions  ~~~~~~~~~~~~~ */
@@ -714,8 +701,7 @@ async function updFSVideoData(raceId, videoPath, detections, timestamp, waypoint
                 .collection('videos').doc(videoPath)
                 .set(payload)
                 .catch(console.error)
-  // .then(firestoreSetRes=>{
-  // });
+
 }
 
 const detectVideoText = async function (gcsUri) {
@@ -792,7 +778,7 @@ async function save_result(raceId, options) {
       }
     });
   });
-
+  
   // update /races
   doc(`races/${raceId}`).update({
     "timestamp.result": new Date().toISOString(),
@@ -800,9 +786,33 @@ async function save_result(raceId, options) {
   });
   return stats
 }
+
+const debounced_save_result = debounce(save_result, 2000)
+/**
+ * Pubsub
+ * {
+          type: 'activity',
+          athlete: pvtProfile,
+          activity: actRec,
+          event: data,
+        }
+ */
+exports.receiveRaceActivities = functions.pubsub.topic(settings.indiathon.topic)
+  .onPublish((messageObject) => {
+    // Decode the PubSub Message body.
+    const message = messageObject.data ? JSON.parse(Buffer.from(messageObject.data, 'base64').toString()) : null;
+    
+    // functions.logger.log(`Received ${JSON.stringify(message).substring(0,100) || 'Nothing'}!`);
+    functions.logger.log(`Received message!`,message);
+    
+    const act=processActivity(message)
+    // Print the message in the logs.
+    
+    return null;
+  });
 /**
  * Exports for testing
  */
 exports.readFile = lazy.videocr.readFile
 exports.imageresult = lazy.videocr.imageresult;
-// exports.admin = admin
+exports.save_result = save_result

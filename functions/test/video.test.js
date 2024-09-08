@@ -3,36 +3,31 @@
  */
 
 
-const projectId='run-pix'
-const config={
-    projectId:`${projectId}`,
-    storageBucket: `${projectId}.appspot.com`,
-    databaseURL: `https://${projectId}.firebaseio.com`,
-  }
 
 const DEBUG=1
 const GS_URL_PREFIX='https://storage.googleapis.com/run-pix.appspot.com/'
 const MAX_FILES = 5;
+const {cfg,debug} = require ("./commonTest")
 
-const log=(...msg)=> (DEBUG) ? console.log(`${new Date().toISOString()}`,...msg) : {}
+const log=(...msg)=> (DEBUG) ? debug(`${new Date().toISOString()}`,...msg) : {}
 const JSS=JSON.stringify
 const {assert} = require('chai')
 const { firebaseConfig } = require('firebase-functions');
 const functions = require('firebase-functions');
 const { storageBucket } = require('firebase-functions/params');
-const test = require('firebase-functions-test')(config,
-    'c:/i/auth/run-pix-092258e3cb1b.json');
+const test = require('firebase-functions-test')(cfg.firebaseConfig,
+    cfg.service_account);
 
 let admin=null,
     app=null;
+admin= require('firebase-admin')
+app = admin.apps[0] || admin.initializeApp();
 
-xdescribe('List all video files - not useful', function ( ){
+const bucketName = 'run-pix-videos'
+const bucket = admin.storage().bucket(bucketName)
+  
+describe('List all video files - not useful', function ( ){
 
-  admin= admin ||  require('firebase-admin')
-  app = app || admin.initializeApp();
-
-  const bucketName = 'run-pix-videos'
-  const bucket = admin.storage().bucket(bucketName)
 
   let filenames=[123,234];
 
@@ -245,7 +240,7 @@ xdescribe('MOCK run race-vid2firestore mychoice24mar', function () {
 
   after(() => {
     // Do cleanup tasks.
-    console.debug("cleaning up")
+    debug("cleaning up")
     test.cleanup();
     process.env.RUNTIME_OPTION=optionBackup
     // Reset the database.

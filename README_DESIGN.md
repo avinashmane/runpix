@@ -112,3 +112,14 @@ photos: Event, WPT
 * img capture without distance
 * upload with exif date
 * selfie upload
+
+# Live races
+
+## registration
+
+New screen
+bibno same as strava
+
+## execution
+
+list curent races

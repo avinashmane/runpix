@@ -283,6 +283,7 @@ const unsubscribe_bibs = onSnapshot(
   query(collection(raceDoc, "bibs")),
   (querySnapshot) => {
     querySnapshot.forEach((x) => bibs.value.push(x.data()));
+    // debug(bibs.value)
     // fetch readings
     unsubscribe_readings = onSnapshot(
       query(collection(raceDoc, "readings"), orderBy("timestamp", "desc")), // query

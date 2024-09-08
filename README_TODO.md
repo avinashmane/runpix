@@ -52,6 +52,8 @@ import {chain,cloneDeep,map,take,keys,orderBy,sumBy,pickBy,split,sortBy,tap,star
 
 ### features
 
+* add pubsub trigger
+* use debug
 * **22Mar**
 
 * Certification link from result (WIP)

@@ -38,7 +38,9 @@ function finalize_results(allEntries,race) {
     
     console.log(`finalizing results: ${allEntries.length}`);
     const keys_ = split("bib name timestamp status waypoint gender imagePath", " ");
-
+    
+    suffixK=(x)=>typeof x === "string" ? x.replace(/(\d+)(k?)/i,"$1K") : x
+    
     // map data
     let results = allEntries
         .filter((x) => x.waypoint != "VENUE")
@@ -55,7 +57,7 @@ function finalize_results(allEntries,race) {
                 Race: x.waypoint,
                 Gender: x.gender,
                 Category:
-                    x.status == "valid" ? `${x.waypoint} - ${getGender(x)}` : `Other - ${x.status}`,
+                    x.status == "valid" ? `${suffixK(x.waypoint)} - ${getGender(x)}` : `Other - ${x.status}`,
                 "Start Time": startTime,
                 "Race Time": period(x.timestamp,race?.timestamp?.start),
                 "Finish Time":

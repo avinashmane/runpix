@@ -1,6 +1,8 @@
 const sharp = require('sharp')
 //requiring path and fs modules
 // const path = require('path');
+const {cfg,debug,projroot} = require ("./commonTest")
+
 const fs = require('fs');
 const { assert } = require('chai');
 //joining path of directory 
@@ -9,7 +11,7 @@ describe("IMG: Image format conversion",function (){
     // let res=[]
     this.timeout(2000); // A very long environment setup.
 
-    let path='/m/runpix/functions/test/master/images'
+    let path =  `${projroot}/functions/test/master/images`
     let files=[];
     
     before('test_all()',async ()=>{
@@ -30,7 +32,7 @@ describe("IMG: Image format conversion",function (){
             it(`Files converted ${f}`, (done)=>{
                 procIMG(path, f)
                 .then(res=>{
-                    console.warn(f,JSON.stringify(res));
+                    debug(f,JSON.stringify(res));
                     done()
                     assert.equal(res.width_in,res.width,'width of images')
                 })
@@ -49,7 +51,7 @@ describe("IMG: Image format conversion",function (){
                         resizeImage(file,scale,quality,progressive,
                             outfile)
                             .then((x)=>{
-                                console.log(x,outfile,
+                                debug(x,outfile,
                                     size,
                                     fs.statSync(outfile).size,
                                     Math.round(100*fs.statSync(outfile).size/size)
@@ -74,7 +76,7 @@ describe('IMG quality Check',()=>{
                     modulateImage(file,param,s,
                         outfile)
                         .then((x)=>{
-                            console.log(x,outfile,
+                            debug(x,outfile,
                                 size,
                                 fs.statSync(outfile).size,
                                 Math.round(100*fs.statSync(outfile).size/size)
@@ -146,9 +148,9 @@ async function test_watermark(input,watermark,output){
     let img_m,wm_m;
     await img.metadata().then((x)=>{img_m=x})
     await wm.metadata().then((x)=>{wm_m=x})
-    // console.warn(">>>",watermark,output)
+    // debug(">>>",watermark,output)
     adjWm=await wm.resize({ width: img_m.width}).toBuffer()
-    // console.log(img_m,wm_m,watermark,output,"XXX")
+    // debug(img_m,wm_m,watermark,output,"XXX")
     
     return img
     .composite([{ input: adjWm,gravity: 'south',// position:'top',//gravity: 'bottom'
@@ -177,13 +179,13 @@ async function test_all() {
         if (!f.includes('6')) continue;
         if (!f.match(/.*\.(png|jpg)/i) )
             continue;
-        console.log(">>>>>>>>>>>",f)
+        debug(">>>>>>>>>>>",f)
         
         let res = await procIMG(path, f);
         result.push(res)
         
     }
-    console.log(result)
+    debug(result)
     return result
 }
 async function procIMG(path, f) {

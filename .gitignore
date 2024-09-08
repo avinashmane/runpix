@@ -23,7 +23,7 @@ coverage/**
 .DS_Store
 .firebase/
 **/*.cache
-
+functions/.*.json
 .env*
 
 

@@ -79,3 +79,31 @@ const META_KEYS = ['ImageHeight', 'ImageWidth', 'ExifVersion', 'DateCreated', 'W
 exports.META_KEYS = META_KEYS;
 const DEBUG_MODE = defaultFor("DEBUG_MODE", 2);
 exports.DEBUG_MODE = DEBUG_MODE;
+
+
+exports.settings = {
+  indiathon: {
+    topic: 'fitnessActivities',
+    subscription: 'projects/run-pix/subscriptions/fitnessActivities-sub', // substription to be deleted
+    // topic: 'projects/run-pix/topics/fitnessActivities'
+  }
+}
+
+const envDEBUGRegex=RegExp(process.env.DEBUG)
+exports.debug=(...args)=> { //false ? console.log : () => {}
+  if (/[A-Z]/.test(args[0])){
+    if (settings?.debug?.[args[0]] || envDEBUGRegex.test(args[0])){
+      return console.debug(...args.slice(1)) // skip first parameter
+    } else
+      return
+  }
+  if (isDevelopmentMode())
+    return console.debug(...args)
+}
+
+exports.errFn=(...args)=>{
+  newArgs = args.map(e=>e instanceof Error?
+    `${e.name} ${e.fileName||''} ${e.lineNumber||''}${e.message} ${JSON.stringify(e).substring(0,100)}` : e
+  )
+  console.error(`Err ${args[0]}:`, ...newArgs.splice(1))
+}

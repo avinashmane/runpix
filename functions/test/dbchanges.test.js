@@ -2,29 +2,29 @@
  * Online tests
  */
 
-const projectId='run-pix'
-const config={
-    projectId:`${projectId}`,
-    storageBucket: `${projectId}.appspot.com`,
-    databaseURL: `https://${projectId}.firebaseio.com`,
-  }
 
-const GS_URL_PREFIX='https://storage.googleapis.com/run-pix.appspot.com/'
+const {cfg,debug} = require ("./commonTest")
+const config={
+    projectId:`${cfg.projectId}`,
+    storageBucket: `${cfg.projectId}.appspot.com`,
+    databaseURL: `https://${cfg.projectId}.firebaseio.com`,
+  }
+// const GS_URL_PREFIX='https://storage.googleapis.com/run-pix.appspot.com/'
 const {assert, expect} = require('chai')
 
-const { firebaseConfig } = require('firebase-functions');
+const admin = require('firebase-admin');
 const functions = require('firebase-functions');
 const { storageBucket } = require('firebase-functions/params');
 const test = require('firebase-functions-test')(config,
-    'c:/i/auth/run-pix-092258e3cb1b.json');
+    cfg.service_account);
 
 const firebaseUser = require('../firebaseUser');
 const { finalize_results } = require('../raceTiming.js');
 const { Alert } = require('selenium-webdriver');
 let fn
-const doc=(path)=>fn.admin.firestore().doc(path)
+const doc=(path)=>admin.firestore().doc(path)
 const get=(path,callback)=>doc(path).get().then(x=>callback(x.data())) 
-const getCol=(path,callback)=>fn.admin.firestore().collection(path).get()
+const getCol=(path,callback)=>admin.firestore().collection(path).get()
                         .then(snap=>{
                             let arr=[]
                             snap.forEach(doc=>arr.push(callback(doc)))
@@ -52,8 +52,8 @@ describe('Test of database changes/functions', function(){
     })
 
     after(function(){
-        // console.log('done')
-        fn.admin.app().delete() 
+        // debug('done')
+        admin.app().delete() 
         test.cleanup()
     })
 
@@ -114,8 +114,8 @@ describe('Test of database changes/functions', function(){
         })
 
 
-        it('finalize result ', function(){
-            // console.log(data)
+        xit('finalize result openbox ', function(){
+            // debug(data)
             const allEntries = raceTiming.addStatusFields(data,
                                                 race?.timestamp?.start)
             expect(allEntries.length).to.be.greaterThan(10)
@@ -124,13 +124,13 @@ describe('Test of database changes/functions', function(){
 
             // Save all entries
             ret.docs.forEach((category) => {
-                console.log(`saving ${category.entries.length} entries for ${category.cat}`);
+                debug(`saving ${category.entries.length} entries for ${category.cat}`);
                 category.entries.forEach((x) => {
                     try {
-                        // console.log(`${x.Rank} ${x.Name} ${x['Race Time']}`)
+                        // debug(`${x.Rank} ${x.Name} ${x['Race Time']}`)
                         doc(`races/${params.raceId}/result/${x.Bib}`)
                             .set( x)
-                            .then(console.log)
+                            .then(debug)
                         
                     } catch (e) {
                         console.error("error saving", e);
@@ -143,6 +143,12 @@ describe('Test of database changes/functions', function(){
                  "timestamp.result": new Date().toISOString(),
              });
 
+        })
+
+        it('finalize result openbox ', async function(){
+            // debug(data)
+            const ret = await fn.save_result(params.raceId,)
+            debug(ret)
         })
 
         
