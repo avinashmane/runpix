@@ -89,7 +89,7 @@ exports.settings = {
   }
 }
 
-const envDEBUGRegex=RegExp(process.env.DEBUG)
+const envDEBUGRegex=RegExp(process.env.DEBUG=='*'?'':process.env.DEBUG)
 exports.debug=(...args)=> { //false ? console.log : () => {}
   if (/[A-Z]/.test(args[0])){
     if (settings?.debug?.[args[0]] || envDEBUGRegex.test(args[0])){

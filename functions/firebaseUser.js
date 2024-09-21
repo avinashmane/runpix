@@ -18,6 +18,7 @@
 const admin = require('firebase-admin');
 const cookieParser = require('cookie-parser')();
 const functions = require('firebase-functions');
+const { error } = require("./utils");
 
 // Express middleware that checks if a Firebase ID Tokens is passed in the `Authorization` HTTP
 // header or the `__session` cookie and decodes it.
@@ -89,5 +90,19 @@ class Firestore {
 
 exports.firestore = new Firestore()
 exports.validateFirebaseIdToken = validateFirebaseIdToken;
+
+async function firebaseGet(path) {
+  var docRef = admin.firestore().doc(path);
+  return docRef.get().then((doc) => {
+    if (doc.exists) {
+      return doc.data();
+    } else {
+      // doc.data() will be undefined in this case
+      error(`No document at ${path}`);
+    }
+  }).catch((error) => {
+    error("Error getting document:", error);
+  });
+}
 
 

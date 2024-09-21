@@ -38,7 +38,14 @@
     "test": "pnpm exec mocha --reporter spec test/*.js",
     "start": "pnpm run shell",
     "deploy": "firebase deploy --only functions",
+    "express": "export $(cat .env | grep \"^[^#;]\" |xargs) &&  node express.js ",
+    "express-debug": "DEBUG=SERVER nodemon express.js ",
+    "build": "export $(cat .env | grep \"^[^#;]\" |xargs)  && docker build . -t gcr.io/${PROJECT_ID}/runpix-func",
+    "comment":"                                                                                                                           watch the path    ",
+    "express-test": "docker run -it -e GOOGLE_APPLICATION_CREDENTIALS=/functions/.serviceaccount.json -e DEBUG=TEST,SERVER -e 'GOOGLE_CLOUD_PROJECT=run-pix' -p 8080:8080 -v .:/functions --name runpix-func gcr.io/run-pix/runpix-func",
+    "express-deploy": "gcloud run deploy runpix-func --image gcr.io/run-pix/runpix-func --set-env-vars=GOOGLE_APPLICATION_CREDENTIALS=/secret/serviceaccount --description 'Express server for eventArc'",
     "logs": "firebase functions:log"
+    
   },
   "engines": {
     "node": "18"

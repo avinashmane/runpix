@@ -12,7 +12,6 @@ const log= DEBUG_MODE>1 ? _console.log: ()=>{}
 
 const mapNano=(x)=>(x.nanos / 1e6).toFixed(0)
 
-
 async function detectText(gcsUri) {
     // [START video_detect_text]
     // Imports the Google Cloud Video Intelligence library

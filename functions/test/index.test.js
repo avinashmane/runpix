@@ -16,8 +16,7 @@ const test = require('firebase-functions-test')(cfg.firebaseConfig,
 // test.mockConfig(config);//{ stripe: { key: '23wr42ewr34' }}
 // const key = functions.config().stripe.key;
   
-// process.env.FIREBASE_CONFIG=config.storageBucket
-  
+config=cfg.firebaseConfig
 // after firebase-functions-test has been initialized
 describe('index.test.js', function () {
   let myFunctions,

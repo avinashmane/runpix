@@ -68,10 +68,11 @@ describe('IMG quality Check',()=>{
     let file='test/data/2023-07-09T06 33 56.012Z~VENUE~jparagj$gmail.com~1P6A7976.jpg'
     let size=fs.statSync(file).size
     scale=[.5,.75,1.25,1.5]
-
+    this.timeout=5000
     for (let param of ['brightness','lightness','contrast','saturation'])
         for (let s of scale)  {
                 let outfile=`test/out/out_${param}_${s*100}.jpg`
+
                 it(outfile,function (done) {
                     modulateImage(file,param,s,
                         outfile)

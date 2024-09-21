@@ -18,7 +18,7 @@ const admin = require('firebase-admin');
 const sharp = require('sharp')
 const exifr = require('exifr');
 const {debounce}  = require('lodash'); //stack
-const {processActivity} = require("./virtualRaces")
+const {processFitnessActivity: processFitnessActivity} = require("./virtualRaces")
 const raceTiming = require('./raceTiming') //stack
 const { DEBUG_MODE, GS_URL_PREFIX, JPEG_EXTENSION, RUNTIME_OPTION, UPLOADS_FOLDER, 
   UPLOADVID_FOLDER, META_KEYS, bibRegex, NOTIMING_WAYPOINTS, testData, PROCESSED_FOLDER, 
@@ -80,7 +80,8 @@ exports.getRaceCfg = getRaceCfg;
  const app = express();
 exports.app = app;
  const firebaseUser = require('./firebaseUser');
-const { renderImage } = require('./express');
+// const { renderImage } = require('./express');
+const { getImageHeight } = require('./imageProcessing');
  
  app.engine('handlebars', exphbs.engine({defaultLayout: 'main'}));
  app.set('view engine', 'handlebars');
@@ -109,8 +110,22 @@ const { renderImage } = require('./express');
     return renderImage(res, req, p, );
     
  });
+ function renderImage(res, req, p) {
+  // preview URL same is image URL
+  if (p.imageUrl) p.previewUrl = p.imageUrl;
 
- app.post('/race/:raceId/results', async (req, res) => {
+  return res.render('image', p); //{
+  //   imageUrl: p.imageUrl,
+  //   previewUrl: p.imageUrl,
+  //   bibNo: p.bibNo,
+  //   raceId: p.raceId,
+  //   pageUrl: p.pageUrl,
+  //   raceOrg: p.raceOrg
+  //   params: JSON.stringify(req.params),
+  // });
+}
+
+app.post('/race/:raceId/results', async (req, res) => {
   // @ts-ignore
   //test link http://localhost:5000/race/werun2023
   const _ret = await save_result(req.params.raceId, req.query)
@@ -119,11 +134,22 @@ const { renderImage } = require('./express');
   
 });
 
- app.get('*', function(req, res){
-  res.send(`Error finding the resource for the URL ${req.url}
-  <br/>
-  Data: ${JSON.stringify(req.params)}` , 404);
+app.post('/event1', async (req, res) => {
+  // @ts-ignore
+  //test link http://localhost:5000/race/werun2023
+  console.log(req.query, req.params,req.body,)
+  res.status(200).send(true)
+  
 });
+
+app.post('/event2', async (req, res) => {
+  // @ts-ignore
+  //test link http://localhost:5000/race/werun2023
+  console.log(req.query, req.params,req.body,)
+  res.status(200).send(true)
+  
+});
+
 
 /**
  * Map parameters and also read race from firebase
@@ -492,21 +518,6 @@ async function saveJPG(bucket, filePath, image, metadata, watermarkImg) {
   return image
 }
 
-function getImageWidth(image,metadata) {
-  try{
-    // fails for light room https://www.reddit.com/r/Lightroom/comments/yheq9r/image_dimensions_not_included_in_exif_data_for/
-    let width = Math.max.apply(Math, Object.keys(metadata).filter(x => x.includes('idth')).map(x => metadata[x]));
-    return width
-  } catch(e){
-    console.error(e)
-    // const size = getNormalSize(await sharp(input).metadata());
-
-    // return (orientation || 0) >= 5
-    //     ?  width: height  :  width ;
-    // }
-  }
-}
-
 function saveThumb(bucket, filePath, image,metadata) {
 
   // Create write stream for uploading thumbnail
@@ -616,29 +627,6 @@ async function delFSReadings(raceId, bibStr, timestamp) {
     });
 }
 
-async function firebaseGet(path) {
-  var docRef = admin.firestore().doc(path);
-  return docRef.get().then((doc) => {
-    if (doc.exists) {
-        return doc.data();
-    } else {
-        // doc.data() will be undefined in this case
-        error(`No document at ${path}`);
-    }
-  }).catch((error) => {
-      error("Error getting document:", error);
-  });
-}
-
-function getImageHeight(meta){
-  try{
-    return meta.Orientation=="Horizontal (normal)"? meta.ImageHeight : meta.ImageWidth
-  } catch(e){
-    return (meta.orientation || 0) >= 5 ? meta.height : meta.width;
-  }
-}
-
-
 /**
  * Video OCR
  * 
@@ -711,11 +699,6 @@ const detectVideoText = async function (gcsUri) {
   lazy.Video = lazy.Video || require('@google-cloud/video-intelligence');
   // Creates a client
   lazy.videoClient = lazy.videoClient || new lazy.Video.VideoIntelligenceServiceClient();
-
-  /**
-   * TODO(developer): Uncomment the following line before running the sample.
-   */
-  // const gcsUri = 'GCS URI of the video to analyze, e.g. gs://my-bucket/my-video.mp4';
 
   const request = {
     inputUri: gcsUri,
@@ -798,16 +781,16 @@ const debounced_save_result = debounce(save_result, 2000)
         }
  */
 exports.receiveRaceActivities = functions.pubsub.topic(settings.indiathon.topic)
-  .onPublish((messageObject) => {
+  .onPublish(async (messageObject) => {
     // Decode the PubSub Message body.
     const message = messageObject.data ? JSON.parse(Buffer.from(messageObject.data, 'base64').toString()) : null;
     
     // functions.logger.log(`Received ${JSON.stringify(message).substring(0,100) || 'Nothing'}!`);
     functions.logger.log(`Received message!`,message);
     
-    const act=processActivity(message)
+    const act=await processFitnessActivity(message)
     // Print the message in the logs.
-    
+    functions.logger.log(`Processed message!`,act);
     return null;
   });
 /**

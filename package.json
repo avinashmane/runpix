@@ -13,8 +13,10 @@
     "hosting": "firebase deploy --only hosting",
     "test:unit": "pnpm exec mocha test/unit/*.test.*js",
     "test:e2e": "cucumber-js",
-    "test:f": "cd functions & node node_modules/mocha/bin/mocha.js --reporter spec",
+    "test:func": "pnpm exec mocha --exec functions/test/*.test.*js",
     "test:reprocess": "cd functions & pnpm exec mocha --reporter spec -f reprocess",
+    "express": "cd functions && export $(cat .env | grep \"^[^#;]\" |xargs) &&  node express.js ",
+    
     "cy:open": "cypress open",
     "vidtest": "cd functions & pnpm exec mocha --reporter spec test/video.test.js -f video ",
     "vidtest:mobile": "cd functions & npm exec mocha functions/test/video.test.js -f mobile"
