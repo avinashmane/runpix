@@ -23,6 +23,9 @@ importers:
       cookie-parser:
         specifier: ^1.4.6
         version: 1.4.6
+      dayjs:
+        specifier: ^1.11.13
+        version: 1.11.13
       debug:
         specifier: ^4.3.7
         version: 4.3.7
@@ -53,6 +56,12 @@ importers:
       mkdirp:
         specifier: ^2.1.3
         version: 2.1.6
+      moment-js:
+        specifier: ^1.1.15
+        version: 1.1.15
+      morgan:
+        specifier: ^1.10.0
+        version: 1.10.0
       pluscodes:
         specifier: ^2.6.0
         version: 2.6.0
@@ -496,9 +505,6 @@ packages:
   '@sinonjs/commons@2.0.0':
     resolution: {integrity: sha512-uLa0j859mMrg2slwQYdO/AkrOfmH+X6LTVmNTS9CqexuE2IvVORIkSpJLqePAbEnKJ77aMmCwr1NUZ57120Xcg==}
 
-  '@sinonjs/commons@3.0.0':
-    resolution: {integrity: sha512-jXBtWAF4vmdNmZgD5FoKsVLv3rPgDnLgPbU84LIJ3otV44vJlDRokVng5v8NFJdCf/da9legHcKaRuZs4L7faA==}
-
   '@sinonjs/commons@3.0.1':
     resolution: {integrity: sha512-K3mCHKQ9sVh8o1C9cxkwxaOmXoAMlDxC1mYyHrjqOWEcBjYr76t96zL2zlj5dUGZ3HSw240X1qgH3Mjf1yJWpQ==}
 
@@ -814,6 +820,10 @@ packages:
   base64-js@1.5.1:
     resolution: {integrity: sha512-AKpaYlHn8t4SVbOHCy+b5+KKgvR4vrsD8vbvrbiQJps7fKDTkjkDry6ji0rUJjC0kzbNePLwzxq8iypo41qeWA==}
 
+  basic-auth@2.0.1:
+    resolution: {integrity: sha512-NF+epuEdnUYVlGuhaxbbq+dvJttwLnGY+YixlXlME5KpQ5W3CnXA5cVTneY3SPbPDRkcjMbifrwmFYcClgOZeg==}
+    engines: {node: '>= 0.8'}
+
   bignumber.js@9.1.2:
     resolution: {integrity: sha512-2/mKyZH9K85bzOEfhXDBFZTGd1CTs+5IHpeFQo9luiBG7hghdC851Pj2WAhb6E3R6b9tZj/XKhbg4fum+Kepug==}
 
@@ -1067,6 +1077,9 @@ packages:
   cross-spawn@7.0.3:
     resolution: {integrity: sha512-iRDPJKUPVEND7dHPO8rkbOnPpyDygcDFtWjpeWNCgy8WP2rXcxXL8TskReQl6OrB2G7+UJrags1q15Fudc7G6w==}
     engines: {node: '>= 8'}
+
+  dayjs@1.11.13:
+    resolution: {integrity: sha512-oaMBel6gjolK862uaPQOVTA7q3TZhuSvuMQAAglQDOWYO9A91IrAOUJEyKVlqJlHE0vq5p5UXxzdPfMH/x6xNg==}
 
   debug@2.6.9:
     resolution: {integrity: sha512-bC7ElrdJaJnPbAP+1EotYvqZsb3ecl5wi6Bfi6BJTUcNowp6cvspg0jXznRTKDjm/E7AdgFBVeAPVMNcKGsHMA==}
@@ -2317,6 +2330,13 @@ packages:
     engines: {node: '>= 14.0.0'}
     hasBin: true
 
+  moment-js@1.1.15:
+    resolution: {integrity: sha512-nIXvKDL4rbRugY3nSku7Qe6/Bbbxc27UXj09Qm/nLuCrEkMhD3cY41uEwY75IYm5GUcl5ucL4lc3JnoNCvbAhg==}
+
+  morgan@1.10.0:
+    resolution: {integrity: sha512-AbegBVI4sh6El+1gNwvD5YIck7nSA36weD7xvIxG4in80j/UoK8AEGaWnnz8v1GxonMCltmlNs5ZKbGvl9b1XQ==}
+    engines: {node: '>= 0.8.0'}
+
   ms@2.0.0:
     resolution: {integrity: sha512-Tpp60P6IUJDTuOq/5Z8cdskzJujfwqfOTkrwIwj7IRISpnkJnT6SyJ4PCPnGMoFjC9ddhal5KVIYtAt97ix05A==}
 
@@ -2417,8 +2437,16 @@ packages:
   object-inspect@1.13.1:
     resolution: {integrity: sha512-5qoj1RUiKOMsCCNLV1CBiPYE10sziTsnmNxkAI/rZhiD63CF7IqdFGC/XzjWjpSgLf0LxXX3bDFIh0E18f6UhQ==}
 
+  on-finished@2.3.0:
+    resolution: {integrity: sha512-ikqdkGAAyf/X/gPhXGvfgAytDZtDbr+bkNUJ0N9h5MI/dmdgCs3l6hoHrcUv41sRKew3jIwrp4qQDXiK99Utww==}
+    engines: {node: '>= 0.8'}
+
   on-finished@2.4.1:
     resolution: {integrity: sha512-oVlzkg3ENAhCk2zdv7IJwd/QUD4z2RxRwpkcGY8psCVcCYZNq4wYnVWALHM+brtuJjePWiYF/ClmuDr8Ch5+kg==}
+    engines: {node: '>= 0.8'}
+
+  on-headers@1.0.2:
+    resolution: {integrity: sha512-pZAE+FJLoyITytdqK0U5s+FIpjN0JP3OzFi/u8Rx+EV5/W+JTWGXG8xFzevE7AjBfDqHv/8vL8qQsIhHnqRkrA==}
     engines: {node: '>= 0.8'}
 
   once@1.4.0:
@@ -2732,6 +2760,9 @@ packages:
   rxjs@6.6.7:
     resolution: {integrity: sha512-hTdwr+7yYNIT5n4AMYp85KA6yw2Va0FLa3Rguvbpa4W3I5xynaBZo41cM3XM+4Q6fRMj3sBYIR1VAmZMXYJvRQ==}
     engines: {npm: '>=2.0.0'}
+
+  safe-buffer@5.1.2:
+    resolution: {integrity: sha512-Gd2UZBJDkXlY7GbJxfsE8/nvKkUEU1G38c1siN6QP6a9PT9MmHB8GnpscSmMJSoF8LOIrt8ud/wPtojys4G6+g==}
 
   safe-buffer@5.2.1:
     resolution: {integrity: sha512-rp3So07KcdmmKbGvgaNxQSJr7bGVSVk5S9Eq1F+ppbRo70+YeaDxkw5Dd8NPN+GD6bjnYm2VuPuCXmpuYvmCXQ==}
@@ -3821,17 +3852,13 @@ snapshots:
     dependencies:
       type-detect: 4.0.8
 
-  '@sinonjs/commons@3.0.0':
-    dependencies:
-      type-detect: 4.0.8
-
   '@sinonjs/commons@3.0.1':
     dependencies:
       type-detect: 4.0.8
 
   '@sinonjs/fake-timers@10.3.0':
     dependencies:
-      '@sinonjs/commons': 3.0.0
+      '@sinonjs/commons': 3.0.1
 
   '@sinonjs/fake-timers@11.3.1':
     dependencies:
@@ -4193,6 +4220,10 @@ snapshots:
 
   base64-js@1.5.1: {}
 
+  basic-auth@2.0.1:
+    dependencies:
+      safe-buffer: 5.1.2
+
   bignumber.js@9.1.2: {}
 
   binary-extensions@2.2.0: {}
@@ -4500,6 +4531,8 @@ snapshots:
       path-key: 3.1.1
       shebang-command: 2.0.0
       which: 2.0.2
+
+  dayjs@1.11.13: {}
 
   debug@2.6.9:
     dependencies:
@@ -6145,6 +6178,18 @@ snapshots:
       yargs-parser: 20.2.4
       yargs-unparser: 2.0.0
 
+  moment-js@1.1.15: {}
+
+  morgan@1.10.0:
+    dependencies:
+      basic-auth: 2.0.1
+      debug: 2.6.9
+      depd: 2.0.0
+      on-finished: 2.3.0
+      on-headers: 1.0.2
+    transitivePeerDependencies:
+      - supports-color
+
   ms@2.0.0: {}
 
   ms@2.1.2: {}
@@ -6248,9 +6293,15 @@ snapshots:
 
   object-inspect@1.13.1: {}
 
+  on-finished@2.3.0:
+    dependencies:
+      ee-first: 1.1.1
+
   on-finished@2.4.1:
     dependencies:
       ee-first: 1.1.1
+
+  on-headers@1.0.2: {}
 
   once@1.4.0:
     dependencies:
@@ -6623,6 +6674,8 @@ snapshots:
   rxjs@6.6.7:
     dependencies:
       tslib: 1.14.1
+
+  safe-buffer@5.1.2: {}
 
   safe-buffer@5.2.1: {}
 

@@ -7,6 +7,7 @@
     "@google-cloud/vision": "^2.1.2",
     "child-process-promise": "^2.2.1",
     "cookie-parser": "^1.4.6",
+    "dayjs": "^1.11.13",
     "debug": "^4.3.7",
     "exif-reader": "^1.1.0",
     "exifr": "^7.1.3",
@@ -17,6 +18,8 @@
     "gm": "^1.23.1",
     "lodash": "^4.17.21",
     "mkdirp": "^2.1.3",
+    "moment-js": "^1.1.15",
+    "morgan": "^1.10.0",
     "pluscodes": "^2.6.0",
     "sharp": "^0.31.3"
   },
@@ -35,17 +38,16 @@
     "lint": "./node_modules/.bin/eslint --max-warnings=0 .",
     "serve": "firebase serve --only functions ",
     "shell": "firebase functions:shell",
-    "test": "pnpm exec mocha --reporter spec test/*.js",
+    "test": "env-cmd -f .env.test pnpm exec mocha -t 0 --exit -p --reporter spec test/*.js ",
     "start": "pnpm run shell",
     "deploy": "firebase deploy --only functions",
-    "express": "export $(cat .env | grep \"^[^#;]\" |xargs) &&  node express.js ",
-    "express-debug": "DEBUG=SERVER nodemon express.js ",
-    "build": "export $(cat .env | grep \"^[^#;]\" |xargs)  && docker build . -t gcr.io/${PROJECT_ID}/runpix-func",
-    "comment":"                                                                                                                           watch the path    ",
-    "express-test": "docker run -it -e GOOGLE_APPLICATION_CREDENTIALS=/functions/.serviceaccount.json -e DEBUG=TEST,SERVER -e 'GOOGLE_CLOUD_PROJECT=run-pix' -p 8080:8080 -v .:/functions --name runpix-func gcr.io/run-pix/runpix-func",
-    "express-deploy": "gcloud run deploy runpix-func --image gcr.io/run-pix/runpix-func --set-env-vars=GOOGLE_APPLICATION_CREDENTIALS=/secret/serviceaccount --description 'Express server for eventArc'",
+    "server": "export $(cat .env | grep \"^[^#;]\" |xargs) &&  node server.js ",
+    "server-debug": "DEBUG=SERVER nodemon server.js ",
+    "server-build": "export $(cat .env | grep \"^[^#;]\" |xargs)  && docker build . -t gcr.io/${PROJECT_ID}/runpix-func",
+    "comment": "                                                                                                                           watch the path    ",
+    "server-test": "docker rm runpix-func & docker run -e DEBUG=* -e GOOGLE_APPLICATION_CREDENTIALS=/functions/.serviceaccount.json -e DEBUG=TEST,SERVER -e 'GOOGLE_CLOUD_PROJECT=run-pix' -p 8080:8080 -v .:/functions --name runpix-func gcr.io/run-pix/runpix-func",
+    "server-deploy": "gcloud run deploy runpix-func --image gcr.io/run-pix/runpix-func --set-env-vars=GOOGLE_APPLICATION_CREDENTIALS=/secret/serviceaccount --description 'Express server for eventArc'",
     "logs": "firebase functions:log"
-    
   },
   "engines": {
     "node": "18"

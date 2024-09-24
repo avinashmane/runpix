@@ -31,7 +31,7 @@ describe('Check Express functions', function () {
     "mychoice24may,testrun".split(",").forEach(race => {
       it(`it should GET race ${race}`, function (done) {
 
-        chai.request(baseUrl)
+        chai.request(cfg.baseUrl)
           .get(`/race/${race}`)
           .end((err, res) => {
             res.should.have.status(200);
@@ -43,7 +43,7 @@ describe('Check Express functions', function () {
       });
       it(`HealthCheck`, function (done) {
 
-        chai.request(baseUrl)
+        chai.request(cfg.baseUrl)
           .get(`/healthcheck`)
           .end((err, res) => {
             res.should.have.status(200);

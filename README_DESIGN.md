@@ -123,3 +123,21 @@ bibno same as strava
 ## execution
 
 list curent races
+
+# Timing Processing rules
+
+* match current day
+* FUTURE timing range (watch timezone)
+* Match sport_type e.g. Run
+* match only original entries i.e. create vs change
+* Take best possible time (in case multiple activities)
+* find fastest consequentive race distance
+* Take largest distance (e.g. !0k among 10 and 5)
+* FUTURE (check splits)
+* FUTURE check GPS location
+* FUTURE farthest distance among all races
+* FUTURE Check race registration
+* Check activity time after start of the race....and FUTURE close before close
+* FUTURE check paused activities ??? How to?
+* Check Gender
+* FUTURE Duplicate activities (duplicate apps)

@@ -18,19 +18,25 @@ const admin = require('firebase-admin');
 const sharp = require('sharp')
 const exifr = require('exifr');
 const {debounce}  = require('lodash'); //stack
-const {processFitnessActivity: processFitnessActivity} = require("./virtualRaces")
+const dayjs = require("dayjs")
+// Vision API
+const vision = require('@google-cloud/vision');
+
+const {processFitnessActivity} = require("./virtualRaces");
+const { getImageHeight } = require('./imageProcessing');
+
 const raceTiming = require('./raceTiming') //stack
+
 const { DEBUG_MODE, GS_URL_PREFIX, JPEG_EXTENSION, RUNTIME_OPTION, UPLOADS_FOLDER, 
   UPLOADVID_FOLDER, META_KEYS, bibRegex, NOTIMING_WAYPOINTS, testData, PROCESSED_FOLDER, 
   THUMBNAILS_FOLDER, WATERMARK_PATH, NOTFOUND, RESIZE_OPTION, JPG_OPTIONS, THUMBSIZE_OPTION, 
   THUMB_JPG_OPTIONS,settings } = require('./settings');
-const { cleanForFS, getNormalSize, parseObjName , getIsoDate , addSeconds, log, debug, error
+const { getNormalSize, parseObjName , getIsoDate , addSeconds, log, debug, error
   } = require('./utils');
+  const { firestore,updFSReadings, delFSReadings, updFSImageData,updFSVideoData } = require('./firebaseUser');
 
 // Node.js core modules
 
-// Vision API
-const vision = require('@google-cloud/vision');
 
 const JSS=JSON.stringify
 // firestore settor/gettors
@@ -73,116 +79,9 @@ exports.getRaceCfg = getRaceCfg;
 
 
 /* ~~~~~~~~~~~~ 3. HTTPS functions  ~~~~~~~~~~~~~ */
+ const {app} = require("./express");
+
  
- const express = require('express');
- const exphbs = require('express-handlebars');
- 
- const app = express();
-exports.app = app;
- const firebaseUser = require('./firebaseUser');
-// const { renderImage } = require('./express');
-const { getImageHeight } = require('./imageProcessing');
- 
- app.engine('handlebars', exphbs.engine({defaultLayout: 'main'}));
- app.set('view engine', 'handlebars');
- //  app.use(firebaseUser.validateFirebaseIdToken);
-
- /**
- * Get dynamic page showing the image
- * Need page url, photo url, thumb url, link event/bib search,
- */ 
-  app.get('/image/:imagePath',async (req, res) =>  {
-    // @ts-ignore
-    //test link http://localhost:5000/image/d2VydW4yMDIzLzUwMzEvMjAyMy0wMy0xM1QxNjozODowMy41Njg5NzN+Z2VuZXJhbH52YWliaGF2flNfRzAzMDAzLmpwZw==
-    let p = await mapParams(req.params);
-    
-    return renderImage(res, req, p, );
-    
-   });
-   
- 
-  app.get('/image/:raceId/:bibNo/:imagePath', async (req, res) => {
-    // @ts-ignore
-    //test link http://localhost:5000/image/werun2023/5031/2023-03-13T16:38:03.568973~general~vaibhav~S_G03003.jpg
-    
-    let p = await mapParams(req.params)
-
-    return renderImage(res, req, p, );
-    
- });
- function renderImage(res, req, p) {
-  // preview URL same is image URL
-  if (p.imageUrl) p.previewUrl = p.imageUrl;
-
-  return res.render('image', p); //{
-  //   imageUrl: p.imageUrl,
-  //   previewUrl: p.imageUrl,
-  //   bibNo: p.bibNo,
-  //   raceId: p.raceId,
-  //   pageUrl: p.pageUrl,
-  //   raceOrg: p.raceOrg
-  //   params: JSON.stringify(req.params),
-  // });
-}
-
-app.post('/race/:raceId/results', async (req, res) => {
-  // @ts-ignore
-  //test link http://localhost:5000/race/werun2023
-  const _ret = await save_result(req.params.raceId, req.query)
-  console.log(req.params.raceId, _ret)
-  res.status(200).send(_ret)
-  
-});
-
-app.post('/event1', async (req, res) => {
-  // @ts-ignore
-  //test link http://localhost:5000/race/werun2023
-  console.log(req.query, req.params,req.body,)
-  res.status(200).send(true)
-  
-});
-
-app.post('/event2', async (req, res) => {
-  // @ts-ignore
-  //test link http://localhost:5000/race/werun2023
-  console.log(req.query, req.params,req.body,)
-  res.status(200).send(true)
-  
-});
-
-
-/**
- * Map parameters and also read race from firebase
- * @param {*} params 
- * @returns 
- */
-async function mapParams(params){
-  // log(params)
-  let p={raceId:null,bibNo:null,imagePath:null};//raceId,bibNo,imagePath;
-  if (!params.raceId) {
-    let buff = new Buffer.from(params.imagePath, 'base64');
-    [p.raceId,p.bibNo,p.imagePath] = buff.toString('ascii').split('/');
-
-  } else {
-    p.raceId= params.raceId
-    p.bibNo=params.bibNo
-    p.imagePath=params.imagePath
-  }
-  
-  // let race =  await firebaseGet(`races/${p.raceId}`);
-  let race =  await getRaceCfg(p.raceId);
-  p.Name = race.Name
-  p.Location = race.Location
-  p.raceDate = (race.Date && race.Date.length>10) ? race.Date.substring(0,10) : race.Date
-  p.linkOrg = race.linkOrg
-  p.raceOrg = race.raceOrg
-  p.timeImage = new Date(p.imagePath.split("~")[0])
-  // sample image "https://storage.googleapis.com/run-pix.appspot.com/processed/werun2023/2023-03-13T16:38:03.568973~general~vaibhav~S_G03003.jpg"
-  p.imageUrl = `${GS_URL_PREFIX}processed/${p.raceId}/${p.imagePath.replace(/\.jpg|\.png/,JPEG_EXTENSION)}` ;
-  //  log('Signed-in user:', user);
-  p.pageUrl = `https://run-pix.web.app/p/${p.raceId}/${p.bibNo}`
-  return p
-}
  // This HTTPS endpoint can  be made accessed by `Authorization` HTTP header
  // with value `Bearer <Firebase ID Token>`.  Not used
 exports.api = functions.https.onRequest(app);
@@ -237,8 +136,8 @@ exports.timingUpdate = functions.firestore
     });
 
   exports.readingsToResult = functions.firestore
-  .document('races/{raceId}/readings/{time_bib}')
-  .onWrite((change, context) => {
+    .document('races/{raceId}/readings/{time_bib}')
+    .onWrite((change, context) => {
   
     // // Get an object with the current document value.
     const raceId = context.params.raceId
@@ -257,6 +156,53 @@ exports.timingUpdate = functions.firestore
     return true
   });
 
+
+exports.activitiesToResult = functions.firestore
+  .document('races/{raceId}/activities/{ath_wpt_act}')
+  .onWrite(async (change, context) => {
+
+  let allEntries;
+  // // Get an object with the current document value.
+  const raceId = context.params.raceId
+  const race  = await firestore.get(`/races/${raceId}`,x=>x)
+  const activities = await getCol(`/races/${raceId}/activities`,
+    doc=>raceTiming.mapActivityToResult(doc,[]))
+
+    allEntries=raceTiming.checkRuleSplitDups(activities)
+    // Registration name Rule
+    if (race.registrationRequired){
+        "filter and map name from bibs"
+    } else{
+        allEntries=allEntries.map(x=>Object.assign(x,{
+            Name : `Strava ${x.athlete}`
+        }))
+    }
+
+    const ret = raceTiming.finalize_results(allEntries,race)
+
+    // Save all entries
+    ret.docs.forEach((category) => {
+        debug(`saving ${category.entries.length} entries for ${category.cat}`);
+        for(let x of category.entries) {
+            try {
+                // debug(`${x.Rank} ${x.Name} ${x['Race Time']}`)
+                firestore.doc(`races/${raceId}/result/${x.Bib}`)
+                    .set( x)
+                    .then(debug(`saved ${x.bib}`))
+                
+            } catch (e) {
+                console.error("error saving", e);
+            }
+        };
+    });
+
+
+     doc( `races/${raceId}`).update({
+         "timestamp.live": new Date().toISOString(),
+     });
+
+  return true
+});
 
 /* ~~~~~~~~~~~~ 5. Storage functions  ~~~~~~~~~~~~~ */
 
@@ -482,13 +428,8 @@ async function saveJPG(bucket, filePath, image, metadata, watermarkImg) {
              .resize(  RESIZE_OPTION )
              .jpeg(    JPG_OPTIONS)
 
-  // log(await watermarkImg.metadata())
-    
+  // log(await watermarkImg.metadata()) 
   if (watermarkImg && (watermarkImg!=NOTFOUND)){
-    // let _width = Object.keys(metadata).filter(x=>x.includes('idth')).map(x=>metadata[x])[0]
-    // let _width = getImageWidth(image,metadata)
-    // let metadata_jpg=await image.metadata()
-    // log(">>>4", RESIZE_OPTION.width,_width,metadata)
     
     let adjWm=await watermarkImg.resize({ width: RESIZE_OPTION.width})
                                 .toBuffer()
@@ -558,75 +499,6 @@ function saveThumb(bucket, filePath, image,metadata) {
 }
 
 
-async function updFSImageData(raceId, imagePath, detections, texts,exifdata) {
-  let timestamp = new Date().toISOString()
-  debug(`writing to firestore ${imagePath}`)
-  return await admin.firestore()
-                .collection('races').doc(raceId)
-                .collection('images').doc(imagePath)
-                .set({
-    imagePath: imagePath,
-    texts: texts,
-    timestamp: timestamp,
-    textAnnotations: detections,
-    metadata: exifdata
-  });
-}
-
-async function updFSReadings(raceId, userId, bibStr, timestamp, score, 
-                             waypoint, attrs, fileName ) {
-                    
-  let x= await admin.firestore()
-    .collection('races').doc(cleanForFS(raceId))
-    .collection("readings").doc(cleanForFS([timestamp,bibStr].join("_")))
-    .set({
-      bib: bibStr,
-      userId: userId,
-      imagePath: fileName,
-      waypoint: waypoint,
-      // latlng: new admin.firestore.GeoPoint(parseFloat(latitude), parseFloat(longitude)),
-      timestamp: timestamp,
-      score: score
-    })
-  .then((x) => {
-      log({
-        bib: bibStr,
-        userId: userId,
-        imagePath: fileName,
-        waypoint: waypoint,
-        // latlng: new admin.firestore.GeoPoint(parseFloat(latitude), parseFloat(longitude)),
-        timestamp: timestamp,
-        score: score
-      })
-      return x
-  })
-  .catch((error) => {
-      error("Error writing document: ", error);
-      return error
-  });
-  // log(x)
-}
-
-async function delFSReadings(raceId, bibStr, timestamp) {
-
-  let x = await admin.firestore()
-    .collection('races').doc(cleanForFS(raceId))
-    .collection("readings").doc(cleanForFS([timestamp, bibStr].join("_")))
-    .delete()
-    .then((x) => {
-      log({
-        op: "delete",
-        bib: bibStr,
-        timestamp: timestamp,
-      })
-      return x
-    })
-    .catch((error) => {
-      error("Error deleting document: ", error);
-      return error
-    });
-}
-
 /**
  * Video OCR
  * 
@@ -671,27 +543,6 @@ exports.scanVideo = async function (storageObject) {
 };
 
 
-async function updFSVideoData(raceId, videoPath, detections, timestamp, waypoint, metadata) {
-  let payload={
-    videoPath: videoPath,
-    textAnnotations: detections,
-    waypoint: waypoint,
-    timestamp: timestamp || new Date().toISOString()
-    }
-  
-  if (metadata) 
-    payload.metadata = metadata
-  
-  debug(`writing to firestore ${videoPath}`)
-
-  return await admin.firestore()
-                .collection('races').doc(raceId)
-                .collection('videos').doc(videoPath)
-                .set(payload)
-                .catch(console.error)
-
-}
-
 const detectVideoText = async function (gcsUri) {
   // [START video_detect_text]
   // Imports the Google Cloud Video Intelligence library
@@ -727,6 +578,7 @@ exports.testHttp = functions.https.onRequest(async (req, res)=>{
 
 
 async function save_result(raceId, options) {
+
   const race = await getRaceCfg(raceId)
   const bibs = await getCol(`/races/${raceId}/bibs`,
     doc => (Object.assign({ id: doc.id }, doc.data())))
@@ -742,7 +594,7 @@ async function save_result(raceId, options) {
   let stats={
     bibs :bibs.length,
     readings: data.length,
-    results: ret.length,
+    results: ret.length || 0,
     savedResults: 0
   }
   // Save all entries
@@ -771,7 +623,8 @@ async function save_result(raceId, options) {
 }
 
 const debounced_save_result = debounce(save_result, 2000)
-/**
+
+/** Receveie fitness activities from Indiathon
  * Pubsub
  * {
           type: 'activity',
@@ -785,14 +638,12 @@ exports.receiveRaceActivities = functions.pubsub.topic(settings.indiathon.topic)
     // Decode the PubSub Message body.
     const message = messageObject.data ? JSON.parse(Buffer.from(messageObject.data, 'base64').toString()) : null;
     
-    // functions.logger.log(`Received ${JSON.stringify(message).substring(0,100) || 'Nothing'}!`);
-    functions.logger.log(`Received message!`,message);
-    
     const act=await processFitnessActivity(message)
     // Print the message in the logs.
-    functions.logger.log(`Processed message!`,act);
+    functions.logger.log(`Processed message!`,act,message);
     return null;
   });
+
 /**
  * Exports for testing
  */

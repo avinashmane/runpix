@@ -48,7 +48,7 @@ RUN ls /usr/bin
 RUN npm install --production --omit=dev --loglevel verbose 
 
 # Run the web service on container startup.
-ENTRYPOINT [ "node", "./express.js" ]
+ENTRYPOINT [ "node", "./server.js" ]
 
 # help: node index.js [SCAN|CLUSTER|SCANCLUSTER|NO_LISTEN|SERVER] [RACEID]
 

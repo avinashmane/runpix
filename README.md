@@ -13,10 +13,12 @@ This project was created with [Vite](https://vitejs.dev/).
 
 ## Repos
 
-* runpix
-* run-pix-admin (python)
-* runpix-face
+* runpix  (run-pix.firebaseapp.com)
+  * functions (https://us-central1-run-pix.cloudfunctions.net/api)
+* run-pix-admin (python) (https://run-pix-admin-nqmxzlpvyq-uc.a.run.app)
+* runpix-face (https://runpix-face-nqmxzlpvyq-uc.a.run.app)
 * docs?
+* Storage: (https://storage.googleapis.com/run-pix.appspot.com/)
 
 ## Languages and Tools
 
@@ -79,7 +81,8 @@ $ yarn build
 ## Debug
 
 
-Array.from(document.querySelectorAll('*')).find(e => e.__vue_app__).__vue_app__.config.globalProperties.$store.state
+Array.from(document.querySelectorAll('*')).find(e => e.__vue_app__).
+__vue_app__.config.globalProperties.$store.state
 
 ### References
 

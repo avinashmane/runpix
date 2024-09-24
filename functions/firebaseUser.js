@@ -19,6 +19,7 @@ const admin = require('firebase-admin');
 const cookieParser = require('cookie-parser')();
 const functions = require('firebase-functions');
 const { error } = require("./utils");
+const { cleanForFS, log, debug } = require("./utils");
 
 // Express middleware that checks if a Firebase ID Tokens is passed in the `Authorization` HTTP
 // header or the `__session` cookie and decodes it.
@@ -78,8 +79,10 @@ class Firestore {
 
   }
   col = (path) => this.firestore.doc(path)
+  /** read data /w callback */
   doc = (path) => this.firestore.doc(path)
-  get = (path, callback) => this.doc(path).get().then(x => callback(x.data()))
+  get = (path, callback) => this.doc(path).get()
+    .then(x => callback(x.data()))
   getCol = (path, callback) => this.firestore.collection(path).get()
     .then(snap => {
       let arr = []
@@ -88,11 +91,13 @@ class Firestore {
     })
 }
 
-exports.firestore = new Firestore()
+let firestore_ = new Firestore()
+exports.firestore = firestore_
+
 exports.validateFirebaseIdToken = validateFirebaseIdToken;
 
 async function firebaseGet(path) {
-  var docRef = admin.firestore().doc(path);
+  var docRef = firestore_.doc(path);
   return docRef.get().then((doc) => {
     if (doc.exists) {
       return doc.data();
@@ -104,5 +109,99 @@ async function firebaseGet(path) {
     error("Error getting document:", error);
   });
 }
+async function updFSImageData(raceId, imagePath, detections, texts, exifdata) {
+  debug(`writing to firestore ${imagePath}`);
+  // return await admin.firestore()
+  //               .collection('races').doc(raceId)
+  //               .collection('images').doc(imagePath).
+  return await firestore.doc(`races/${raceId}/images/${imagePath}`).
+    set({
+      imagePath: imagePath,
+      texts: texts,
+      timestamp: new Date().toISOString(),
+      textAnnotations: detections,
+      metadata: exifdata
+    });
+}
+exports.updFSImageData = updFSImageData;
+
+
+async function updFSReadings(raceId, userId, bibStr, timestamp, score,
+  waypoint, attrs, fileName) {
+
+  let x = await admin.firestore()
+    .collection('races').doc(cleanForFS(raceId))
+    .collection("readings").doc(cleanForFS([timestamp, bibStr].join("_")))
+    .set({
+      bib: bibStr,
+      userId: userId,
+      imagePath: fileName,
+      waypoint: waypoint,
+      // latlng: new admin.firestore.GeoPoint(parseFloat(latitude), parseFloat(longitude)),
+      timestamp: timestamp,
+      score: score
+    })
+    .then((x) => {
+      log({
+        bib: bibStr,
+        userId: userId,
+        imagePath: fileName,
+        waypoint: waypoint,
+        // latlng: new admin.firestore.GeoPoint(parseFloat(latitude), parseFloat(longitude)),
+        timestamp: timestamp,
+        score: score
+      });
+      return x;
+    })
+    .catch((error) => {
+      error("Error writing document: ", error);
+      return error;
+    });
+  // log(x)
+}
+exports.updFSReadings = updFSReadings;
+
+async function delFSReadings(raceId, bibStr, timestamp) {
+
+  let x = await admin.firestore()
+    .collection('races').doc(cleanForFS(raceId))
+    .collection("readings").doc(cleanForFS([timestamp, bibStr].join("_")))
+    .delete()
+    .then((x) => {
+      log({
+        op: "delete",
+        bib: bibStr,
+        timestamp: timestamp,
+      });
+      return x;
+    })
+    .catch((error) => {
+      error("Error deleting document: ", error);
+      return error;
+    });
+}
+exports.delFSReadings = delFSReadings;
+
+async function updFSVideoData(raceId, videoPath, detections, timestamp, waypoint, metadata) {
+  let payload = {
+    videoPath: videoPath,
+    textAnnotations: detections,
+    waypoint: waypoint,
+    timestamp: timestamp || new Date().toISOString()
+  };
+
+  if (metadata)
+    payload.metadata = metadata;
+
+  debug(`writing to firestore ${videoPath}`);
+
+  return await admin.firestore()
+    .collection('races').doc(raceId)
+    .collection('videos').doc(videoPath)
+    .set(payload)
+    .catch(console.error);
+
+}
+exports.updFSVideoData = updFSVideoData;
 
 

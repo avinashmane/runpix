@@ -13,11 +13,10 @@ const config={
 const {assert, expect} = require('chai')
 
 const admin = require('firebase-admin');
-const functions = require('firebase-functions');
-const { storageBucket } = require('firebase-functions/params');
 const test = require('firebase-functions-test')(config,
     cfg.service_account);
-
+const dayjs = require('dayjs')
+const _ = require("lodash")
 const firebaseUser = require('../firebaseUser');
 const { finalize_results } = require('../raceTiming.js');
 const { Alert } = require('selenium-webdriver');
@@ -57,7 +56,7 @@ describe('Test of database changes/functions', function(){
         test.cleanup()
     })
 
-    xdescribe ('Test database changes trigger - readings', function (){
+    xdescribe ('Test database changes /races/videos -trigger update readings', function (){
         let data
         const params= {
             raceId: 'testrun',
@@ -98,25 +97,28 @@ describe('Test of database changes/functions', function(){
     })
 
     describe ('finalize results - readings', function (){
-        let data,bibs,raceTiming,race
+        let dataReadings,bibs,raceTiming,race
+        raceTiming = require('../raceTiming.js')
         const params= {
             raceId: 'testrun',
         }
     
+        function rerankResults(raceId){
+
+        }
         before(async function (){
             this.timeout(50000)
             race  = await get(`/races/${params.raceId}`,x=>x)
-            raceTiming = require('../raceTiming.js')
             bibs = await getCol(`/races/${params.raceId}/bibs`,
                 doc=>(Object.assign({id:doc.id},doc.data())) )
-            data = await getCol(`/races/${params.raceId}/readings`,
+            dataReadings = await getCol(`/races/${params.raceId}/readings`,
                 doc=>raceTiming.mapReading(doc,bibs))
         })
 
 
-        xit('finalize result openbox ', function(){
+        it('finalize result readings ', function(){
             // debug(data)
-            const allEntries = raceTiming.addStatusFields(data,
+            const allEntries = raceTiming.addStatusFields(dataReadings,
                                                 race?.timestamp?.start)
             expect(allEntries.length).to.be.greaterThan(10)
             const ret = finalize_results(allEntries,race)
@@ -130,7 +132,80 @@ describe('Test of database changes/functions', function(){
                         // debug(`${x.Rank} ${x.Name} ${x['Race Time']}`)
                         doc(`races/${params.raceId}/result/${x.Bib}`)
                             .set( x)
+                            
                             .then(debug)
+                    } catch (e) {
+                        console.error("error saving", e);
+                    }
+                });
+            });
+
+
+             doc( `races/${params.raceId}`).update({
+                 "timestamp.result": new Date().toISOString(),
+             });
+
+        })
+
+        it('finalize result readings Save', async function(){
+            // debug(data)
+            const ret = await fn.save_result(params.raceId,)
+            debug(ret)
+        })
+
+        
+    })
+
+    describe ('virtual finalize results - activities ', function (){
+        let dataReadings,bibs,raceTiming,race
+        const params= {
+            raceId: 'pcmcrunners2024-09-24',//'testrun',
+            key:'something,'
+        }
+        let data
+        const path=`/races/${params.raceId}/activities/${params.key}`
+
+
+    
+        before(async function (){
+            this.timeout(50000)
+            race  = await get(`/races/${params.raceId}`,x=>x)
+            raceTiming = require('../raceTiming.js')
+            bibs = await getCol(`/races/${params.raceId}/bibs`,
+                doc=>(Object.assign({id:doc.id},doc.data())) )
+            dataReadings = await getCol(`/races/${params.raceId}/activities`,
+                doc=>raceTiming.mapActivityToResult(doc,bibs))
+        })
+
+
+        it('virtual finalize result readings ', function(){
+            
+            allEntries=dataReadings
+            // Deduplication
+            allEntries=raceTiming.checkRuleSplitDups(allEntries)
+            // Registration name Rule
+            if (race.registrationRequired){
+                "filter and map name from bibs"
+            } else{
+                allEntries=allEntries.map(x=>_.extend(x,{
+                    Name : `Strava ${x.athlete}`
+                }))
+            }
+            // allEntries = raceTiming.addStatusFields(dataReadings,
+            //                                     race?.timestamp?.start)
+            expect(allEntries.length).to.be.greaterThan(10)
+            const ret = finalize_results(allEntries,race)
+
+
+            // Save all entries
+            ret.docs.forEach((category) => {
+                debug(`saving ${category.entries.length} entries for ${category.cat}`);
+                category.entries.forEach((x) => {
+                    try {
+                        // debug(`${x.Rank} ${x.Name} ${x['Race Time']}`)
+                        doc(`races/${params.raceId}/result/${x.Bib}`)
+                            .set( x)
+                            .then(debug(`saved ${x.bib}`))
                         
                     } catch (e) {
                         console.error("error saving", e);
@@ -145,12 +220,17 @@ describe('Test of database changes/functions', function(){
 
         })
 
-        it('finalize result openbox ', async function(){
-            // debug(data)
-            const ret = await fn.save_result(params.raceId,)
-            debug(ret)
-        })
+        it('virtual finalize result firetore change event', async function(){
+            // Make snapshot for state of database beforehand
+            const beforeSnap = test.firestore.makeDocumentSnapshot(data, path);
+            // Make snapshot for state of database after the change
+            const afterSnap = test.firestore.makeDocumentSnapshot({}, path)
+            const change = test.makeChange(beforeSnap, afterSnap);
+            // Call wrapped function with the Change object
+            const wrapped = test.wrap(fn.activitiesToResult);
+            return wrapped(change, {params:params});
 
-        
+        })        
     })
+
 })

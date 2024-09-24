@@ -5,14 +5,46 @@ const { cfg, debug, projroot } = require("./commonTest")
 
 const GS_URL_PREFIX = 'https://storage.googleapis.com/run-pix.appspot.com/'
 const { assert } = require('chai')
-
-// const { firebaseConfig } = require('firebase-functions');
-const functions = require('firebase-functions');
-const { storageBucket } = require('firebase-functions/params');
-const test = require('firebase-functions-test')(cfg.firebaseConfig,
-    cfg.service_account);
-const firestore = require("../firebaseUser")
 const _ = require("lodash")
+const dayjs = require("dayjs")
+const {firestore} = require("../firebaseUser")
+const races = require("../races")
+
+describe('Races basic', function () {
+  this.timeout(10000);
+    
+    xit('refresh template (do not use) - one time', async () => {
+        let data
+        data= await firestore.doc(`defaults/races/pcmc/mychoice`).get().then(x=>  x.data())
+
+        const raceDoc = await firestore.doc(`defaults/races/pcmcrunners/mychoice`).set(data);
+        // data= await firestore.doc(`/races/mychoice15sept`).get().then(x=>  x.data())
+        // const raceDoc = firestore.doc(`defaults/races/pcmc/mychoice`).set(data);
+        return debug(data)
+    })
+    xit('Create second sunday ',async ()=>{
+      'write date based on date..'
+
+      debug(await races.createRaceNthSunday('pcmcrunners','mychoice',3))
+    })
+
+    it('Create race coming Sunday',async ()=>{
+      'write date based on date..'
+
+      debug(await races.createSundayRace('pcmcrunners',"weekly"))
+    })
+
+    it('Create race tomorrow',async ()=>{
+      tomorrow=dayjs().add(1,'d')
+      let data = {
+        Date : tomorrow.format('YYYY-MM-DD'),
+        id : `daily-${tomorrow.format('YYYY-MM-DD')}`,
+        Name: 'Daily Run'
+      }
+      debug(await races.createRace(data.id,'pcmcrunners',"weekly",data))
+    })
+})
+
 
 describe('Virtual Races', function () {
     // this.timeout(10000)
@@ -22,20 +54,11 @@ describe('Virtual Races', function () {
     const tomorrow = new Date(today.getTime() + 24 * 60 * 60 * 1000);
 
     it('List races (restart test case)', async () => {
-        races= await virtualRaces.readActiveRaces()
-        return console.table(races)
+        racesData= await races.readLiveRaces()
+        return console.table(racesData)
     })
 
-    it('Create dynamic race coming Sunday',async ()=>{
-        'write date based on date..'
 
-        debug(await virtualRaces.createLiveRace('pcmcrunners',{
-            Name: 'Daily Run',
-            Date: tomorrow,
-            status: ['live','nolist'],
-            Distances: ['10K','5K']
-        }))
-    })
 
     it('Map Race',async ()=>{
         'write date based on date..'

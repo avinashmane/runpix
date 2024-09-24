@@ -6,12 +6,13 @@
 
 # problems
 
-* sync problems in githus and 2 laptops
+
 * Deploy Error: Could not load the default credentials. Browse to https://cloud.google.com/docs/authentication/getting-started for more information.
 pnpm add @google-cloud/functions-framework
 
 # Todo:
 
+* check NaN:NaN:NanN for Race Timing from save_result()
 * result publishing
 
 arrayOfMins=_.chain(allEntries.value).filter(checkStatus).filter(checkBib).groupBy("bib").map((x,k)=>_.minBy(x,"timestamp")).value() 
@@ -52,8 +53,13 @@ import {chain,cloneDeep,map,take,keys,orderBy,sumBy,pickBy,split,sortBy,tap,star
 
 ### features
 
+* **23sep**
+
+* functions: reorg.
+* sync problems in github and 2 laptops
 * add pubsub trigger
 * use debug
+
 * **22Mar**
 
 * Certification link from result (WIP)

@@ -22,13 +22,14 @@
     
     <div v-if="bibSelection && raceId" class="w-full text-lg ">
       BIB: {{bibSelection}} {{bibData.Name}}
-      <small class="text-right">{{message}}</small>
+      
     </div>
+    <small class="text-right">{{message}}</small>
     <div v-if="!bibSelection && raceId && races.find(x=>x.id==raceId)?.photoStatus.includes('face')" > 
       <hr/>
       <FileUpload mode="basic" name="demo[]"  accept="image/*" customUpload @uploader="faceUploader" 
-      class="w-full "
-        :maxFileSize="10000000" :auto="true" chooseLabel="Upload cropped face image 👤" />
+        class="w-full"  chooseLabel="Upload cropped face image 👤" 
+        :maxFileSize="10000000" :auto="true"/>
     </div>
 
   
@@ -120,6 +121,8 @@ import Compressor from 'compressorjs';
 import { db, storage } from "../../firebase/config" 
 import {chain,cloneDeep,map,take,keys,orderBy,sumBy,pickBy,split,sortBy,tap,startsWith}  from "lodash-es"
 import {debug} from "../helpers"
+
+console.error(config)
 
 const store = useStore()
 store.dispatch('getRacesAction')
@@ -305,7 +308,8 @@ let faceUploader=async (x)=>{
     // which means you have to access the `result` in the `success` hook function.
     success(result) {
       const formData = new FormData();
-
+      
+      message.value = `${fileId} Uploaded`
       // The third parameter is required for server
       formData.append('event',raceId.value)
       formData.append('imageFile', fileId)

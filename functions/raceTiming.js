@@ -20,7 +20,11 @@ const {
     extend,
     startsWith,
   } = require("lodash");
-  const _ = require("lodash");
+const _ = require("lodash");
+const dayjs = require('dayjs')
+const ts_fmt="dddd DD-MMM-YYYY hh:mm:ssa"
+const suffixK=(x)=>typeof x === "string" ? x.replace(/(\d+)(k?)/i,"$1K") : x  
+const debug = require("debug")("RUNPIX:TIMING")
 /**
   * Bib	25
 
@@ -36,32 +40,31 @@ Start Time "7:10:00"
   */
 function finalize_results(allEntries,race) {
     
-    console.log(`finalizing results: ${allEntries.length}`);
+    debug(`finalizing results: ${allEntries.length}`);
     const keys_ = split("bib name timestamp status waypoint gender imagePath", " ");
-    
-    suffixK=(x)=>typeof x === "string" ? x.replace(/(\d+)(k?)/i,"$1K") : x
     
     // map data
     let results = allEntries
         .filter((x) => x.waypoint != "VENUE")
-        .filter((x) => "valid split volunteer dnf dns".includes(x.status.toLowerCase()))
+        .filter((x) => "valid split volunteer dnf dns".includes(x.status?.toLowerCase()))
         .map((x) => {
             // gun time
-            let startTime = race?.timestamp?.start
-                ? new Date(race?.timestamp?.start).toTimeString()
-                : "-";
-            // debug(typeof x.timestamp)
+            let startTime = x.start_ts || (race?.timestamp?.start ? dayjs(race?.timestamp?.start) : null);
+            const timestamp = typeof x.timestamp instanceof dayjs ? x.timestamp : dayjs(x.timestamp) 
+            let elapsed=timestamp.diff(startTime, 's'),
+                race_time=elapsedTo_HMS(elapsed)
+            let gender =  x.gender || getGender(x)
+            // console.debug(`${x.bib} ${startTime} ${timestamp} : ${elapsed} ${race_time}`)
             return {
                 Bib: x.bib,
-                Name: x.name,
-                Race: x.waypoint,
-                Gender: x.gender,
+                Name: x.name || `Athlete id# ${x.bib}`,
+                Race: x.waypoint || ruleGuessWaypoint(x.bib,elapsed,race.Distances) ,
+                Gender: gender,
                 Category:
-                    x.status == "valid" ? `${suffixK(x.waypoint)} - ${getGender(x)}` : `Other - ${x.status}`,
-                "Start Time": startTime,
-                "Race Time": period(x.timestamp,race?.timestamp?.start),
-                "Finish Time":
-                    typeof x.timestamp == "string" ? x.timestamp : x.timestamp.toTimeString(),
+                    x.status == "valid" ? `${suffixK(x.waypoint)} - ${gender}` : `Other - ${x.status}`,
+                "Start Time": startTime ? startTime.format(ts_fmt) : '-',
+                "Race Time": race_time,
+                "Finish Time": timestamp.format(ts_fmt),
                 Status: x.status,
                 Rank: "",
             };
@@ -81,55 +84,97 @@ function finalize_results(allEntries,race) {
             docs: ret
         }
 
-    // Save all entries
-    ret.forEach((category) => {
-        console.log(`saving ${category.entries.length} entries for ${category.cat}`);
-        category.entries.forEach((x) => {
-            try {
-                // console.log(`${x.Rank} ${x.Name} ${x['Race Time']}`)
-                setDoc(doc(db, "races", raceId, "result", x.Bib), x).then(
-                    (x) => processedFinalizedEntries.value++
-                );
-            } catch (e) {
-                console.error("error saving", e);
-            }
-        });
-    });
-
-
-    // updateDoc(doc(db, `races/${raceId}`), {
-    //     "timestamp.result": new Date().toISOString(),
-    // });
-
-    function rankResultsByRaceTime(x) {
-        return _(x)
-            .orderBy("Race Time")
-            .map((x, i) => extend(x, { Rank: i + 1 }))
-            .value();
-    }
-
-    function groupResultsByValidCategories(results) {
-        // let ret = groupBy(results, (x) => `${x.Category}_${x.Status}`)
-        // ret= each(ret,(o, k) => ({
-        //     cat: k,
-        //     entries: sortBy(o, "Race Time"),
-        //   }))
-        // ret = pickBy(ret,(x) => RegExp(/^\d+K\D/).test(x.cat));
-        // return ret
-        return chain(results)
-            .groupBy(x => `${x.Category}_${x.Status}`)
-            .map((o, k) => ({
-                cat: k,
-                entries: sortBy(o, "Race Time")
-            }))
-            .filter(x => RegExp(/^\d+K?\D/).test(x.cat))
-            .tap(console.log)
-            .value();
-    }
 };
 
-function updateTiming(race, timestamp,) {
+function ruleGuessWaypoint(bib,elapsed,distances){
+    let waypoint
+    // valid paces for 5k/10k
+    //if less than 50min assume 5k... Race admin to change later
+    if ((elapsed<60*50) && distances.includes('5K')) 
+        waypoint= '5K'
+    if ((elapsed<60*60*2) && distances.includes('10K')) 
+        waypoint= '10K'
+    if (waypoint)
+     console.warn(`distance overridden bib: ${bib} ${(elapsed/50).toFixed(0)}m to ${waypoint}`)
+    return waypoint
+}
 
+function groupResultsByValidCategories(results) {
+
+    return chain(results)
+        .groupBy(x => `${x.Category}_${x.Status}`)
+        .map((o, k) => ({
+            cat: k,
+            entries: sortBy(o, "Race Time")
+        }))
+        .filter(x => RegExp(/^\d+K?\D/).test(x.cat))
+        // .tap(console.log)
+        .value();
+}
+
+function rankResultsByRaceTime(x) {
+    return _(x)
+        .orderBy("Race Time")
+        .map((x, i) => extend(x, { Rank: i + 1 }))
+        .value();
+}
+
+/**
+ * Need following
+Bib "4002"  Athlete
+Category "5K - Male" - Only distance 
+Finish Time "06:43:00 GMT+0530 (India Standard Time)"
+Gender "Male"
+Name "NANDLAL YADAV"
+Race "5K"
+Race Time "00:37:44"
+Rank 25
+Start Time "06:05:15 GMT+0530 (India Standard Time)"
+Status "valid" 
+ */
+function mapActivityToResult(doc, bibs){
+    const ts_fmt="dddd DD-MMM-YYYY hh:mm:ssa"
+    let data = doc.data();
+    let [athlete,distance,activity] = doc.id.split("_")
+    
+    timestamp = dayjs(data.start_date_local);   
+/**
+ * 
+    athlete 100075877
+    device_name "Garmin Forerunner 55"
+    distance 5000
+    elapsed 2319
+    event "create"
+    sport_type "Run"
+    start_date_local "2024-09-22T07:37:32Z"
+    start_latlng
+ */
+    ret ={bib: athlete,
+        timestamp: timestamp.add(data.elapsed,'second') , // end time
+        waypoint: distance,
+        start_ts: timestamp,
+        end_ts: timestamp.add(data.elapsed,'second') , // end time
+        // "Start Time": timestamp.format(ts_fmt) ,
+        // Category: distance, // "5K - Male" - Only distance 
+        // Activity: activity,
+        // Gender : '-',
+        // Race: distance,
+        status: 'valid'
+    }
+    return _.assign(data,ret)
+
+
+}
+
+function elapsedTo_HMS(elapsed){
+    if (elapsed<0) return `Invalid (${elapsed})`
+    const getDivRem=(arr)=>[Math.floor(arr[0]/arr[1]),arr[0] % arr[1]]
+    const pad_=(x)=>_.padStart(x,2,'0')
+    let [d,h_]=getDivRem([elapsed,24*60*60])
+    let [h,m_]=getDivRem([h_,60*60])
+    let [m,s]=getDivRem([m_,       60])
+    const days=d ? `${d} `:''
+    return `${days}${pad_(h)}:${pad_(m)}:${pad_(s)}`
 }
 
 function mapReading(doc,bibs) {
@@ -139,7 +184,7 @@ function mapReading(doc,bibs) {
     data.name = NOMATCH;
 
     if (!data.hasOwnProperty("bib") || doc.id.includes("START")) {
-        console.log("nonBib/START", data);
+        debug("nonBib/START", data);
     } else if (data.bib.search(regExp) != -1) {
         // matching bib pattern
 
@@ -177,12 +222,7 @@ function mapReading(doc,bibs) {
 
 function addStatusFields(ret, raceStart) {
     // mark entries started before start of race
-    ret = map(ret, (x) => {
-        if (raceStart && x.timestamp < raceStart) {
-            x.status = (x.status || "") + "prior";
-        }
-        return x;
-    });
+    ret = ruleRemoveEntriesBeforeStart(ret, raceStart);
     // bib match
     ret = map(ret, (x) => {
         if (["", "N/A"].includes(x?.name)) {
@@ -192,7 +232,7 @@ function addStatusFields(ret, raceStart) {
     });
     // all remaining
     ret = map(ret, (x) => {
-        //if(x.bib=='3178')debugger;
+        
         x.status = x.status || "valid";
         return x;
     });
@@ -216,26 +256,37 @@ function addStatusFields(ret, raceStart) {
     //             return a
     //         },[])
     //         .value()
+    ret = checkRuleSplitDups(ret);
+
+    return ret;
+}
+
+
+function checkRuleSplitDups(ret) {
     ret = orderBy(ret, (x) => x.bib + x.waypoint + x.timestamp, "asc")
         .reduce((a, o) => {
-            if (
-                o.status == "valid" &&
-                a.some((x) => x.bib + x.waypoint + x.status == o.bib + o.waypoint + o.status)
-            ) {
+            if (o.status == "valid" &&
+                a.some((x) => x.bib + x.waypoint + x.status == o.bib + o.waypoint + o.status)) {
                 o.status = "dup";
-            } else if (
-                o.status == "valid" &&
-                a.some((x) => x.bib + x.status == o.bib + o.status)
-            ) {
+            } else if (o.status == "valid" &&
+                a.some((x) => x.bib + x.status == o.bib + o.status)) {
                 o.status = "split";
             }
             a.push(o);
             return a;
         }, []);
-
     return ret;
 }
 
+function ruleRemoveEntriesBeforeStart(ret, raceStart) {
+    ret = map(ret, (x) => {
+        if (raceStart && x.timestamp < raceStart) {
+            x.status = "prior"; //(x.status || "") + 
+        }
+        return x;
+    });
+    return ret;
+}
 
 /**
  * Convert to date adjusting for timezone
@@ -254,14 +305,15 @@ function getBibRegExp() {
 }
 
 function getGender(entry) {
+    const defaultGender="Open"
     let gender = entry?.gender?.trim()
     
     // Doc: Gender not mentioned is considered as male
     if (["Male", "Female"].includes(gender))
         return gender
     else {
-        console.log('default to Male', entry)
-        return "Male"
+        // console.log(`default to ${defaultGender}`, entry.bib)
+        return defaultGender
     }
 
 }
@@ -295,10 +347,16 @@ function period(ts,startTime) {
       console.warn(`error ${ts} ${JSON.stringify(e)}`);
     }
   }
+  
   let range = (i, j) =>
     [...Array(j).keys()].map((x) => x + i).filter((x) => x <= entries.value.length);
   let abbr = (x, len = 6) => String(x).substring(0, len);
   let pad = (x, n = 2) => ("00" + x).slice(-n);
   
 
-module.exports = { finalize_results, mapReading, addStatusFields }
+module.exports = { finalize_results, 
+    mapReading, 
+    addStatusFields,
+    checkRuleSplitDups,
+    mapActivityToResult
+ }

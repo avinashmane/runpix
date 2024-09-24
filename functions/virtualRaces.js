@@ -1,11 +1,11 @@
 /**
  * Virtual races
  */
+const { readLiveRaces } = require("./races");
 const {firestore} = require("./firebaseUser")
 const _ = require ("lodash");
 const debug = require("debug")('TEST')
 
-let activeRaces={}
 /**
  * 
  * @param {*} msg 
@@ -15,7 +15,7 @@ let activeRaces={}
  */
 async function processFitnessActivity(msg){
 
-    await readActiveRaces()
+    let activeRaces =  await readLiveRaces()
     const act = mapActivity(msg)
     let stat={status:null}
     // matchedRaces=activeRaces.map(x=>x.Date==act.Date)
@@ -30,14 +30,14 @@ async function processFitnessActivity(msg){
         }
         const distances = race.Distances.map(convertDistance)
         //  only one distance per race
-        const eligibleDistances=_(distances).filter(x=> x<=act.distance).orderBy().value()
+        const eligibleDistances=_(distances)
+            .filter(x=> x<=act.distance).orderBy().value()
         
         if(eligibleDistances.length){
             const distance=eligibleDistances.pop()
             const distName= race.Distances[distances.indexOf(distance)] || 'xK'
             
-            
-            await saveRaceActivity(distName, distance, act, race, msg.event);
+            await saveRaceActivity(distName, distance, act, race, msg.event,msg.athlete);
         } else {
             debug (`No eligible distance : ${act.distance} `,race.Distances)
         }
@@ -50,7 +50,7 @@ async function processFitnessActivity(msg){
     return matchedRaces
 }
 
-async function saveRaceActivity(distName,distance, act, race, event) {
+async function saveRaceActivity(distName,distance, act, race, event, athlete) {
     const selectedActivityFields=['sport_type','start_date_local','start_latlng','device_name']
     const athleteId=act.athlete.id 
     const elapsed=getEffectiveTime(distance,act);
@@ -62,9 +62,11 @@ async function saveRaceActivity(distName,distance, act, race, event) {
         athlete: athleteId,
         distance: distance,
         elapsed: elapsed,
-        event: event.aspect_type
-    },_.pick(act,selectedActivityFields)
-    ));
+        event: event.aspect_type /** check if change has distance or timing changing*/
+        },
+        _.pick( act, selectedActivityFields),
+        _.pick( athlete, ['email','name','gender','image']))
+    );
 }
 
 function getEffectiveTime(distance, act) {
@@ -108,57 +110,6 @@ function mapActivity(msg){
 }
 
 
-/**
- * Races that are started
- * Not expired 
- */
-async function readActiveRaces (
-                status=['live'],
-                cutoffDays=6) {
-    
-                    if (_.keys(activeRaces).length) 
-        return activeRaces                    
-
-    cols="id Name Location Date status Distances".split(" ")
-    const racesData= await firestore.getCol('/races',
-        x=> _.assign({id:x.id},x.data()))
-        // debug(_.keys(racesData[0]))
-    const cutoffDate=new Date(_.now().valueOf()-cutoffDays*24*3600*1000)
-    activeRaces = _(racesData)
-        .filter(x=>_.intersection(x.status,status).length)
-        // .tap(x=>debug(,new Date(x.Date)> new Date(_.now()-6*24*3600)))
-        .filter(x=>new Date(x.Date)> cutoffDate)
-        .map(x=>_.pick(x,cols))
-        .value()
-    return activeRaces
-}
-
-async function createLiveRace (prefix,data){
-    data.Date = data.Date || getUpcomingSunday(new Date())  // default to coming Sunday
-    data.Date = _.isDate(data.Date) ? data.Date?.toISOString() : data.Date
-    data.Date = data.Date?.substring(0,10)
-    id = `${prefix}${data.Date}`
-    data.Location  = data.Location || 'Virtual'
-
-    const raceDoc= firestore.doc(`/races/${id}`)
-    await raceDoc.set(data)
-
-    return data
-}
-
-function getUpcomingSunday(date) {
-    date = date || new Date();
-    const daysUntilSunday = 7 - date.getDay(); // Calculate the number of days until the next Sunday
-  
-    // If today is Sunday, add 7 days to get the next Sunday
-    if (date.getDay() === 0) {
-      daysUntilSunday += 7;
-    }
-  
-    const upcomingSunday = new Date(date.getTime() + daysUntilSunday * 24 * 60 * 60 * 1000);
-    return upcomingSunday;
-  }
-
   function convertDistance(dist){
     if (typeof dist === "string") 
         if ("Kk".includes(dist.slice(-1)))
@@ -168,11 +119,9 @@ function getUpcomingSunday(date) {
     else
         return dist
   }
-readActiveRaces()
 
 module.exports = {
-    readActiveRaces,
-    createLiveRace,
+    
     processFitnessActivity,
-    activeRaces
+    
 }

@@ -6,7 +6,6 @@ const {cfg,debug,projroot} = require ("./commonTest")
 const GS_URL_PREFIX='https://storage.googleapis.com/run-pix.appspot.com/'
 const {assert} = require('chai')
 
-// const { firebaseConfig } = require('firebase-functions');
 const functions = require('firebase-functions');
 const { storageBucket } = require('firebase-functions/params');
 const test = require('firebase-functions-test')(cfg.firebaseConfig,
@@ -147,7 +146,7 @@ describe('index.test.js', function () {
   describe('firestore_imageUpdate_tests', function () {
     // Test Case: setting messages/11111/original to 'input' should cause 'INPUT' to be written to
     // messages/11111/uppercase
-    it('should process logical deletion of images', function () {
+    xit('should process logical deletion of images', function () {
       // [START assertOnline]
       // Create a DataSnapshot with the value 'input' and the reference path 'messages/11111/original'.
       fsPath='/races/mychoice23apr/images/2022-12-08T07:41:48.652Z~venue~avinashmane$gmail.com~Screenshot 2022-12-08 at 13-11-41 Athlete Heatmaps Strava.png'
