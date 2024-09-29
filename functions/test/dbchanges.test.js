@@ -159,7 +159,7 @@ describe('Test of database changes/functions', function(){
     describe ('virtual finalize results - activities ', function (){
         let dataReadings,bibs,raceTiming,race
         const params= {
-            raceId: 'pcmcrunners2024-09-24',//'testrun',
+            raceId: 'weekly-24-09-29',//'pcmcrunners2024-09-24',
             key:'something,'
         }
         let data

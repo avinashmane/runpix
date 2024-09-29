@@ -157,6 +157,9 @@ exports.timingUpdate = functions.firestore
   });
 
 
+  /**
+   * Virtual races
+   */
 exports.activitiesToResult = functions.firestore
   .document('races/{raceId}/activities/{ath_wpt_act}')
   .onWrite(async (change, context) => {

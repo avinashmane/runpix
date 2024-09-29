@@ -3,7 +3,8 @@
  */
 const { readLiveRaces } = require("./races");
 const {firestore} = require("./firebaseUser")
-const _ = require ("lodash");
+const {pick,min,extend,orderBy,filter} = require("lodash")
+// const _ = require ("lodash");
 const debug = require("debug")('TEST')
 
 /**
@@ -30,8 +31,7 @@ async function processFitnessActivity(msg){
         }
         const distances = race.Distances.map(convertDistance)
         //  only one distance per race
-        const eligibleDistances=_(distances)
-            .filter(x=> x<=act.distance).orderBy().value()
+        const eligibleDistances=orderBy(filter(distances,x=> x<=act.distance))
         
         if(eligibleDistances.length){
             const distance=eligibleDistances.pop()
@@ -58,14 +58,15 @@ async function saveRaceActivity(distName,distance, act, race, event, athlete) {
     debug(`act ${act.id} distance ${distance}/${act.distance} mins ${(elapsed/60).toFixed(2)} min `)
     
     key = `${athleteId}_${distName}_${act.id}`;
-    await firestore.doc(`/races/${race.id}/activities/${key}`).set(_.assign({
+    await firestore.doc(`/races/${race.id}/activities/${key}`).set(extend({
         athlete: athleteId,
         distance: distance,
         elapsed: elapsed,
+        activity: act.id,
         event: event.aspect_type /** check if change has distance or timing changing*/
         },
-        _.pick( act, selectedActivityFields),
-        _.pick( athlete, ['email','name','gender','image']))
+        pick( act, selectedActivityFields),
+        pick( athlete, ['email','name','gender','image']))
     );
 }
 
@@ -76,7 +77,7 @@ function getEffectiveTime(distance, act) {
         sum_ = (arr, kpi = 'elapsed_time') => arr.reduce((a, x) => a + (x[kpi] || 0), 0)
         getTimes = (splits_metric, n) => Array.from({ length: splits_metric.length - n }, (_, i) => sum_(splits_metric.slice(i, i + n)));
         times = getTimes(splits_metric, nSplit)
-        lowestTimeIndex = times.indexOf(_.min(times))
+        lowestTimeIndex = times.indexOf(min(times))
         getSplitPace = (x) => x.elapsed_time / x.distance
         startPace = getSplitPace(splits_metric[lowestTimeIndex])
         endPace = getSplitPace(splits_metric[lowestTimeIndex + nSplit - 1])

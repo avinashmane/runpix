@@ -4,8 +4,10 @@ run-pix.web.app
 
 This project was created with [Vite](https://vitejs.dev/).
 
-* [Features and roadmap](TODO.md)
-* [DESIGN](README_DESIGN.md)
+* [Github Pages Index](docs/index.md)
+  * [Features and roadmap](docs/todo.md)
+  * [DESIGN](docs/design.md)
+  * [Overview](docs/overview.md)
 * [WIKI](https://github.com/avinashmane/runpix/wiki)
 * [Feature requests](https://github.com/avinashmane/runpix/discussions)
 

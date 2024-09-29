@@ -38,7 +38,7 @@
     "lint": "./node_modules/.bin/eslint --max-warnings=0 .",
     "serve": "firebase serve --only functions ",
     "shell": "firebase functions:shell",
-    "test": "env-cmd -f .env.test pnpm exec mocha -t 0 --exit -p --reporter spec test/*.js ",
+    "test": "env-cmd -f .env.test pnpm exec nyc mocha -t 0 --exit -p --reporter spec test/*.js ",
     "start": "pnpm run shell",
     "deploy": "firebase deploy --only functions",
     "server": "export $(cat .env | grep \"^[^#;]\" |xargs) &&  node server.js ",

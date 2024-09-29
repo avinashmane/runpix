@@ -11,12 +11,13 @@
     "build": "vite build",
     "serve": "vite preview",
     "hosting": "firebase deploy --only hosting",
+    "coverage": "nyc pnpm exec test:unit",
     "test:unit": "pnpm exec mocha test/unit/*.test.*js",
     "test:e2e": "cucumber-js",
     "test:func": "pnpm exec mocha --exec functions/test/*.test.*js",
     "test:reprocess": "cd functions & pnpm exec mocha --reporter spec -f reprocess",
     "express": "cd functions && export $(cat .env | grep \"^[^#;]\" |xargs) &&  node express.js ",
-    
+    "backup" : "gsutil -m rsync -r -y node_modules -y .git . gs://backup-avinashmane/runpix",
     "cy:open": "cypress open",
     "vidtest": "cd functions & pnpm exec mocha --reporter spec test/video.test.js -f video ",
     "vidtest:mobile": "cd functions & npm exec mocha functions/test/video.test.js -f mobile"

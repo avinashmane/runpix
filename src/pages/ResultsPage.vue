@@ -39,6 +39,7 @@
       </template>
 
       <template #content>
+
         <table>
           <tr>
             <td colspan="2" class="text-center"><i class="pi pi-star" style="font-size: 2rem"></i></td>
@@ -79,6 +80,17 @@
             <td>Rank</td>
             <td>{{ bibData.Rank }}</td>
           </tr>
+          <tr v-if="bibData.device_name">
+            <td>Device</td>
+            <td>{{ bibData.device_name }} ({{ bibData.event }})</td>
+          </tr>
+          <tr v-if="bibData.activity">
+            <td>Activity</td>
+            <td><a class="text-blue-600 dark:text-blue-500 hover:underline" 
+              :href="`https://www.strava.com/activities/${bibData.activity}`" >{{bibData.activity }}</a>&nbsp;
+              <small> Check out the activity!</small></td>
+            
+          </tr>          
         </table>
 
 
@@ -166,9 +178,10 @@ const params = route.params;
 const store = useStore()
 store.dispatch('getRacesAction')
 
-const races = computed(() => store.state.datastore.races
+const races = computed(() => orderBy(store.state.datastore.races
   .filter(x => new Date(x.Date).getFullYear() == year.value)
-  .filter(x => checkResStatus(x))
+  .filter(x => checkResStatus(x)),
+  "Date","desc")
 )
 let race = computed(() =>
   (races.value.length && raceId.value) ?

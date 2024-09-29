@@ -12,18 +12,18 @@ const {
     groupBy,
     orderBy ,
     sumBy,
-    pickBy,
+    pick,
     uniqBy,
     split,
     sortBy,
     tap,
     extend,
-    startsWith,
+    padStart
   } = require("lodash");
 const _ = require("lodash");
 const dayjs = require('dayjs')
 const ts_fmt="dddd DD-MMM-YYYY hh:mm:ssa"
-const suffixK=(x)=>typeof x === "string" ? x.replace(/(\d+)(k?)/i,"$1K") : x  
+const suffixK=(x)=>typeof x === "string" ? x.replace(/([\d\.]+)(k?)/i,"$1K") : x  
 const debug = require("debug")("RUNPIX:TIMING")
 /**
   * Bib	25
@@ -53,9 +53,9 @@ function finalize_results(allEntries,race) {
             const timestamp = typeof x.timestamp instanceof dayjs ? x.timestamp : dayjs(x.timestamp) 
             let elapsed=timestamp.diff(startTime, 's'),
                 race_time=elapsedTo_HMS(elapsed)
-            let gender =  x.gender || getGender(x)
+            let gender =  getGender(x.gender )
             // console.debug(`${x.bib} ${startTime} ${timestamp} : ${elapsed} ${race_time}`)
-            return {
+            let resultRec= {
                 Bib: x.bib,
                 Name: x.name || `Athlete id# ${x.bib}`,
                 Race: x.waypoint || ruleGuessWaypoint(x.bib,elapsed,race.Distances) ,
@@ -67,7 +67,10 @@ function finalize_results(allEntries,race) {
                 "Finish Time": timestamp.format(ts_fmt),
                 Status: x.status,
                 Rank: "",
+                // activity_key: 
             };
+            return extend(resultRec,
+                   pick(x,["activity","device_name","event","image"]))
         });
 
     // sorted by groups
@@ -154,6 +157,7 @@ function mapActivityToResult(doc, bibs){
         waypoint: distance,
         start_ts: timestamp,
         end_ts: timestamp.add(data.elapsed,'second') , // end time
+        activity: activity,
         // "Start Time": timestamp.format(ts_fmt) ,
         // Category: distance, // "5K - Male" - Only distance 
         // Activity: activity,
@@ -161,7 +165,7 @@ function mapActivityToResult(doc, bibs){
         // Race: distance,
         status: 'valid'
     }
-    return _.assign(data,ret)
+    return extend(data,ret)
 
 
 }
@@ -169,7 +173,7 @@ function mapActivityToResult(doc, bibs){
 function elapsedTo_HMS(elapsed){
     if (elapsed<0) return `Invalid (${elapsed})`
     const getDivRem=(arr)=>[Math.floor(arr[0]/arr[1]),arr[0] % arr[1]]
-    const pad_=(x)=>_.padStart(x,2,'0')
+    const pad_=(x)=>padStart(x,2,'0')
     let [d,h_]=getDivRem([elapsed,24*60*60])
     let [h,m_]=getDivRem([h_,60*60])
     let [m,s]=getDivRem([m_,       60])
@@ -304,13 +308,15 @@ function getBibRegExp() {
     return race?.value?.bibPattern ? RegExp(race?.value?.bibPattern) : false;
 }
 
-function getGender(entry) {
-    const defaultGender="Open"
-    let gender = entry?.gender?.trim()
+function getGender(gender) {
+    const defaultGender="Male"
+    gender = gender?.trim()
     
     // Doc: Gender not mentioned is considered as male
-    if (["Male", "Female"].includes(gender))
-        return gender
+    if (["Male", "M"].includes(gender))
+        return 'Male'
+    if (["f","F", "Female"].includes(gender))
+        return 'Female'
     else {
         // console.log(`default to ${defaultGender}`, entry.bib)
         return defaultGender
