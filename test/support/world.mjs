@@ -1,6 +1,10 @@
 // CustomWorld.js
-import { World,setWorldConstructor } from '@cucumber/cucumber';
+import { World,setDefaultTimeout,setWorldConstructor } from '@cucumber/cucumber';
 import seleniumWebdriver from "selenium-webdriver";
+
+
+/* Global timouot */
+setDefaultTimeout(10 * 1000);
 
 /*
  * The only method to be inherited from the default world is
@@ -11,9 +15,7 @@ import seleniumWebdriver from "selenium-webdriver";
 export default class extends World {
   // export default class extends World {
   driver = null;
-  attach = null
-
-
+  // attach = null
   /*
    * A constructor is only needed if you have custom actions
    * to take after the Cucumber parses the options or you
@@ -43,10 +45,14 @@ export default class extends World {
     path=path.substring(0,1)=='/'?path.substring(1):path;
     return `${this.parameters.base_url}/${path}`
   }
+
   async init(scenario) {
-    
+    var chromeCapabilities = seleniumWebdriver.Capabilities.chrome();
+    chromeCapabilities.set("acceptInsecureCerts", true);
+
     this.driver = await new seleniumWebdriver.Builder()
       .forBrowser(this.parameters.browser)
+      .withCapabilities(chromeCapabilities)
       .build();
   }
 }

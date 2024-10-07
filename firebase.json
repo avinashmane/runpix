@@ -9,6 +9,14 @@
           "optional": {"region": "us-central1" }
         }, 
         {
+          "source": "/terms.html",
+          "destination": "/terms.html"
+        },
+        {
+          "source": "/privacy.html",
+          "destination": "/privacy.html"
+        },
+        {
           "source": "**",
           "destination": "/index.html"
         }

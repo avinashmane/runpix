@@ -34,7 +34,7 @@ let items = [
   <div class="rounded bg-white shadow-lg m-2 p-2">
     <div class="w-full text-center ">
       <h1 class="text-xl">Home </h1>
-      <RacesCard menu="['photos', 'results']"/>
+      <RacesCard :menu="['photos', 'results']"/>
     </div>
   </div>
 
@@ -53,7 +53,7 @@ let items = [
                       }
                     ]
                   }),
-                  content: { class: 'border-primary text-lg text-primary-700' },
+                  content: { class: 'text-lg text-primary-700' },
                   title: 'text-lg',                                     // OR { class: 'text-xl' }
                   toggler: () => 'bg-primary hover:bg-primary-reverse'  // OR { class: 'bg-primary hover:bg-primary-reverse' }
                 }">

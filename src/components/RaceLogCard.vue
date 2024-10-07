@@ -9,14 +9,14 @@
 
   <div id="selections" class="flex align-items-center">
     <!-- <label for="showAll" class="ml-2">All:</label> -->
-    <Dropdown :options=showAllOptions v-model="showAll" inputId="showAll" value="showAll" />
-    <Dropdown :options=waypoints v-model="selWpt"/>
-    <Dropdown :options=bibsOptions v-model="bibsVal"/>
-    <Dropdown :options=genderOptions v-model="genderVal"/>
+    <Select :options=showAllOptions v-model="showAll" inputId="showAll" value="showAll" />
+    <Select :options=waypoints v-model="selWpt"/>
+    <Select :options=bibsOptions v-model="bibsVal"/>
+    <Select :options=genderOptions v-model="genderVal"/>
   </div>
 
   <div id="sort" class="flex align-items-center">
-    <Dropdown :options=sortOptions v-model="sortVal"/>
+    <Select :options=sortOptions v-model="sortVal"/>
   </div>
 
   <InputText v-model="bibSearch"/>
@@ -113,7 +113,7 @@ import Image from 'primevue/image';
 import Dialog from 'primevue/dialog';
 import InputText from 'primevue/inputtext';
 import Checkbox from 'primevue/checkbox';
-import Dropdown from 'primevue/dropdown';   // optional
+import Select from 'primevue/select';   // optional
 // import TabView from 'primevue/tabview';
 // import TabPanel from 'primevue/tabpanel';
 // import Row from 'primevue/row';                   // optional

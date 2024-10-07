@@ -28,7 +28,7 @@ import Image from 'primevue/image';
 import Dialog from 'primevue/dialog';
 import InputText from 'primevue/inputtext';
 import Checkbox from 'primevue/checkbox';
-import Dropdown from 'primevue/dropdown';   // optional
+import Select from 'primevue/select';   // optional
 // import Row from 'primevue/row';                   // optional
 import { db, storage } from "../../firebase/config" //storage
 import { collection,query,doc,limit, orderBy ,onSnapshot,getDocs, updateDoc } from "firebase/firestore";

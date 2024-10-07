@@ -6,7 +6,7 @@ import { getStorage, ref as dbRef, uploadBytes } from "firebase/storage";
 import {useStore} from "vuex";
 import Button from 'primevue/button';
 import Toast from 'primevue/toast';
-import Dropdown from 'primevue/dropdown';
+import Select from 'primevue/select';
 // import FileUpload from 'primevue/fileupload';
 import { useRoute } from 'vue-router';
 import {debug} from "../helpers"

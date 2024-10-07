@@ -65,7 +65,7 @@
                 :disabled="button.play.disabled">Play</Button>
             </li>
           </ol>
-          <Dropdown :options="mimeOptions" v-model="mimeType" :disabled="button.mimeType.disable"/>
+          <Select :options="mimeOptions" v-model="mimeType" :disabled="button.mimeType.disable"/>
           
           <div>
               <h4>Media Stream Constraints options</h4>
@@ -89,7 +89,7 @@
 // import ToggleButton from 'primevue/togglebutton';
   import InputText from 'primevue/inputtext';
   import SelectButton from 'primevue/selectbutton';
-  import Dropdown from 'primevue/dropdown';
+  import Select from 'primevue/select';
   import InputSwitch from 'primevue/inputswitch';
   import { getDateTime  } from "../helpers"
   import {db,  storage  } from "../../firebase/config"

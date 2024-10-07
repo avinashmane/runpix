@@ -1,8 +1,8 @@
 <template>
-  <div class="w-screen flex h-[70px] items-center bg-white shadow-lg inset-x-0 top-0 fixed justify-center z-40">
-    <div class="flex container w-[100%]">
-      <span class="flex items-center w-[70%]">
-          <a class="text-primary flex" href="/">
+  <div class="w-screen flex items-center bg-white shadow-lg inset-x-0 top-0 fixed justify-center z-40">
+    <div class="flex w-full">
+      <span class="flex items-center w-full justify-center">
+          <a class="ml-2 text-primary" href="/">
             <img class="logo" 
               src="/assets/graphics/logo_runpix.png" 
               :alt="site" /> 
@@ -107,10 +107,10 @@ let site= computed(()=>{
   })
 
   const items = computed(()=>[
-    {
-        label: 'Races',
-        icon: 'pi pi-search',
-        items: [
+    // {
+    //     label: 'Races',
+    //     icon: 'pi pi-search',
+    //     items: [
             {
                 label: 'Results',
                 icon: 'pi pi-bolt',
@@ -126,8 +126,8 @@ let site= computed(()=>{
                 icon: 'pi pi-pencil',
                 route: '/e'
             },
-        ]
-    },
+    //     ]
+    // },
     {
         label: 'About',
         icon: 'pi pi-envelope',
@@ -135,6 +135,7 @@ let site= computed(()=>{
     },
     {
         label: 'Help',
+        icon: 'pi pi-info',
         url: 'https://avinashmane.github.io/runpix-docs/'
     },
     userState.isSignIn? 

@@ -5,7 +5,8 @@ Feature: Selenium testing using Selenium official web page
     Scenario: Basic website check
         Given I have visited path "/login?email=avinashmane@yahoo.com"
         When There is a title on the page as "Run PiX"
-        When I clicked on text "Project Info"
+        When I clicked on text "More"
+        When I clicked on text "Test Run"
         Then input "name" has value "Ashish's test project"
 
     # Scenario: Basic

@@ -6,6 +6,7 @@ import CustomWorld  from '../../support/world.mjs'
 
 // console.log('hooks')
 const matchAnyIn=(listStr, str)=>listStr.split(",").some(x=>str.includes(x))
+
 setWorldConstructor(CustomWorld)
 setDefaultTimeout (1000000)
 
@@ -20,9 +21,10 @@ After(async function (scenario) {
   if (isSelenium(scenario)){
     if (scenario.result.status === Status.FAILED) {
         try{
-            const data = await this.driver.takeScreenshot();
-            // Attaching screenshot to report
-            await this.attach(data, 'image/png');
+            await this.driver.takeScreenshot().then(data =>{
+              // Attaching screenshot to report
+              return this.attach(data, 'image/png');
+            } );
         } catch (e) {
             console.error(e);
         }

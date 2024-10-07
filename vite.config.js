@@ -28,12 +28,12 @@ export default defineConfig({
     rollupOptions: {
       output: {
         // preserveModules: true,
-        // preserveEntrySignatures: true
+        // preserveEntrySignatures: true,
         manualChunks: (id) => {
           // console.log(id)
           if (id.includes("node_modules")) {
               if (id.includes("primevue")) {
-                  return id.includes("data")?"vendor_primevue_data":"vendor_primevue";
+                  return "vendor_primevue";//id.includes("data")?"vendor_primevue_data":
               } else if (id.includes("lodash")) {
                 return "vendor_lodash";
               } else if (id.includes("firebase")) {
@@ -42,7 +42,7 @@ export default defineConfig({
           
               return "vendor"; // all other package goes here
           }
-          },
+        },
       },
       
       // https://rollupjs.org/configuration-options/

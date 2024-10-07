@@ -3,7 +3,7 @@
 
     <DataView :value="races" :sort-field="Date" :sort-order="-1" :pt="{
         root: { class: 'bg-transparent' },
-        content: { class: 'border-primary text-lg text-primary-700' },
+        content: { class: 'text-lg text-primary-700' },
         title: 'text-xl'
     }">
         <template #list="slotProps">

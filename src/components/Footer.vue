@@ -27,9 +27,9 @@ const footer=values.split('\n').filter(x=>x)
       <i class="pi pi-user-edit" style="font-size: 1.5rem"></i>
       Feature requests
     </a>    
-    <a href="https://pcmcrunners.in/#/profile">
+    <a href="/terms.html">
       <i class="pi pi-info-circle" style="font-size: 1.5rem"></i>
-      Get Fit for FREE
+      Terms
     </a>
     
   </div>

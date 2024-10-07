@@ -14,7 +14,7 @@
             </td>
             <td>
               <!-- {{ race }} -->
-              <Dropdown v-model="waypoint" :options="race?.Waypoints" editable 
+              <Select v-model="waypoint" :options="race?.Waypoints" editable 
                   placeholder="Select a Waypoint" class="md:w-14rem" />   
               </td>
           </tr>
@@ -50,7 +50,7 @@ import Card from 'primevue/card';
 import SelectButton from 'primevue/selectbutton';
 
 
-import Dropdown from 'primevue/dropdown';
+import Select from 'primevue/select';
 import { computed, ref, reactive } from 'vue';
 import { useRoute } from 'vue-router';
 import {chain,cloneDeep,map,take,keys,orderBy,sumBy,pickBy,split,sortBy,tap,startsWith}  from "lodash-es"

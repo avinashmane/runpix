@@ -44,7 +44,7 @@
           <h4 @click="klick">MediaStreamConstraints</h4>
         </div>
         <div>
-            <Dropdown :options="mimeOptions" v-model="mimeType" :disabled="button.mimeType.disable" />
+            <Select :options="mimeOptions" v-model="mimeType" :disabled="button.mimeType.disable" />
             <p>Echo cancellation: <input type="checkbox" id="echoCancellation"></p>
             <div v-if="camera.zoomCapability" class="flex flex-row">
             <div class="label">Zoom:</div>
@@ -100,7 +100,7 @@ import { getAllDocs } from '../api'
 // import ToggleButton from 'primevue/togglebutton';
 import InputText from 'primevue/inputtext';
 import SelectButton from 'primevue/selectbutton';
-import Dropdown from 'primevue/dropdown';
+import Select from 'primevue/select';
 import InputSwitch from 'primevue/inputswitch';
 import { getDateTime } from "../helpers"
 import { db, storage } from "../../firebase/config"

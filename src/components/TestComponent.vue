@@ -1,6 +1,6 @@
 <script setup>
 import { onMounted, reactive, ref } from 'vue'
-import Dropdown from 'primevue/dropdown';
+import Select from 'primevue/select';
 
 defineProps({
   msg: String

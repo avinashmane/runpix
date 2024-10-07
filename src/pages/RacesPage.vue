@@ -4,40 +4,7 @@
     <Card class="w-full text-center justify-center flex-col rounded">
 
       <template #content>
-        <RacesCard menu="['edit', 'results']" :nolist="nolist"/>
-
-      
-        <!-- <DataTable :value="races"  stripedRows>
-            <Column field="id" style="width: 20%"  class="p-1">       
-              <template #body="{ data }">         
-                <img class="w-20 rounded-full drop-shadow object-cover aspect-square"
-                  :src="getPublicUrl('thumbs',data?.id,data?.coverPage)"
-                  @click="router.push(`/e/${data.id}`)"/>  
-              </template>
-            </Column>
-            <Column field="Name" header="Name" sortable  class="p-1">
-              <template #body="{ data }">
-                <div class="container" @click="router.push(`/e/${data.id}`)">
-                  <small>
-                    {{data.id}}
-                  </small>
-                  <div>{{data.Name}}</div>
-                </div>
-              </template>
-            </Column>
-            <Column field="Date" header="Date Location" sortable  class="p-1">
-              <template #body="{ data }">
-                <div class="flex flex-row  ">
-                <Button @click="router.push(`/e/${data.id}`)" icon="pi pi-flag" class="rounded-full aspect-square w-10"/>
-                <span class="text-sm">
-                  <div>{{ data.Date }}</div>
-                  <div>{{data.Location}}</div>
-                </span>
-              </div>
-              </template>
-            </Column>
-        </DataTable> -->
-      
+        <RacesCard :menu="['edit', 'results']" :nolist="nolist"/>
 
       </template>
     </Card>
@@ -87,9 +54,6 @@ import { useRouter, useLink } from 'vue-router'
 import Card from 'primevue/card' ;
 import { computed,ref } from 'vue';
 import {getDateTime} from '../helpers';
-import DataTable from 'primevue/datatable';
-import DataView from 'primevue/dataview'
-import Column from 'primevue/column';
 import InputSwitch from 'primevue/inputswitch';
 import {db} from '../../firebase/config'
 import TabView from 'primevue/tabview';

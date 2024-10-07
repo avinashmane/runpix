@@ -3,10 +3,17 @@
   
   <div class="container mx-auto gap-3">
     <h1 @dblclick="klick()">Photos</h1>
-    {{ photoStatus }}
+    <!-- {{ photoStatus }} -->
     <form @submit="searchImages" class="gap-2 mx-2">
-      <Dropdown v-model="raceId" :options="races" optionLabel="Name" optionValue="id" @change="onChangeEvent"
-                        placeholder="Select a race" class="md:w-14rem w-full" />   
+      <div class="p-inputgroup flex">
+      <Select v-model="year" :options="years" class="w-4/12 " />
+      <!-- <Select v-model="raceId" :options="races" optionLabel="Name" optionValue="id" @change="loadRace"
+        placeholder="Select a race" class="w-full" /> -->
+        <Select v-model="raceId" :options="races" optionLabel="Name" 
+            optionValue="id" @change="onChangeEvent"
+            placeholder="Select a race" class="md:w-14rem w-full" />   
+      </div>
+    
       <div class="card flex justify-content-center w-full gap-2 py-1" v-if="!races.find(x=>x.id==raceId)?.photoStatus.includes('faceonly')">
         <Button @click="bibSelection='';allImages=[];uploadedImage=''" class="text-white" raised >
           <i class="pi pi-times"></i>
@@ -103,7 +110,7 @@
 <script setup>
 import { useStore } from 'vuex';
 import ImageCard from "../components/ImageCard.vue";
-import Dropdown from 'primevue/dropdown';
+import Select from 'primevue/select';
 import Image from 'primevue/image';
 import Dialog from 'primevue/dialog';
 import AutoComplete from 'primevue/autocomplete';
@@ -122,7 +129,8 @@ import { db, storage } from "../../firebase/config"
 import {chain,cloneDeep,map,take,keys,orderBy,sumBy,pickBy,split,sortBy,tap,startsWith}  from "lodash-es"
 import {debug} from "../helpers"
 
-console.error(config)
+const year = ref(new Date().getUTCFullYear())
+let years = Array(year.value - (year.value - 6)).fill('').map((v, idx) => year.value - idx);
 
 const store = useStore()
 store.dispatch('getRacesAction')
@@ -131,11 +139,13 @@ const route = useRoute();
 const router = useRouter()
 const races =  computed(() =>{ 
                 const races=orderBy(store.state.datastore.races
+                  .filter(x => new Date(x.Date).getFullYear() == year.value)
                   .filter(r=>(r.photoStatus && (r.photoStatus.indexOf("available")>=0) )),
                   "Date","desc")
                   if(races.find(x=>x.id==raceId.value)?.photoStatus.includes("face")){
                     apiCall(config.api.faceMatchUpload + '/api/faceapi');
                   }
+                  message.value='';
                 return races
                 });
 const photoStatus = computed(()=> races.value.find(x=>x.id==raceId.value)?.photoStatus)
@@ -169,7 +179,7 @@ function onChangeEvent(e){
 }
 
 /**
- * Dropdown for the Bib
+ * Select for the Bib
  * @param {*} event 
  */
 const searchBib = async (event) => {
@@ -357,7 +367,7 @@ const entryToEdit = ref(null)
 let diaTexts=ref('')
 let dialogHeader=computed(()=>
       (races.value.length&&raceId.value)?
-          races.value.filter(x=>x.id==raceId.value)[0].Name :
+          races.value.filter(x=>x.id==raceId.value)?.[0]?.Name :
           '')
 
 function toggleDialog  (i){

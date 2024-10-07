@@ -10,9 +10,29 @@ import PrimeVue from 'primevue/config';
 import Button from 'primevue/button';
 import ToastService from 'primevue/toastservice';
 import Tooltip from 'primevue/tooltip';
-// import 'primevue/resources/themes/saga-blue/theme.css';
-import 'primevue/resources/primevue.min.css';
-import "primevue/resources/themes/lara-light-indigo/theme.css";
+import Ripple from 'primevue/ripple';
+import { definePreset } from '@primevue/themes';
+import Aura from '@primevue/themes/aura';
+
+const MyPreset = definePreset(Aura, {
+    semantic: {
+        primary: {
+            50: '{indigo.50}',
+            100: '{indigo.100}',
+            200: '{indigo.200}',
+            300: '{indigo.300}',
+            400: '{indigo.400}',
+            500: '{indigo.500}',
+            600: '{indigo.600}',
+            700: '{indigo.700}',
+            800: '{indigo.800}',
+            900: '{indigo.900}',
+            950: '{indigo.950}'
+        }
+    }
+});
+// import 'primevue/resources/primevue.min.css';
+// import "primevue/resources/themes/lara-light-indigo/theme.css";
 import 'primeicons/primeicons.css';  
 import VueGtag from "vue-gtag-next";
 import VueSocialSharing from 'vue-social-sharing'
@@ -38,6 +58,7 @@ app.use(store)
     .use(pinia)
     // PrimeVUE
     .use(PrimeVue,{
+        theme: { preset: MyPreset},
         locale: {
             fileSizeTypes: ['G','M'],
             en: {
@@ -57,5 +78,5 @@ app.use(store)
 
 app.component('Button', Button);
 app.directive('tooltip', Tooltip);
-
+app.directive('ripple', Ripple);
 app.mount('#app')

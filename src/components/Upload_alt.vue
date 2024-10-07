@@ -1,6 +1,6 @@
 <template>
 
-  <Dropdown
+  <Select
     v-model="waypoint"
     :options="Waypoints"
     editable
@@ -71,7 +71,7 @@ const props = defineProps({
 // Components
 import DropZone from "../components/DropZone.vue";
 import FilePreview from "../components/FilePreview.vue";
-import Dropdown from "primevue/dropdown";
+import Select from "primevue/select";
 import { ref } from "vue";
 import { useStore } from "vuex";
 // File Management

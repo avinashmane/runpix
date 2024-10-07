@@ -11,12 +11,12 @@ const callback = (response) => {
 </script>
 
 <template>
-  <Nav />
+  <Nav/>
   <!-- LOGIN Status -->
-  <div class="mt-20 max-w-screen-md mx-auto bg-gradient-to-r from-cyan-500 to-blue-500 border-red-600">
+  <div class="mt-20 min-h-[90vh] max-w-screen-md mx-auto bg-gradient-to-r from-indigo-200 to-blue-200 border-red-600">
     <RouterView />
   </div>
-  <Footer  />
+  <Footer/>
 
 </template>
 

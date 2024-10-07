@@ -15,7 +15,7 @@
       <label for="showHidden" class="ml-2">Show All</label>
       <Checkbox v-model="showHidden" inputId="showHidden" value="showHidden" />
       <label for="numTexts" class="ml-2">Numbers of bibs</label>
-      <Dropdown
+      <Select
         v-model="numTexts"
         inputId="numTexts"
         :options="numTextsOptions"
@@ -128,7 +128,7 @@ import Upload from "../components/Upload_alt.vue";
 import Image from "primevue/image";
 import Dialog from "primevue/dialog";
 import InputText from "primevue/inputtext";
-import Dropdown from "primevue/dropdown";
+import Select from "primevue/select";
 import Checkbox from "primevue/checkbox";
 import { getDocData } from "../api";
 import { getPublicUrl } from "../helpers";
