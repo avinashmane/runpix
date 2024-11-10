@@ -2,41 +2,43 @@
 
   <form>
     <template v-for="(label,key) in labels" >
-      <tr class="p-inputgroup w-full" v-if="!'Waypoints id'.includes(key)">
-        <td class="p-inputgroup-addon w-[30%]">
+      <div class="w-full flex gap-1" v-if="!'Waypoints id'.includes(key)">
+        <span class="text-sm w-[30%]">
             {{(typeof label=="string") ? label : label.label}}
-        </td>
-        <td class="p-inputgroup-addon ">
+        </span>
+        <span class="w-full">
           <InputText v-if='typeof label=="string"' :disabled="!editable" 
               v-model="race[key]" autofocus />
           <InputMask v-else :disabled="!editable"  
               v-model="race[key]" v-bind:mask="label.mask" :placeholder="label.placeholder" />
-        </td>
-      </tr>
+        </span>
+      </div>
     </template>
+
     <tr>
-      <td>
+      <small>
         Distances
-      </td>
+      </small>
       <td>
         <InputText :disabled="!editable" separator=","
           v-model="raceArr.Distances" aria-labelledby="multiple" />
       </td>
     </tr>
     <tr>
-      <td>
+      <small>
         Waypoints
-      </td>
+      </small>
       <td>
         <InputText :disabled="!editable" 
           v-model="raceArr.Waypoints" aria-labelledby="multiple" />
       </td>
     </tr>
-    
-    <SelectButton :disabled="!editable" class="status-button"
-      v-model="race.status"  :options="raceStatusOptions"
-      multiple aria-labelledby="multiple" />
-
+    <div>
+      <small>Status</small>
+      <MultiSelect :disabled="!editable" class="status-button"
+        v-model="race.status"  :options="raceStatusOptions"
+        multiple aria-labelledby="multiple" />
+    </div>
     <div v-for="(v,k) in race.timestamp">
       {{k}} : {{getLocalDateTime(v)}} <span class="text-sm italics">{{ v }}</span>
     </div>
@@ -64,13 +66,18 @@
 </template>
 
 <script setup>
+const props =  defineProps({
+  race: Object,
+  waypoint: String
+})
 import InputMask from 'primevue/inputmask';
 import SelectButton from 'primevue/selectbutton';
 import Inplace from 'primevue/inplace';
 import InputText from 'primevue/inputtext';
 import Chips from 'primevue/chips'
 import ToggleButton from 'primevue/togglebutton';
-// import Select from 'primevue/select';
+import IftaLabel from 'primevue/iftalabel';
+import MultiSelect from 'primevue/multiselect';
 import { useStore } from 'vuex';
 import { computed ,ref, reactive } from 'vue';
 import { useRoute } from 'vue-router';
@@ -89,10 +96,7 @@ let joinArr=(x,sep=",")=>{//debug(x);
       return ret
     }
 
-const props =  defineProps({
-  race: Object,
-  waypoint: String
-})
+
 const route = useRoute();  
 const raceId = route.params.raceId
 

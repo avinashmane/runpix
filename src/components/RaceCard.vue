@@ -1,5 +1,6 @@
 <template>
-  <div class="flex flex-row w-full rounded shadow-lg h-20 mb-2 bg-yellow-50 p-2">
+  <!--small Race Card-->
+  <div class="flex flex-row w-full rounded dark:bg-slate-700 light:bg-yellow-50 shadow-lg h-20 mb-2 p-2">
 
     <div id="raceImage" class="flex flex-col mx-auto align-middle w-20" @click="router.push(`/e/${race.id}`)">
       <img class="w-16 rounded-full shadow-lg object-cover aspect-square"
@@ -38,7 +39,7 @@
             v-if="race?.certificate?.finisherCertificate && props.menu.includes('results') && (race?.status?.includes('final') || race?.status?.includes('provisional'))"
             label="Certificate" size="small" :pt="smallButton" @click="router.push(`/r/${race.id}`)" />
           <Button v-if="props.menu.includes('edit')" label="Edit" size="small" :pt="smallButton"
-            @click="router.push(`/e/${race.id}`)" />
+            @click="router.push(`/e/${race.id}/edit`)" />
 
           <Button v-if="!props.menu" label="Race" :pt="smallButton" @click="router.push(`/e/${race.id}`)" />
 

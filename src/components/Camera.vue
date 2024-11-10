@@ -1,7 +1,18 @@
 <template>
 <!-- {{bibs}} -->
-  <div id="container w-full">
-    <b>CAMERA : {{waypoint}}</b>  <small v-if="['VENUE'].includes(waypoint)"> Not valid for timing</small>
+  <div id="container w-full ">
+    <div class="flex flex-row justify-around">
+      <div class="flex flex-col">
+        <b>Waypt : {{waypoint}}</b>  
+        <small v-if="['VENUE'].includes(waypoint)"> Not valid for timing</small>
+      </div>      
+      <div class="flex flex-col">
+        <!-- h-[2rem] w-[2rem] label="Camera" -->
+        <span>Camera</span>
+        <ToggleSwitch v-model="camera.perm"  @click="toggleVideo" 
+                  @dblclick="klick" aria-labelledby="single" />
+      </div>
+    </div>
     <div v-if="bib" id="lookupoverlay" 
       class="absolute background-0 text-xl text-left text-light">
       <ul >
@@ -18,14 +29,17 @@
         </p>
       </video>
     </div>
+
     <form>  
       <div class="flex flex-column gap-2 p-float-label">
-          <InputText id="bib" v-model="bib" placeholder="Enter a single bib number" 
-            aria-describedby="bib-help" class="w-1/3 border bg-yellow-50"/>
-          <Button v-for="d in race?.Distances" @click="recordBib(d)" class="text-white p-2 bg-blue-500 hover:bg-blue-400">
-            {{d}}
-          </Button>
+        <InputText id="bib" v-model="bib" placeholder="Enter a single bib number" 
+          aria-describedby="bib-help" class="w-1/3 border bg-yellow-50"/>
+        <Button v-for="d in race?.Distances" @click="recordBib(d)" class="text-white p-2 bg-blue-500 hover:bg-blue-400">
+          {{d}}
+        </Button>
+          
       </div>
+      
         <!-- <SelectButton :options="race.Distances" :model="distance"></SelectButton> -->
     </form>
 
@@ -34,13 +48,11 @@
       <div class="label" @click="klick">Zoom:</div>
       <input name="zoom" type="range" disabled>
     </div>
-    <span>Cam
-      <InputSwitch v-model="camera.perm" label="Camera" @click="toggleVideo()" 
-                @dblclick="klick" aria-labelledby="single" />
-    </span>
-    <div  v-if="camera.perm">
 
-        <canvas></canvas>
+    
+    <canvas :hidden="!camera.perm"></canvas>
+
+    <div  v-if="camera.perm">
 
         <div id="video">
           <!-- <video id="gum" playsinline autoplay muted></video> -->
@@ -80,17 +92,22 @@
     </div>
   </div>
   <!-- <button @click="klick">x</button> -->
-
 </template>
 
 <script setup>
+  const props = defineProps({
+    raceId: String,
+    waypoint: String,
+    race: Object,
+    // bibs: Object,
+  })
   import {onMounted, computed,   reactive, ref  } from 'vue'
   import {getAllDocs} from '../api'
 // import ToggleButton from 'primevue/togglebutton';
   import InputText from 'primevue/inputtext';
   import SelectButton from 'primevue/selectbutton';
   import Select from 'primevue/select';
-  import InputSwitch from 'primevue/inputswitch';
+  import ToggleSwitch from 'primevue/toggleswitch';
   import { getDateTime  } from "../helpers"
   import {db,  storage  } from "../../firebase/config"
   import { doc, getDoc ,updateDoc, setDoc } from 'firebase/firestore'
@@ -99,13 +116,9 @@
   const store = useStore()
   const captureCount = store.state.captureCount
   import { config } from '../config';
+  const str=(x)=>JSON.stringify(x)
   
-  const props = defineProps({
-    raceId: String,
-    waypoint: String,
-    race: Object,
-    // bibs: Object,
-  })
+
   const UPLOADS_FOLDER = config.storage.uploads;
   const UPLOADVIDS_FOLDER = config.storage.uploadvid
   
@@ -114,6 +127,7 @@
   /**
    * navigator.mediaDevices.getSupportedConstraints()  
    */
+   const checked = ref(false);
   const bib = ref("")
   const distance=ref(null)
   // Put variables in global scope to make them available to the browser console.
@@ -144,18 +158,28 @@
     permission: 'N'
   })
 
+  onMounted(() => {
+    startup();
+    getAllDocs(`races/${props.raceId}/bibs`).then(x=>allBibs=x)
+    recordedVideo = document.querySelector('video#recorded');
+    })
+
+  let klick=()=>{debugger};
+  
+
   async function startup() {
-
     if (camera.perm==false) return;
-
+    console.log('startup',str(camera))
+    
     video = document.querySelector('video');
     canvas = window.canvas = document.querySelector('canvas');
     canvas.width = 480;
     canvas.height = 360;
 
     
-    await init(constraints);
-    getQuery()
+    await init(constraints)
+      .then(x=>  getQuery())
+      .catch(err=>console.error(err))
   }
 
   function handleMediaSuccess(stream) {
@@ -214,22 +238,22 @@
     // } catch(TypeError) {
     //   camera.permission='X'
     // }
-
   }
 
   function toggleVideo(e) {
-    camera.perm = !camera.perm;
-    if (camera.perm){
+    console.log(e,e.target.checked)
+    // camera.perm = !camera.perm;
+    console.log('toggleVideo',str(camera),video)
+    if (e.target.checked){ //change from camera.perm on 6-nov
       setTimeout(startup,100);
-    }else{
+    }else if (video){
       video.pause();
       // video.src=null;
       for (const track of video.srcObject.getTracks()) {
         track.stop();
       }
       video.srcObject = null;
-    }
-    // console.log(camera.perm, e)
+    } 
   }
 
   function playPauseMedia() {
@@ -276,14 +300,7 @@
 
   };
 
-  onMounted(() => {
-    startup();
-    getAllDocs(`races/${props.raceId}/bibs`).then(x=>allBibs=x)
-    recordedVideo = document.querySelector('video#recorded');
-    })
 
-  let klick=()=>{debugger};
-  
   function recordBib(dist){
     // if bib is mentioned...update firebase
     const counter=getCaptureCounter();
@@ -481,7 +498,7 @@ function handleSuccess(stream) {
   button.record.disabled = false;
   console.log('getUserMedia() got stream:', stream);
   window.stream = stream;
-
+  // console.trace(stream)
   const gumVideo = document.querySelector('video#gum');
   gumVideo.srcObject = stream;
 
@@ -496,8 +513,12 @@ async function init(constraints) {
   try {
     const stream = await navigator.mediaDevices
                 .getUserMedia(constraints);
+    console.trace(constraints)
     handleSuccess(stream);
   } catch (e) {
+    const stream = await navigator.mediaDevices
+                .getUserMedia({audio:false,video:true});
+    console.trace(constraints,stream)    
     console.error('navigator.getUserMedia error:', e);
     // debugger
     errorMsg = `navigator.getUserMedia error:${e.toString()}`;

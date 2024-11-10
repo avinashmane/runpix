@@ -24,11 +24,7 @@ import { computed, ref } from 'vue'
 import { useStore } from 'vuex';
 
 import Paginator from 'primevue/paginator';
-import Image from 'primevue/image';
-import Dialog from 'primevue/dialog';
 import InputText from 'primevue/inputtext';
-import Checkbox from 'primevue/checkbox';
-import Select from 'primevue/select';   // optional
 // import Row from 'primevue/row';                   // optional
 import { db, storage } from "../../firebase/config" //storage
 import { collection,query,doc,limit, orderBy ,onSnapshot,getDocs, updateDoc } from "firebase/firestore";

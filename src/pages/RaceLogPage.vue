@@ -173,7 +173,7 @@
     <template #footer>
       <Button @click="router.back()" icon="pi pi-chevron-left"></Button>
       <Button @click="finalize_results">Finalize</Button>
-      <Button :label="toast" @click='showToast()' @dblclick="klick">Toast</Button>
+      <Button @click='showToast()' @dblclick="klick">Toast</Button>
       <!-- {{  race  }} -->
       <div v-if="totalFinalizedEntries">
         {{ processedFinalizedEntries }} / {{ totalFinalizedEntries }} entries processed

@@ -32,7 +32,7 @@
 
     <span class="flex flex-auto my-2">
       Camera
-      <InputSwitch v-model="camera.perm" label="Camera" @click="toggleCamera()" @dblclick="klick"
+      <ToggleSwitchhh v-model="camera.perm" label="Camera" @click="toggleCamera()" @dblclick="klick"
         aria-labelledby="single" />
     </span>
 
@@ -58,7 +58,7 @@
           <!-- <button id="recButton" @click="clickRecButton" :disabled="button.record.disabled"
             :class="{ Rec: isRecording, notRec: !isRecording }"></button> -->
           <!-- <Button id="start" @click="startButtonListener">Start camera</Button> -->
-          <!-- <InputSwitch v-model="camera.autoupload" label="Auto Upload" @dblclick="klick"/> -->
+          <!-- <ToggleSwitch v-model="camera.autoupload" label="Auto Upload" @dblclick="klick"/> -->
           <Button id="record" @click="recordButtonListener" :disabled="button.record.disabled">{{ button.record.text
           }}</Button>
           <Button id="play" @click="playButtonListener" :disabled="button.play.disabled">Play</Button>
@@ -101,7 +101,7 @@ import { getAllDocs } from '../api'
 import InputText from 'primevue/inputtext';
 import SelectButton from 'primevue/selectbutton';
 import Select from 'primevue/select';
-import InputSwitch from 'primevue/inputswitch';
+import ToggleSwitch from 'primevue/toggleswitch';
 import { getDateTime } from "../helpers"
 import { db, storage } from "../../firebase/config"
 import { doc, getDoc, updateDoc, setDoc } from 'firebase/firestore'

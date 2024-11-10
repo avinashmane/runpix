@@ -117,7 +117,7 @@ import Select from 'primevue/select';   // optional
 // import TabView from 'primevue/tabview';
 // import TabPanel from 'primevue/tabpanel';
 // import Row from 'primevue/row';                   // optional
-import { orderBy as _orderBy }  from "lodash-es"
+import { orderBy as _orderBy, cloneDeep }  from "lodash-es"
 import { db, storage } from "../../firebase/config" //storage
 import { config } from "../config"
 import { collection,query,doc,limit, orderBy ,onSnapshot,getDocs, updateDoc } from "firebase/firestore";

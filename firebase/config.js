@@ -16,6 +16,8 @@ const firebaseConfig = {
     measurementId: `${import.meta.env.VITE_MEASUREMENT_ID}`
 }
 
+if (import.meta.dev) console.log(firebaseConfig)
+
 initializeApp(firebaseConfig)
 const firebaseAuth = getAuth()
 // connectAuthEmulator(firebaseAuth, "http://localhost:5000");

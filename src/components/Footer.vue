@@ -1,17 +1,6 @@
-<script setup>
-let header="text|link".split('|')
-let values=`
-RUNPIX @2023|#
-Rating link|#
-Feedback link|#`
-// bg-indigo-900 text-white
-const footer=values.split('\n').filter(x=>x)
-             .map(x=>x.split("|"))
-             .map(x=>header.reduce((obj, k, i) => ({...obj, [k]: x[i] }), {})) 
-</script>
 
 <template>
-  <div class="grid grid-cols-4 gap-4 mt-4 mx-auto bg-gray-300 hover:items-center">
+  <div class="p-2 mx-8 flex flex-cols-4 gap-4 mt-4 mx-auto dark:bg-blue-900 hover:items-center">
     <!-- <div v-for="x in footer">
         {{x.text}} {{x.link}}
     </div> -->
@@ -34,6 +23,18 @@ const footer=values.split('\n').filter(x=>x)
     
   </div>
 </template>
+
+<script setup>
+let header="text|link".split('|')
+let values=`
+RUNPIX @2023|#
+Rating link|#
+Feedback link|#`
+// bg-indigo-900 text-white
+const footer=values.split('\n').filter(x=>x)
+             .map(x=>x.split("|"))
+             .map(x=>header.reduce((obj, k, i) => ({...obj, [k]: x[i] }), {})) 
+</script>
 
 <style scoped>
 

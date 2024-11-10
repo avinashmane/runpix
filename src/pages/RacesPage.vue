@@ -1,17 +1,16 @@
 <template>
   <div class="container mx-auto">
     
-    <Card class="w-full text-center justify-center flex-col rounded">
+    <Card class="w-full text-center justify-center flex-col rounded " >
 
       <template #content>
-        <RacesCard :menu="['edit', 'results']" :nolist="nolist"/>
-
+        <RacesCard :menu="['edit', 'results']" :nolist="nolist" />
       </template>
     </Card>
 
     <TabView>
       <TabPanel header="Process">
-          <InputSwitch v-model="nolist"/> 
+          <ToggleSwitch v-model="nolist"/> 
           <p>
             Mark old races as "nolist"
           </p>
@@ -54,7 +53,7 @@ import { useRouter, useLink } from 'vue-router'
 import Card from 'primevue/card' ;
 import { computed,ref } from 'vue';
 import {getDateTime} from '../helpers';
-import InputSwitch from 'primevue/inputswitch';
+import ToggleSwitch from 'primevue/toggleswitch';
 import {db} from '../../firebase/config'
 import TabView from 'primevue/tabview';
 import TabPanel from 'primevue/tabpanel';

@@ -1,30 +1,35 @@
 <template>
-  <div class="container mx-auto py-4">
-    <h1 @dblclick="klick()" class="text-lg">Results </h1>
+  <Card>
+    <template #content>
+      <h1 @dblclick="klick()" class="text-lg">Results </h1>
 
-    <RaceSelectionByYear v-model="raceId"
-      :races="races"
-      @change="loadRace"
-    ></RaceSelectionByYear>
+      <RaceSelectionByYear v-model="raceId"
+        :races="races"
+        @change="loadRace"
+      ></RaceSelectionByYear>
 
-    <div class="card flex justify-content-center w-full mt-2">
-      <Button @click="cancelBibSelection()"><i class="pi pi-times w-6 "></i></Button>
+      <div class="card flex justify-content-center w-full mt-2">
+        <Button @click="cancelBibSelection()"><i class="pi pi-times w-6 "></i></Button>
 
-      <AutoComplete v-model="bibSelection" showClear :suggestions="items" @complete="searchBib"
-        :dropdown-click="searchBib" class="w-full " inputClass="w-full px-2 mx-2" />
-      <Button name="searchResults" @click="searchResults" icon="pi pi-search" raised></Button>
-    </div>
-  </div>
+        <AutoComplete v-model="bibSelection" showClear :suggestions="items" @complete="searchBib"
+          :dropdown-click="searchBib" class="w-full " inputClass="w-full px-2 mx-2" />
+        <Button name="searchResults" @click="searchResults" icon="pi pi-search" raised></Button>
+      </div>
+    </template>
+  </Card>
+
+
 
   <div v-if="bibSelection && ('Name' in bibData) && raceId" class="container text-xl mx-auto mt-30 center">
     <!-- <small>{{ message }}</small> -->
     <ResultCard :race="race" :bibData="bibData">
     </ResultCard>
   </div>
+  
 
   <!--Show the leader board -->
-  <div v-if="!bibSelection" class="container mx-auto">
-    <Card >
+  <div v-if="!bibSelection && raceInfo.top" class="container mx-auto mx-2">
+    <Card class="mx-2">
       <template #subtitle>
         <div class="flex w-full justify-end">
           <a v-if="race.linkPhotos && ['available'].includes(race.photoStatus)" 
@@ -45,16 +50,16 @@
 
       <template #content>
         <div v-for="catTop, cat in raceInfo.top">
-          <h2 class="text-2xl bg-blue-100 shadow-lg px-2 ">{{ cat }}</h2>
-          <table class="table-auto w-full">
-            <tr v-for="r, category in catTop" @click="setBib(r.Bib)" 
-              class="px-2 ">
-
-              <td v-for="f in ['Rank', 'Bib', 'Name', 'Race Time']" :class="f+'border shadow-md p-1 text-sm'">
+          <h2 class="text-2xl bg-indigo-300 shadow-lg px-2 rounded my-2">{{ cat }}</h2>
+          <div class="w-full">
+            <div v-for="r, category in catTop" @click="setBib(r.Bib)" 
+              class="flex flex-row shadow-md justify-left items-center">
+              <span v-for="f in ['Rank', 'Bib', 'Name', 'Race Time']" 
+                :class="f+'   p-1 text-sm'">
                 {{ r[f] }}
-              </td>
-            </tr>
-          </table>
+              </span>
+            </div>
+          </div>
         </div>
       </template>
     </Card>
@@ -295,6 +300,16 @@ function getCertData(){
   font-variant: small-caps;
 }
 
-td.Rank {
-  font-weight: bold;
-}</style>
+span.Rank {
+  @apply w-[1rem] text-center
+}
+span.Bib {
+  @apply text-xl min-w-[5rem] text-center
+}
+span.Name {
+  @apply w-full flex-1 text-center
+}
+span.Time {
+  @apply justify-self-end text-center flex-initial
+}
+</style>

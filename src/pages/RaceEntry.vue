@@ -8,16 +8,22 @@
 
         <template #content>
           
-          <tr >
+          <!-- <tr >
             <td class="p-inputgroup-addon w-sm" @click="klick">
                 Waypoint
             </td>
             <td>
-              <!-- {{ race }} -->
               <Select v-model="waypoint" :options="race?.Waypoints" editable 
                   placeholder="Select a Waypoint" class="md:w-14rem" />   
               </td>
-          </tr>
+          </tr> -->
+          <div class="flex items-center gap-4 mb-8">
+            <span>
+              WayPoint
+            </span>
+            <Select v-model="waypoint" :options="race?.Waypoints" editable
+              placeholder="Select a Waypoint" />
+          </div>
 
             <div>
                 <CameraVideo v-if="route.params?.mode=='video'" 

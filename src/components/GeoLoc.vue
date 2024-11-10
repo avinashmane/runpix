@@ -7,14 +7,14 @@
             </small>
         </div>
         GPS
-        <InputSwitch v-model="geoLocPerm" @click="toggleGPS()" aria-labelledby="single" />
+        <ToggleSwitch v-model="geoLocPerm" @click="toggleGPS()" aria-labelledby="single" />
     </div>
 </template>
 
 <script>
 import { ref, onMounted, reactive } from 'vue'
 import Button from 'primevue/button';
-import InputSwitch from 'primevue/inputswitch';
+import ToggleSwitch from 'primevue/toggleswitch';
 import {getDateTime,debug} from "../helpers"
 // import ToggleButton from 'primevue/togglebutton';
 

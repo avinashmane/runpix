@@ -100,12 +100,13 @@ describe('Test of database changes/functions', function(){
         let dataReadings,bibs,raceTiming,race
         raceTiming = require('../raceTiming.js')
         const params= {
-            raceId: 'testrun',
+            raceId: 'mychoice24nov',
         }
     
         function rerankResults(raceId){
 
         }
+
         before(async function (){
             this.timeout(50000)
             race  = await get(`/races/${params.raceId}`,x=>x)

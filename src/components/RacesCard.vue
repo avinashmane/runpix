@@ -1,10 +1,11 @@
 <template>
-    <h1 @dblclick="klick" class="text-center">Races</h1> 
+    <!--List of all races or RaceCards-->
+    <h1 @dblclick="klick" class="text-center text-xl">Races</h1> 
 
     <DataView :value="races" :sort-field="Date" :sort-order="-1" :pt="{
-        root: { class: 'bg-transparent' },
-        content: { class: 'text-lg text-primary-700' },
-        title: 'text-xl'
+        header: { class: 'bg-red-500 ' },
+        content: { class: 'text-lg ' },
+        title: {class:'text-xl'}
     }">
         <template #list="slotProps">
 

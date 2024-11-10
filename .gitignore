@@ -1,3 +1,4 @@
+nuxt/
 # Logs
 logs
 *.log
@@ -25,6 +26,7 @@ coverage/**
 **/*.cache
 functions/.*.json
 .env*
+.nuxt/
 
 
 

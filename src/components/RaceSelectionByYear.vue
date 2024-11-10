@@ -1,4 +1,5 @@
 <template>
+    <!--Year/Race selection...that's it-->
     <div class="p-inputgroup flex">
       <Select v-model="year" :options="years" class="w-4/12 " />
       <Select v-model="raceId" :options="races" optionLabel="Name" 

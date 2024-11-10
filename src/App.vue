@@ -13,19 +13,15 @@ const callback = (response) => {
 <template>
   <Nav/>
   <!-- LOGIN Status -->
-  <div class="mt-20 min-h-[90vh] max-w-screen-md mx-auto bg-gradient-to-r from-indigo-200 to-blue-200 border-red-600">
+  <div class="mt-20 min-h-[10vh] max-w-screen-md mx-auto ">
+    <!-- bg-gradient-to-r from-primary-200 to-green-200 -->
     <RouterView />
   </div>
+  
   <Footer/>
 
 </template>
 
 <style scoped>
-RouterView {
-  /* min-height: calc(85vh - 70px); */
-}
 
-footer {
-  height: 15vh;
-}
 </style>

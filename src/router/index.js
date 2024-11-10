@@ -14,8 +14,8 @@ import PhotosPage from "../pages/PhotosPage.vue";
 import RaceLog from "../pages/RaceLogPage.vue";
 import RaceStartList from "../pages/RaceStartListPage.vue";
 import Races from "../pages/RacesPage.vue";
-import Race from "../pages/Race.vue";
-import RaceAdmin from "../pages/RaceAdmin.vue";
+import Race from "../pages/RaceForm.vue";
+import RaceEdit from "../pages/RaceEditCard.vue";
 import RaceEntry from "../pages/RaceEntry.vue";
 import TestFunctions from "../pages/TestFunctions.vue";
 import NotFoundPage from "../pages/exceptions/NotFoundPage.vue";
@@ -67,7 +67,7 @@ const routes = [
           },
           {
             path: ':raceId/edit',
-            component: RaceAdmin,
+            component: RaceEdit,
           },
           {
             path: ':raceId/bibs',
