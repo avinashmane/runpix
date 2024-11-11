@@ -1,5 +1,5 @@
 <template>
-  <Card>
+  <Card id="result_select">
     <template #content>
       <h1 @dblclick="klick()" class="text-lg">Results </h1>
 
@@ -19,8 +19,7 @@
   </Card>
 
 
-
-  <div v-if="bibSelection && ('Name' in bibData) && raceId" class="container text-xl mx-auto mt-30 center">
+  <div v-if="bibSelection && ('Name' in bibData) && raceId" class="container  text-xl mx-auto mt-30 center">
     <!-- <small>{{ message }}</small> -->
     <ResultCard :race="race" :bibData="bibData">
     </ResultCard>
@@ -28,8 +27,7 @@
   
 
   <!--Show the leader board -->
-  <div v-if="!bibSelection && raceInfo.top" class="container mx-auto mx-2">
-    <Card class="mx-2">
+  <Card v-if="!bibSelection && raceInfo.top" class="w-full mx-auto my-2 ">
       <template #subtitle>
         <div class="flex w-full justify-end">
           <a v-if="race.linkPhotos && ['available'].includes(race.photoStatus)" 
@@ -62,9 +60,8 @@
           </div>
         </div>
       </template>
-    </Card>
-  </div>
-
+  </Card>
+  
   <img v-else src="/assets/graphics/finish.jpg" class="m-[10%] w-[80%]"/>
 
   <!-- {{races.map(x=>x.status)}} -->

@@ -1,10 +1,11 @@
 <template>
   <Toast/>
-  <Card class="bg-white">
+
+  <Card id="provisional" class="bg-white">
     <template #title> Provisional Timing {{ raceId }} </template>
     <template #content>
       <div>
-        Start: {{ race?.timestamp?.start?.toLocaleString() }} -
+        Start: {{ race?.timestamp?.start?.toLocaleString() || isLive() ? 'Live' : '--'}} 
         <!-- <InputMask v-model="startTime" 
         dateTimeFormat="YYYY-MM-DD HH:mm:SS" placeholder="YYYY-MM-DD HH:MM:SS" mask="9999-99-99 99:99:99"/> -->
       </div>
@@ -52,7 +53,9 @@
             <td>
               {{ formatDate(entries[i].timestamp) }}
               <br />
-              <i>{{ period(entries[i].timestamp) }}</i>
+              <i>{{ isLive()
+                  ? dayjs.duration(entries[i].elapsed,"s").format('HH:mm:ss') 
+                  : period(entries[i].timestamp) }}</i>
             </td>
             <td>
               <span :class="entries[i].status">{{ entries[i].bib }}</span>
@@ -65,10 +68,12 @@
             <td>
               {{ entries[i].waypoint }}
               <small>
-                <u>{{ abbr(entries[i].userId) }}</u>
+                <u>{{ isLive()
+                  ? entries[i].device_name
+                  : abbr(entries[i].userId) }}</u>
               </small>
             </td>
-            <td class="image w-20%">
+            <td v-if="isLive()" class="image w-20%">
               <Image
                 v-if="entries[i].imagePath"
                 preview
@@ -78,7 +83,11 @@
                 ><small>{{ entries[i].type }}</small></span
               >
 
-              <div class="flex"></div>
+            </td>
+            <td class="w-1/12">
+              <a :href="'https://www.strava.com/activities/'+entries[i].activity" target="_blank"><i
+                class="pi pi-external-link"
+              /></a>
             </td>
           </template>
         </tr>
@@ -89,7 +98,7 @@
           <div v-if="entries[entryToEdit].imagePath">
             <Image :src="GS_PREFIX + entries[entryToEdit].imagePath" />
           </div>
-          <tr v-if="race">
+          <tr v-if="race" >
             <td>{{ race.status }}</td>
             <td>
               {{
@@ -171,10 +180,14 @@
     </template>
 
     <template #footer>
-      <Button @click="router.back()" icon="pi pi-chevron-left"></Button>
-      <Button @click="finalize_results">Finalize</Button>
-      <Button @click='showToast()' @dblclick="klick">Toast</Button>
-      <!-- {{  race  }} -->
+      <div class="flex flex-row justify-around align-items-center">
+        <Button @click="router.back()" icon="pi pi-chevron-left"></Button>
+        <Button @click="finalize_results">Finalize (old)</Button>
+        <Button @click="finalize_results_server()">Finalize (server)</Button>
+        <Button @click='resetResults()' @dblclick="klick">Reset results</Button>
+        <!-- <Button @click='showToast()' @dblclick="klick">Toast</Button> -->
+        <!-- {{  race  }} -->
+      </div>
       <div v-if="totalFinalizedEntries">
         {{ processedFinalizedEntries }} / {{ totalFinalizedEntries }} entries processed
       </div>
@@ -191,10 +204,10 @@
 //   raceId: raceId,
 //   race: race,
 // }
-import { computed, ref } from "vue";
+import { computed, ref, onBeforeUnmount } from "vue";
 import { useStore } from "vuex";
 import { useRoute, useRouter } from "vue-router";
-
+import axios from 'axios';
 import Paginator from "primevue/paginator";
 import Image from "primevue/image";
 import Dialog from "primevue/dialog";
@@ -216,6 +229,7 @@ import {
   getDocs,
   updateDoc,
   setDoc,
+  deleteDoc
 } from "firebase/firestore";
 import {
   chain,
@@ -238,6 +252,9 @@ import {
 } from "lodash-es";
 import {debug} from "../helpers"
 import _ from 'lodash-es'
+import dayjs from "dayjs"
+import duration from 'dayjs/plugin/duration'
+dayjs.extend(duration)
 
 const GS_PREFIX = config.GS_PREFIX;
 const NOMATCH = "N/A";
@@ -267,6 +284,12 @@ const allEntries = ref([]);
 let bibs = ref([]);
 let raceDoc = doc(db, "races", raceId); //
 
+
+function isLive(){
+  return race.value?.status?.includes('live')
+}
+const getReadingsPath=()=>isLive()?"activities":"readings"
+
 const totalFinalizedEntries = ref(null);
 const processedFinalizedEntries = ref(0);
 const startTime = computed(() => {
@@ -278,6 +301,7 @@ const startTime = computed(() => {
 });
 let unsubscribe_readings;
 let toastNewUpdates
+
 // fetch bibs
 const unsubscribe_bibs = onSnapshot(
   query(collection(raceDoc, "bibs")),
@@ -286,10 +310,15 @@ const unsubscribe_bibs = onSnapshot(
     // debug(bibs.value)
     // fetch readings
     unsubscribe_readings = onSnapshot(
-      query(collection(raceDoc, "readings"), orderBy("timestamp", "desc")), // query
-      (querySnapshot) => {
+      query(collection(raceDoc,getReadingsPath() ), 
+            // isLive() ? null : orderBy("timestamp", "desc") // 
+      ),(querySnapshot) => {
+        // console.log(querySnapshot.docs)
         allEntries.value = [];
-        querySnapshot.forEach(mapReading);
+        if(isLive())
+          querySnapshot.forEach(mapActivity);
+        else
+          querySnapshot.forEach(mapReading);
 
         allEntries.value = addStatusFields(allEntries.value);
 
@@ -301,6 +330,18 @@ const unsubscribe_bibs = onSnapshot(
     );
   }
 );
+
+onBeforeUnmount(()=> {
+   // Perform cleanup here
+  if (unsubscribe_readings){
+    unsubscribe_readings()
+    console.log('unsubscribe_readings unsubscribed');
+  }
+  if (unsubscribe_bibs){
+    unsubscribe_bibs()
+    console.log('unsubscribe_bibs unsubscribed');
+  }
+})
 
 function toastBib(querySnapshot){
   querySnapshot.docChanges().forEach(change => {
@@ -322,17 +363,13 @@ function toastBib(querySnapshot){
 
 let entries = computed(() => {
   let ret = cloneDeep(allEntries.value)
-              .filter((x) => !x.id.includes("_START_")); // remove start entries
-  // ret = addStatusFields(ret) moved to all entries
-  // status with status from bib
-  const bibRegExp = getBibRegExp();
-
+                .filter((x) => !x.id.includes("_START_")); // remove start entries
+  //common filters
   if (selWpt.value && selWpt.value != "All") {
-    ret = ret.filter((x) => x.waypoint == selWpt.value);
+      ret = ret.filter((x) => x.waypoint == selWpt.value);
   }
 
   // show All or only valid
-
   if (showAll.value == "Valid") {
     // debugger
     ret = ret.filter((x) => x.status == "valid");
@@ -340,26 +377,11 @@ let entries = computed(() => {
   if (showAll.value == "Invalid") {
     ret = ret.filter((x) => !(x.status == "valid"));
   }
-  console.log(`selected ${ret.length}/${allEntries.value.length} v:${showAll.value} d:${selWpt.value} g:${genderVal.value} s:${sortVal.value} b:${bibsVal.value}`);
-  // name or pattern matched
-  const matchBib = (x) => {
-    const patMatch = x.bib.match(bibRegExp);
-    // console.warn(`${x.bib}:${patMatch?1:0}||${x.name}>>${patMatch || (x.name!=NOMATCH)}`)
-    return patMatch || x.name != NOMATCH;
-  };
-
-  if (bibsVal.value == "Matched") {
-    ret = ret.filter((x) => !["", "N/A"].includes(x?.name)); // not in this list
-  } else if (bibsVal.value == "Pattern") {
-    ret = ret.filter(matchBib);
-  } else if (bibsVal.value == "N/A") {
-    ret = ret.filter((x) => !matchBib(x));
-  }
-
   if (["Male", "Female"].includes(genderVal.value)) {
-    ret = ret.filter((x) => x.gender == genderVal.value);
+      ret = ret.filter((x) => x.gender == genderVal.value);
   }
-  // sort
+
+    // sort
   // debugger
 
   ret = _orderBy(ret, "timestamp", sortVal.value.toLowerCase());
@@ -373,7 +395,33 @@ let entries = computed(() => {
         x.status.includes(bibSearch.value)
     );
 
-  return ret;
+  
+  if(isLive()){ // Live/virtual race...activities
+
+    return ret
+
+  } else { // readings
+    
+    // status with status from bib
+    const bibRegExp = getBibRegExp();
+    console.log(`selected ${ret.length}/${allEntries.value.length} v:${showAll.value} d:${selWpt.value} g:${genderVal.value} s:${sortVal.value} b:${bibsVal.value}`);
+    // name or pattern matched
+    const matchBib = (x) => {
+      const patMatch = x.bib.match(bibRegExp);
+      // console.warn(`${x.bib}:${patMatch?1:0}||${x.name}>>${patMatch || (x.name!=NOMATCH)}`)
+      return patMatch || x.name != NOMATCH;
+    };
+
+    if (bibsVal.value == "Matched") {
+      ret = ret.filter((x) => !["", "N/A"].includes(x?.name)); // not in this list
+    } else if (bibsVal.value == "Pattern") {
+      ret = ret.filter(matchBib);
+    } else if (bibsVal.value == "N/A") {
+      ret = ret.filter((x) => !matchBib(x));
+    }
+
+    return ret;
+  }
 });
 
 function addStatusFields(ret) {
@@ -403,20 +451,7 @@ function addStatusFields(ret) {
     if (x?.waypoint) a[x.waypoint] = Number(x.waypoint.replace(/[KMkm]/g, ""));
     return a;
   }, {});
-  // ret = chain(ret)
-  //        .orderBy(x=>x.bib+x.waypoint+x.timestamp,"asc")
-  //        .reduce((a,o)=>{
-  //             if ((o.status == 'valid') && a.some(
-  //                   x=>x.bib+x.waypoint+x.status==o.bib+o.waypoint+o.status)){
-  //               o.status='dup'
-  //             } else if ((o.status == 'valid') && a.some(
-  //                   x=>x.bib+x.status==o.bib+o.status)){
-  //               o.status='split'
-  //             }
-  //             a.push(o)
-  //             return a
-  //         },[])
-  //         .value()
+
   ret = _orderBy(ret, (x) => x.bib + x.waypoint + x.timestamp, "asc")
         .reduce((a, o) => {
           if (
@@ -435,6 +470,22 @@ function addStatusFields(ret) {
         }, []);
 
   return ret;
+}
+function mapActivity(doc){
+  let data = doc.data();
+  data.id = doc.id;
+  const id_splits = doc.id?.split('_'); 
+  data.waypoint=id_splits[1];
+  data.bib=id_splits[0]
+  data.timing = data.timestamp;
+  data.name = data.name || data.email;
+  data.timestamp = (data.start_date_local);
+  data.gender=getGender(data)
+  // else /** if (data.gender=='M') */ data.gender='Male'
+  
+  allEntries.value.push(data);
+
+  if (!waypoints.value.includes(data.waypoint)) waypoints.value.push(data.waypoint);
 }
 
 function mapReading(doc) {
@@ -572,7 +623,7 @@ const setStatus = (id, val) => {
   try {
     e[0].status = val;
     // debugger
-    const path = `races/${raceId}/readings/${id}`;
+    const path = `races/${raceId}/${getReadingsPath()}/${id}`;
     return updateDoc(doc(db, path), { status: val });
   } catch (err) {
     console.error(err);
@@ -584,7 +635,7 @@ function submitChange() {
 
   if (entries.value[entryToEdit.value].bib.search(regExp) >= 0) {
     let payload = cloneDeep(entries.value[entryToEdit.value]);
-    let path = `races/${raceId}/readings/${payload.id}`;
+    let path = `races/${raceId}/${getReadingsPath()}/${payload.id}`;
     delete payload.id;
     // debugger
     // debug(typeof payload.timestamp, payload.timestamp)
@@ -610,6 +661,7 @@ Race Time "0:07:32"
 Rank "1"
 Start Time "7:10:00" 
   */
+ // this should be done in backend one logic
 function finalize_results() {
   console.log(`finalizing results: ${allEntries.value.length}`);
   const keys_ = split("bib name timestamp status waypoint gender imagePath", " ");
@@ -685,14 +737,14 @@ function finalize_results() {
     // ret = pickBy(ret,(x) => RegExp(/^\d+K\D/).test(x.cat));
     // return ret
     return chain(results)
-    .groupBy(x => `${x.Category}_${x.Status}`)
-    .map((o, k) => ({
-      cat: k,
-      entries: sortBy(o, "Race Time")
-    }))
-    .filter(x => RegExp(/^\d+K\D/).test(x.cat))
-    .tap(console.log)
-    .value();
+      .groupBy(x => `${x.Category}_${x.Status}`)
+      .map((o, k) => ({
+        cat: k,
+        entries: sortBy(o, "Race Time")
+      }))
+      .filter(x => RegExp(/^\d+K\D/).test(x.cat))
+      .tap(console.log)
+      .value();
   }
 }
 
@@ -722,10 +774,55 @@ import { useToast } from 'primevue/usetoast';
 const toast = useToast();
 
 const showToast = (summary,mesg,severity) => {
-    toast.add({ severity: severity||'success', 
+    toast.add({ //severity: severity||'success', 
                 summary: summary||'Bib missing', 
-                detail: mesg||'Message Content', life: 3000 });
+                detail: mesg||'Message Content', life: 2000 });
 };
+
+function finalize_results_server(){
+  const url=''
+  return axios
+    .post(url, props.data, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+    .then((ret) => {
+      console.log("Certificate generated", ret);
+      cert.value.status = "Y";
+      cert.value.url = ret.data.contentUrl;
+      console.log(cert);
+      return ret;
+    })
+    .catch((e) => {
+      cert.value.status = "E";
+      console.warn( e);
+    });
+}
+
+function resetResults(bib=null){
+  const deleteRef=(ref)=>{
+          ret =deleteDoc(ref);
+          console.log(ref.path)
+          return ret
+        }
+  
+  if (bib){
+    
+    return deleteDoc(doc(raceDoc,'result',bib))
+
+  } else { // b=null ie all entries
+
+    const col=collection(raceDoc,'result' )
+    return onSnapshot(
+      query(col, ), (querySnapshot) => {
+        // console.log(col.path,querySnapshot.docs)
+        querySnapshot.forEach(x=>deleteRef(x.ref));
+
+      })
+    }
+}
+
 
 </script>
 

@@ -43,7 +43,7 @@
     </template>
   </Card>
 
-  <Card>
+  <Card class="my-2">
     <template #content>
       <div class="flex flex-wrap bg-gray-200 w-full justify-evenly">
         <!-- <ImageCard v-for="img in images" v-bind:raceId="raceId" v-bind:bibNo="bibNo" v-bind:imagePath="img.imagePath"/> -->
