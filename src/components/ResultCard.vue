@@ -99,6 +99,7 @@
 const props=defineProps({
   race: Object,
   bibData: Object,
+  getCertData: Function
 })
 import Card from 'primevue/card';
 import { getPublicUrl } from "../helpers";

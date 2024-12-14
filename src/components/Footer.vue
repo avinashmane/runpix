@@ -1,35 +1,37 @@
 
 <template>
-  <div class="p-2 mx-8 flex flex-cols-4 gap-4 mt-4 mx-auto dark:bg-blue-900 hover:items-center">
-    <!-- <div v-for="x in footer">
-        {{x.text}} {{x.link}}
-    </div> -->
-    <a href="https://www.facebook.com/runpixindia">
-      <i class="pi pi-camera" style="font-size: 1.5rem"></i>
+  <div class="flex flex-cols justify-around py-2 mx-4 mx-auto dark:bg-blue-900 hover:items-center">
+    <div v-for="x in footer" :href="x.link" class="flex flex-col">
+      <i :class="x.icon+' text-xl text-center'"/>
+      <div class="mx-auto">{{x.text}}</div>
+    </div>
+    <!-- <a href="">
+      <i class="" ></i>
       RUNPIX @2023
-    </a>
-    <a href="https://runpix.page.link/feedback">
-      <i class="pi pi-star-fill" style="font-size: 1.5rem"></i>
+    </a> -->
+    <!-- <a href="">
+      <i class="" style="font-size: 1.5rem"></i>
       Feedback
     </a>
-    <a href="https://runpix.page.link/features">
-      <i class="pi pi-user-edit" style="font-size: 1.5rem"></i>
+    <a href="">
+      <i class="" style="font-size: 1.5rem"></i>
       Feature requests
     </a>    
-    <a href="/terms.html">
-      <i class="pi pi-info-circle" style="font-size: 1.5rem"></i>
+    <a href="">
+      <i class="" style="font-size: 1.5rem"></i>
       Terms
-    </a>
+    </a> -->
     
   </div>
 </template>
 
 <script setup>
-let header="text|link".split('|')
+let header="text|icon|link".split('|')
 let values=`
-RUNPIX @2023|#
-Rating link|#
-Feedback link|#`
+RUNPIX @2023|pi pi-camera|https://www.facebook.com/runpixindia
+Feedback|pi pi-star-fill|https://runpix.page.link/feedback
+Feature requests|pi pi-user-edit|https://runpix.page.link/features
+Terms|pi pi-info-circle|/terms.html`
 // bg-indigo-900 text-white
 const footer=values.split('\n').filter(x=>x)
              .map(x=>x.split("|"))

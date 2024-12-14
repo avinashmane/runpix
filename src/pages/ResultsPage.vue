@@ -21,7 +21,7 @@
 
   <div v-if="bibSelection && ('Name' in bibData) && raceId" class="container  text-xl mx-auto mt-30 center">
     <!-- <small>{{ message }}</small> -->
-    <ResultCard :race="race" :bibData="bibData">
+    <ResultCard :race="race" :bibData="bibData" :get-cert-data="getCertData">
     </ResultCard>
   </div>
   
