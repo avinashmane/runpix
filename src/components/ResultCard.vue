@@ -43,12 +43,12 @@
           <td>{{ bibData.Race }}</td>
         </tr>
         <tr>
-          <td>Start</td> 
-          <td>{{ time(bibData['Start Time']) }}</td>
+          <td>Start</td>
+          <td>{{ timeFmt(bibData['Start Time']) }}</td>
         </tr>
         <tr>
           <td>Finish</td>
-          <td>{{ time(bibData['Finish Time']) }}</td>
+          <td>{{ timeFmt(bibData['Finish Time']) }}</td>
         </tr>
         <tr>
           <td>Net Time</td>
@@ -122,10 +122,16 @@ function initials(name){
                 .map(x=>x.toUpperCase().slice(0,1))
                 .join("")
 }
-function time(time_str){
+function timeFmt(time_str){
   // if only time is passed?
-  if(! (/(am|pm)/i.test(time_str))) 
+  // if( (/(am|pm)/i.test(time_str))){
+  if(time_str.split(' ')[0].includes('day')) {  // first word includes day
+    return time_str
+    time_str= time_str.split(' ').slice(1).join(' ' )// skip first column i.e.
+  } else {
     time_str= race.value.Date+" "+time_str
-  return dayjs(time_str).format('HH:mm:ss A Z')
+    console.log(time_str)
+    return dayjs(time_str)//.format('HH:mm:ss A Z')
+  }
 }
 </script>

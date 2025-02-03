@@ -17,7 +17,7 @@ const functions = require('firebase-functions');
 const admin = require('firebase-admin');
 const sharp = require('sharp')
 const exifr = require('exifr');
-const {debounce}  = require('lodash'); //stack
+const {debounce,isEmpty}  = require('lodash'); //stack
 const dayjs = require("dayjs")
 // Vision API
 const vision = require('@google-cloud/vision');
@@ -60,26 +60,10 @@ if(admin.apps.length==0) {
 }
 
 let watermarks={}; //key="raceId" : watermark sharp image
-
-let race_cfg={};
-const getRaceCfg= async (race) =>  { 
-  if (race_cfg.hasOwnProperty(race)) 
-    return race_cfg[race] 
-  admin.firestore().doc(`races/${race}`)
-    .onSnapshot(snap=>{
-      race_cfg[race]=snap.data();
-      debug(`load ${race}`,race_cfg[race])
-      return race_cfg[race] 
-    })
-  // function below waits 3 seconds
-  return await new Promise(resolve => setTimeout(resolve, 1000))
-                        .then(()=> race_cfg[race])
-};
-exports.getRaceCfg = getRaceCfg;
-
-
+const {getRaceCfg} = require("./races")
 /* ~~~~~~~~~~~~ 3. HTTPS functions  ~~~~~~~~~~~~~ */
  const {app} = require("./express");
+const { getRaceCfg } = require('./races');
 
  
  // This HTTPS endpoint can  be made accessed by `Authorization` HTTP header
@@ -103,21 +87,9 @@ exports.timingUpdate = functions.firestore
 
       var [ignore, ignore_, waypoint, userId, date, gps, fileName] = parseObjName(videoPath);
       // // perform desired operations ...
-      if (document) { // add or update
-        // bib "124"
-        // imagePath "processed/testrun/2023-03-12T02:28:48.000Z~VENUE~avinashmane$gmail.com~20230312_075846.jpg"
-        // score 0
-        // timestamp "2023-03-13T02:28:00.000Z"
-        // userId "avinashmane$gmail.com"
-        // waypoint "VENUE" 
-        document.textAnnotations.forEach((textAnn)=>{
-          let  timestamp = addSeconds(document.timestamp, textAnn.secStart)
-          
-          updFSReadings(raceId, userId, textAnn.text, timestamp?.toISOString(), textAnn.confidence, 
-            textAnn.waypoint, {}, videoPath )
-        }) 
-        
-      } else { /// deletions
+      
+      // first delete old snapshot
+      if (change.before.exists && oldDocument?.textAnnotations?.length){ /// deletions
 
         oldDocument.textAnnotations.forEach((textAnn)=>{
           
@@ -126,6 +98,23 @@ exports.timingUpdate = functions.firestore
           delFSReadings(raceId,textAnn.text,timestamp.toISOString())
         })
       }
+      // then add new data
+      if (change.after.exists) { // add or update
+        // bib "124"
+        // imagePath "processed/testrun/2023-03-12T02:28:48.000Z~VENUE~avinashmane$gmail.com~20230312_075846.jpg"
+        // score 0
+        // timestamp "2023-03-13T02:28:00.000Z"
+        // userId "avinashmane$gmail.com"
+        // waypoint "VENUE" 
+        document?.textAnnotations?.forEach((textAnn)=>{
+          let  timestamp = addSeconds(document.timestamp, textAnn.secStart)
+          
+          updFSReadings(raceId, userId, textAnn.text, timestamp?.toISOString(), textAnn.confidence, 
+            document.waypoint, {}, videoPath )
+            .catch(console.error)
+        }) 
+        
+      } 
       // if (getRaceCfg()?.processing?.scanImages){
       //   debug(context.params,change?.before?.data(),change?.after?.data())
       // } else {

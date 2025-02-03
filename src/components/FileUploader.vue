@@ -1,42 +1,37 @@
 <template>
     <main class="border-4 m-2 p-2 rounded">
 
+        <h1 class="text-center text-xl my-2" @click="openFile">New uploader</h1>
 
-
+<!-- {{ logs }} -->
+        <Select
+                v-model="waypoint"
+                :options="waypoints"
+                editable
+                placeholder="Select a Waypoint"
+                class="w-1/2 m-2 px-2 "
+            />
         <input ref="fileInput" multiple type="file" @change="handleFileChange" hidden />
         <div class="flex flex-col md:flex-row justify-around w-full ">
             <div class="flex justify-around gap-4">
                 <Button @click="fileInput?.click()" :disabled="loadingInProgress" class="p-button">Select</Button>
                 <Button @click="clearAllFiles()" :disabled="loadingInProgress" class="p-button">Clear all</Button>
-                <Button @click="doSomething()" :disabled="loadingInProgress" class="p-button">Upload</Button>
+                <Button @click="uploadFilesNow()" :disabled="loadingInProgress" class="p-button">Upload</Button>
             </div>
-            <Select
-                v-model="waypoint"
-                :options="waypoints"
-                editable
-                placeholder="Select a Waypoint"
-                class="w-1/3 m-1 px-2"
-            />
-            <Select class="min-w-32 " v-model="sortKey" :disabled="loadingInProgress" :options="sortOptions" optionLabel="label" @change="sortFiles" />
+
+            <Select class="min-w-32 my-2" v-model="sortKey" :disabled="loadingInProgress" :options="sortOptions" optionLabel="label" @change="sortFiles" />
         </div>
 
         <Paginator v-if="files.length" v-model:first="first" :rows="rows" :totalRecords="files.length"
             @page="pageHandler" />
 
 
-        <!-- <DataView v-if="files.length" :value="files" paginator :rows="rows" :first="first" @page="pageHandler"
-            :sort-field="sortKey.field" :sort-order="sortKey.order" :pt="{
-                header: { class: 'bg-red-500 ' },
-                content: { class: 'text-lg ' },
-                title: { class: 'text-xl' }
-            }">
-            <template #header> -->
         <div class="flex justify-center">
 
         </div>
-        {{ loadedFiles }}/{{ files?.length }} files uploaded
+        {{ loadedFiles }}/{{ files?.length }} files uploaded at {{ waypoint.value }}
         <br/>
-        Uploading {{ loadingFiles }}  as {{ store.profile.email }}
+        <div v-if="loadingFiles">Uploading {{ loadingFiles }}  as {{ store.profile.email }} at {{ waypoint.value }}</div>
         
         <!-- {{ first }}{{ URLs }} -->
 
@@ -48,12 +43,10 @@
                 <div>{{ f.file.name }}</div>
                 <div class="flex-none text-sm" @click="removeFile(i)">🗑️{{ first + i + 1 }} {{ byteValue(f.file.size) }}</div>
 
-                <div class="flex-1 text-sm">{{ dayjs(f.file.lastModified).format() }} -- {{ f.status }}</div>
+                <div class="flex-1 text-sm">{{ dayjs(f.file.lastModified).format('YYYY-MM-DD HH:mm:ss') }} -- {{ f.status }}</div>
             </div>
         </div>
-        <!-- </div> -->
-        <!-- </template>
-        </DataView> -->
+
     </main>
 </template>
 
@@ -87,11 +80,7 @@ import createUploader from "../helpers/file-uploader";
 const waypoint = ref("VENUE");
 
 const store = useUserStore()
-const { uploadFiles } = createUploader({
-  raceId: props.raceId,
-  waypoint: waypoint.value,
-  user: store.profile.email,
-});
+
 
 const loadingInProgress=ref(false)
 const fileInput = ref(null)
@@ -99,20 +88,28 @@ const files = ref([])
 const rows = ref(5)
 const first = ref(0)
 const URLs = ref([])
-
+const logs=ref([]) // only for debug
 const loadingFiles=computed(()=>files.value.filter(f=>f.status=='loading').length)
 const loadedFiles=computed(()=>files.value.filter(f=>f.status==true).length)
 
 function handleFileChange() {
     files.value = Array.from(fileInput.value?.files)
-                .map(file=>({
-                    file:file,
-                    status:null
-                }))
+                .map(file=>{
+                    // logs.value.push(file.lastModified )
+                    // console.log(file);
+                    return {
+                        file:file,
+                        status:null
+                }})
     refreshThumbUrls(first.value)
 }
 
-function doSomething() {
+function uploadFilesNow() {
+    const {uploadFiles}=createUploader({
+        raceId: props.raceId,
+        waypoint: waypoint.value,
+        user: store.profile.email,
+    });
     loadingInProgress.value=true
     uploadFiles(files.value,(err,res)=>{
         loadingInProgress.value=false

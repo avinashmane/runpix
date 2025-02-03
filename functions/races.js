@@ -1,6 +1,10 @@
 const _ = require("lodash");
 const { firestore } = require("./firebaseUser");
-const dayjs = require("dayjs")
+const dayjs = require("dayjs");
+const admin = require("firebase-admin");
+// const admin = require("firebase-admin");
+// const { debug } = require("./utils");
+const { debug } = require("./utils");
 // const admin = require('firebase-admin');
 /**
  * Races that are started
@@ -79,9 +83,27 @@ function getNthSundayOfMonth(n) {
         dayjs().startOf('month').add(-dayjs().startOf('month').day() + n * 7 + 1, 'd');
 }
 
-module.exports = {
+let race_cfg = {};
+const getRaceCfg = async (race) => {
+  if (race_cfg.hasOwnProperty(race))
+    return race_cfg[race];
+  admin.firestore().doc(`races/${race}`)
+    .onSnapshot(snap => {
+      race_cfg[race] = snap.data();
+      debug(`load ${race}`, race_cfg[race]);
+      return race_cfg[race];
+    });
+  // function below waits 3 seconds
+  return await new Promise(resolve => setTimeout(resolve, 1000))
+    .then(() => race_cfg[race]);
+};
+// exports.getRaceCfg = getRaceCfg;
+
+export {
     readLiveRaces,
     createRaceNthSunday,
     createRace,
     createSundayRace,
-}
+    getRaceCfg,
+    race_cfg
+};

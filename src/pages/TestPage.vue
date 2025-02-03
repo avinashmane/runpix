@@ -11,18 +11,26 @@ import {useUserStore}  from '@/stores/index.js'
 const userStore = useUserStore()
 
 const toast = useToast();
-
+const logs=ref([])
 const show = () => {
     toast.add({ severity: 'info', summary: 'Info', detail: 'Message Content', life: 3000 });
 };
 
+function handleFileChange(x){
+  console.log(x)
+  let a=[]
+  for(const f of x.target.files) a.push(`${f.name} ${(f.lastModified)}`)
+  logs.value=JSON.stringify(a)
+}
+
 </script>
 
 <template>
-<h3>Show a file-select field which allows only one file to be chosen:</h3>
+<h3 @click="handleFileChange">Show a file-select field which allows only one file to be chosen:</h3>
+>>> {{ logs }}
 <form action="/action_page.php">
   <label for="myfile">Select a file:</label>
-  <input type="file" id="myfile" name="myfile"><br><br>
+  <input type="file" id="myfile" multiple name="myfile" @change="handleFileChange"><br><br>
   <input type="submit">
 </form>
 

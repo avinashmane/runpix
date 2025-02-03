@@ -73,7 +73,7 @@ async function mapParams(params) {
     p.imagePath = params.imagePath
   }
 
-   let race = await getRaceCfg(p.raceId);
+  let race = await getRaceCfg(p.raceId);
   p.Name = race.Name
   p.Location = race.Location
   p.raceDate = (race.Date && race.Date.length > 10) ? race.Date.substring(0, 10) : race.Date

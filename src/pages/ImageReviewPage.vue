@@ -1,4 +1,5 @@
 <template>
+  <div class="bg-slate-200 dark:bg-slate-800">
   <BackButton/>
   <h1 class="text-xl text-center">Uploads for {{ raceId }}</h1>
 
@@ -6,16 +7,18 @@
     <Button  :label="upload ? 'Image review' : 'Bulk Upload'" @click="upload = !upload" />
   </div>
 
-  <Upload v-if="upload" oldModule
-          :raceId="raceId" 
-          :waypoints="waypoints" 
-          :message="userStore.checkAccess('photos','mychoice','upload')?'Check your permissions':''"/>
-
   <FileUploader v-if="upload" 
       :raceId="raceId" 
           :waypoints="waypoints" 
           :user="store.state.auth?.userDetails?.userData?.email?.replace('@', '$')">
   </FileUploader>
+
+  <hr class="my-4"/>
+  <!-- old -->
+  <Upload v-if="upload" oldModule
+          :raceId="raceId" 
+          :waypoints="waypoints" 
+          :message="userStore.checkAccess('photos','mychoice','upload')?'Check your permissions':''"/>
 
   <div v-if="!upload">
     <div class="flex align-items-center">
@@ -124,6 +127,7 @@
     <!-- <Button name="races" >Race</Button> -->
     <Button raised icon="pi pi-chevron-left" class="p-2" />
   </router-link>
+  </div>
 </template>
 
 <script setup>

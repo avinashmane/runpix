@@ -56,11 +56,13 @@ describe('Test of database changes/functions', function(){
         test.cleanup()
     })
 
-    xdescribe ('Test database changes /races/videos -trigger update readings', function (){
+    describe ('Test database changes /races/videos -trigger update readings', function (){
         let data
         const params= {
-            raceId: 'testrun',
-            videoPath: '2024-05-08T06:10:08.601Z~VENUE~avinashmane$gmail.com~vid_0.webm'
+            // raceId: 'testrun',
+            raceId: 'mychoice25jan',
+            videoPath: '2025-01-12T02:20:47.621Z~END~avinashmane@gmail.com~VID_20250112_075044.mp4'
+            // videoPath: '2024-05-08T06:10:08.601Z~VENUE~avinashmane$gmail.com~vid_0.webm'
         }
         const path=`/races/${params.raceId}/videos/${params.videoPath}`
 
@@ -68,9 +70,22 @@ describe('Test of database changes/functions', function(){
             data = await get(path,x=> x)
         })
 
+        it('timingUpdate - create - video', function(){
+            // Make snapshot for state of database beforehand
+            const beforeSnap = test.firestore.makeDocumentSnapshot(null, path);
+            // Make snapshot for state of database after the change
+            const afterSnap = test.firestore.makeDocumentSnapshot(
+                data, 
+                path);
+            const change = test.makeChange(beforeSnap, afterSnap);
+            // Call wrapped function with the Change object
+            const wrapped = test.wrap(fn.timingUpdate);
+            return wrapped(change, {params:params});
+
+        })
         it('timingUpdate - update - video', function(){
             // Make snapshot for state of database beforehand
-            const beforeSnap = test.firestore.makeDocumentSnapshot(data, path);
+            const beforeSnap = test.firestore.makeDocumentSnapshot({data}, path);
             // Make snapshot for state of database after the change
             const afterSnap = test.firestore.makeDocumentSnapshot(
                 Object.assign({waypoint: '10K'},data), 
