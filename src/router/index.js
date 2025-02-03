@@ -108,16 +108,15 @@ const routes = [
           ],
     },
     {
-        path: "/testpage",
-        alias: '/test',
-        name: 'TestPage',
-        component: TestPage
-    },
-    {
         path: "/testfunction",
         alias: '/testfn',
         name: 'TestPage',
         component: TestFunctions
+    },
+    {
+        path: '/test',
+        name: 'TestPage',
+        component: TestPage
     },
     {
         path: "/home",
@@ -160,7 +159,10 @@ const routes = [
     },
     {
         path: "/:catchAll(.*)",
-        component: NotFoundPage
+        component: NotFoundPage,
+        beforeEnter: (to, from, next) => {
+            console.log(to, from)
+        }
     }
 ]
 
@@ -169,6 +171,7 @@ const router = createRouter({
         import.meta.env.BASE_URL),
     routes
 });
+
 
 trackRouter(router);
 

@@ -51,8 +51,8 @@ export default defineNuxtConfig({
   dir: {
     app: 'nuxt/',
     assets: '../public/assets',
-    // public: '../public',
-    // pages: '../src/pages',
+    public: '../public',
+    pages: '../nuxt/pages',
   },
   // dev: true,
   srcDir: 'nuxt/',

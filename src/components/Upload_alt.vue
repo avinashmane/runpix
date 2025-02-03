@@ -11,7 +11,7 @@
   <DropZone class="drop-area m-2" @files-dropped="addFiles" #default="{ dropZoneActive }">
     <label for="file-input">
       <span v-if="dropZoneActive">
-        <span>Drop Them Here</span>
+        <span>Drop them here</span>
         <span class="smaller">to add them</span>
       </span>
       <span v-else-if="props.message">
@@ -43,6 +43,8 @@
         tag="li"
         @remove="removeFile"
       />
+      {{ JSON.stringify(files) }}
+      {{ files?.map(x=>x?.file.name) }}
     </ul>
   </DropZone>
   <div class="m-2 flex justify-evenly">
@@ -68,12 +70,14 @@ const props = defineProps({
     default: null
   }
 });
+
 // Components
 import DropZone from "../components/DropZone.vue";
 import FilePreview from "../components/FilePreview.vue";
 import Select from "primevue/select";
 import { ref } from "vue";
 import { useStore } from "vuex";
+import {dayjs} from "../helpers"
 // File Management
 import useFileList from "../helpers/file-list";
 const { files, addFiles, removeFile } = useFileList();

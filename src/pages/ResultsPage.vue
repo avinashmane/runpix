@@ -1,5 +1,5 @@
 <template>
-  <Card id="result_select">
+  <Card id="result_select" class="mb-4 ">
     <template #content>
       <h1 @dblclick="klick()" class="text-lg">Results </h1>
 
@@ -18,12 +18,11 @@
     </template>
   </Card>
 
-
-  <div v-if="bibSelection && ('Name' in bibData) && raceId" class="container  text-xl mx-auto mt-30 center">
-    <!-- <small>{{ message }}</small> -->
-    <ResultCard :race="race" :bibData="bibData" :get-cert-data="getCertData">
+  <!-- <div  class="flex text-xl mx-auto mt-30 center"> -->
+    <ResultCard v-if="bibSelection && ('Name' in bibData) && raceId"
+       :race="race" :bibData="bibData" :get-cert-data="getCertData">
     </ResultCard>
-  </div>
+  <!-- </div> -->
   
 
   <!--Show the leader board -->
@@ -102,7 +101,6 @@ let raceId = ref(params.raceId)
 if (params.raceId)
   loadRaceId(params.raceId)
 
-
 const bibSelection = ref(params.bib);
 const items = ref([]);
 const entries = ref([])
@@ -112,19 +110,23 @@ let filteredBibObjects = ref([])
 let bibData = computed(() => {
   if (!filteredBibObjects.value.length) 
     return {}
-
-  let filt = filteredBibObjects.value.filter(x => x.Bib == bibSelection.value.split(' ')[0])
+  const bibNo=bibSelection.value.split(' ')[0]
+  router.replace(`/r/${raceId.value}/${bibNo}`)
+  
+  let filt = filteredBibObjects.value.filter(x => x.Bib == bibNo).map(mapBibResult)
   return filt.length ? filt[0] : {}
 })
 
 
-
-/////////////////////////////
+/**
+ * dropdown for Bib selection
+ * @param {*} event 
+ */
 const searchBib = async (event) => {
   // exit if raceId is not selected
   if (!raceId.value) return;
-  console.log(raceId.value)
-  // debugger
+  // console.log(cloneDeep(raceId.value))
+
   var raceBibsCol = collection(db, "races", raceId.value, "result");
   entries.value = []
   let n = 10,
@@ -161,7 +163,9 @@ const searchBib = async (event) => {
   console.warn(_items)
 }
 
-
+/**
+ * When bib text is entered and 🔍 is clicked
+ */
 const searchResults = async () => {
   let bibNo = bibSelection.value.split(" ")[0]
 
@@ -175,6 +179,7 @@ const searchResults = async () => {
 
 if (params.bib)
   searchResults()
+
 
 async function searchResultsForBib(bibNo) {
   let containsOperator = '==',//"array-contains",
@@ -209,8 +214,12 @@ async function searchResultsForBib(bibNo) {
   message.value = `Not found`
 }
 
+/**
+ * Map /races/raceid/results/xxx entry
+ * @param {*} data 
+ */
 function mapBibResult(data) {
-  data=JSON.parse(JSON.stringify(data))
+  data=cloneDeep(data)
   if ('Rank' in data){
     data['Rank'] = `${data['Rank']}`;
   }

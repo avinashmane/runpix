@@ -126,111 +126,19 @@ describe('OCR video basic tests', function () {
 })
 
 /**
- * MOCH Run processing
+ * MOCK Run processing
  */
-xdescribe('MOCK run race-vid2firestore mychoice24mar', function () {
+describe('MOCK run race-vid2firestore mychoice25jan', function () {
   var indexModule = require('../index.js'); // Works for both ESM and CommonJS
   var videocrModule = require('../videoocr.js'); // Works for both ESM and CommonJS
   this.timeout(100000); 
-  const filenames=`gs://run-pix.appspot.com/uploadvid/mychoice24mar/VID_20240310_065448.mp4
-  gs://run-pix.appspot.com/uploadvid/mychoice24mar/VID_20240310_065713.mp4
-  gs://run-pix.appspot.com/uploadvid/mychoice24mar/VID_20240310_065843.mp4
-  gs://run-pix.appspot.com/uploadvid/mychoice24mar/VID_20240310_065922.mp4
-  gs://run-pix.appspot.com/uploadvid/mychoice24mar/VID_20240310_070038.mp4
-  gs://run-pix.appspot.com/uploadvid/mychoice24mar/VID_20240310_070118.mp4
-  gs://run-pix.appspot.com/uploadvid/mychoice24mar/VID_20240310_070129.mp4
-  gs://run-pix.appspot.com/uploadvid/mychoice24mar/VID_20240310_070246.mp4
-  gs://run-pix.appspot.com/uploadvid/mychoice24mar/VID_20240310_070310.mp4
-  gs://run-pix.appspot.com/uploadvid/mychoice24mar/VID_20240310_070318.mp4
-  gs://run-pix.appspot.com/uploadvid/mychoice24mar/VID_20240310_070407.mp4
-  gs://run-pix.appspot.com/uploadvid/mychoice24mar/VID_20240310_070430.mp4
-  gs://run-pix.appspot.com/uploadvid/mychoice24mar/VID_20240310_070438.mp4
-  gs://run-pix.appspot.com/uploadvid/mychoice24mar/VID_20240310_070452.mp4
-  gs://run-pix.appspot.com/uploadvid/mychoice24mar/VID_20240310_070511.mp4
-  gs://run-pix.appspot.com/uploadvid/mychoice24mar/VID_20240310_070518.mp4
-  gs://run-pix.appspot.com/uploadvid/mychoice24mar/VID_20240310_070534.mp4
-  gs://run-pix.appspot.com/uploadvid/mychoice24mar/VID_20240310_070538.mp4
-  gs://run-pix.appspot.com/uploadvid/mychoice24mar/VID_20240310_070544.mp4
-  gs://run-pix.appspot.com/uploadvid/mychoice24mar/VID_20240310_070553.mp4
-  gs://run-pix.appspot.com/uploadvid/mychoice24mar/VID_20240310_070634.mp4
-  gs://run-pix.appspot.com/uploadvid/mychoice24mar/VID_20240310_070655.mp4
-  gs://run-pix.appspot.com/uploadvid/mychoice24mar/VID_20240310_070707.mp4
-  gs://run-pix.appspot.com/uploadvid/mychoice24mar/VID_20240310_070714.mp4
-  gs://run-pix.appspot.com/uploadvid/mychoice24mar/VID_20240310_070739.mp4
-  gs://run-pix.appspot.com/uploadvid/mychoice24mar/VID_20240310_070805.mp4
-  gs://run-pix.appspot.com/uploadvid/mychoice24mar/VID_20240310_070822.mp4
-  gs://run-pix.appspot.com/uploadvid/mychoice24mar/VID_20240310_070834.mp4
-  gs://run-pix.appspot.com/uploadvid/mychoice24mar/VID_20240310_070842.mp4
-  gs://run-pix.appspot.com/uploadvid/mychoice24mar/VID_20240310_070847.mp4
-  gs://run-pix.appspot.com/uploadvid/mychoice24mar/VID_20240310_070914.mp4
-  gs://run-pix.appspot.com/uploadvid/mychoice24mar/VID_20240310_070922.mp4
-  gs://run-pix.appspot.com/uploadvid/mychoice24mar/VID_20240310_070944.mp4
-  gs://run-pix.appspot.com/uploadvid/mychoice24mar/VID_20240310_070952.mp4
-  gs://run-pix.appspot.com/uploadvid/mychoice24mar/VID_20240310_071005.mp4
-  gs://run-pix.appspot.com/uploadvid/mychoice24mar/VID_20240310_071023.mp4
-  gs://run-pix.appspot.com/uploadvid/mychoice24mar/VID_20240310_071051.mp4
-  gs://run-pix.appspot.com/uploadvid/mychoice24mar/VID_20240310_071104.mp4
-  gs://run-pix.appspot.com/uploadvid/mychoice24mar/VID_20240310_071111.mp4
-  gs://run-pix.appspot.com/uploadvid/mychoice24mar/VID_20240310_071130.mp4
-  gs://run-pix.appspot.com/uploadvid/mychoice24mar/VID_20240310_071242.mp4
-  gs://run-pix.appspot.com/uploadvid/mychoice24mar/VID_20240310_071309.mp4
-  gs://run-pix.appspot.com/uploadvid/mychoice24mar/VID_20240310_071325.mp4
-  gs://run-pix.appspot.com/uploadvid/mychoice24mar/VID_20240310_071348.mp4
-  gs://run-pix.appspot.com/uploadvid/mychoice24mar/VID_20240310_071420.mp4
-  gs://run-pix.appspot.com/uploadvid/mychoice24mar/VID_20240310_071430.mp4
-  gs://run-pix.appspot.com/uploadvid/mychoice24mar/VID_20240310_071514.mp4
-  gs://run-pix.appspot.com/uploadvid/mychoice24mar/VID_20240310_071536.mp4
-  gs://run-pix.appspot.com/uploadvid/mychoice24mar/VID_20240310_071601.mp4
-  gs://run-pix.appspot.com/uploadvid/mychoice24mar/VID_20240310_071627.mp4
-  gs://run-pix.appspot.com/uploadvid/mychoice24mar/VID_20240310_071705.mp4
-  gs://run-pix.appspot.com/uploadvid/mychoice24mar/VID_20240310_071725.mp4
-  gs://run-pix.appspot.com/uploadvid/mychoice24mar/VID_20240310_071743.mp4
-  gs://run-pix.appspot.com/uploadvid/mychoice24mar/VID_20240310_071748.mp4
-  gs://run-pix.appspot.com/uploadvid/mychoice24mar/VID_20240310_071817.mp4
-  gs://run-pix.appspot.com/uploadvid/mychoice24mar/VID_20240310_071841.mp4
-  gs://run-pix.appspot.com/uploadvid/mychoice24mar/VID_20240310_071933.mp4
-  gs://run-pix.appspot.com/uploadvid/mychoice24mar/VID_20240310_071948.mp4
-  gs://run-pix.appspot.com/uploadvid/mychoice24mar/VID_20240310_072021.mp4
-  gs://run-pix.appspot.com/uploadvid/mychoice24mar/VID_20240310_072041.mp4
-  gs://run-pix.appspot.com/uploadvid/mychoice24mar/VID_20240310_072052.mp4
-  gs://run-pix.appspot.com/uploadvid/mychoice24mar/VID_20240310_072106.mp4
-  gs://run-pix.appspot.com/uploadvid/mychoice24mar/VID_20240310_072146.mp4
-  gs://run-pix.appspot.com/uploadvid/mychoice24mar/VID_20240310_072209.mp4
-  gs://run-pix.appspot.com/uploadvid/mychoice24mar/VID_20240310_072218.mp4
-  gs://run-pix.appspot.com/uploadvid/mychoice24mar/VID_20240310_072239.mp4
-  gs://run-pix.appspot.com/uploadvid/mychoice24mar/VID_20240310_072317.mp4
-  gs://run-pix.appspot.com/uploadvid/mychoice24mar/VID_20240310_072338.mp4
-  gs://run-pix.appspot.com/uploadvid/mychoice24mar/VID_20240310_072423.mp4
-  gs://run-pix.appspot.com/uploadvid/mychoice24mar/VID_20240310_072448.mp4
-  gs://run-pix.appspot.com/uploadvid/mychoice24mar/VID_20240310_072613.mp4
-  gs://run-pix.appspot.com/uploadvid/mychoice24mar/VID_20240310_072626.mp4
-  gs://run-pix.appspot.com/uploadvid/mychoice24mar/VID_20240310_072642.mp4
-  gs://run-pix.appspot.com/uploadvid/mychoice24mar/VID_20240310_072700.mp4
-  gs://run-pix.appspot.com/uploadvid/mychoice24mar/VID_20240310_072703.mp4
-  gs://run-pix.appspot.com/uploadvid/mychoice24mar/VID_20240310_072717.mp4
-  gs://run-pix.appspot.com/uploadvid/mychoice24mar/VID_20240310_072744.mp4
-  gs://run-pix.appspot.com/uploadvid/mychoice24mar/VID_20240310_072831.mp4
-  gs://run-pix.appspot.com/uploadvid/mychoice24mar/VID_20240310_072845.mp4
-  gs://run-pix.appspot.com/uploadvid/mychoice24mar/VID_20240310_072902.mp4
-  gs://run-pix.appspot.com/uploadvid/mychoice24mar/VID_20240310_072910.mp4
-  gs://run-pix.appspot.com/uploadvid/mychoice24mar/VID_20240310_072924.mp4
-  gs://run-pix.appspot.com/uploadvid/mychoice24mar/VID_20240310_072933.mp4
-  gs://run-pix.appspot.com/uploadvid/mychoice24mar/VID_20240310_073048.mp4
-  gs://run-pix.appspot.com/uploadvid/mychoice24mar/VID_20240310_073101.mp4
-  gs://run-pix.appspot.com/uploadvid/mychoice24mar/VID_20240310_073125.mp4
-  gs://run-pix.appspot.com/uploadvid/mychoice24mar/VID_20240310_073206.mp4
-  gs://run-pix.appspot.com/uploadvid/mychoice24mar/VID_20240310_073218.mp4
-  gs://run-pix.appspot.com/uploadvid/mychoice24mar/VID_20240310_073224.mp4
-  gs://run-pix.appspot.com/uploadvid/mychoice24mar/VID_20240310_073432.mp4
-  gs://run-pix.appspot.com/uploadvid/mychoice24mar/VID_20240310_073439.mp4
-  gs://run-pix.appspot.com/uploadvid/mychoice24mar/VID_20240310_073512.mp4
-  gs://run-pix.appspot.com/uploadvid/mychoice24mar/VID_20240310_073626.mp4
-  gs://run-pix.appspot.com/uploadvid/mychoice24mar/VID_20240310_073642.mp4
-  gs://run-pix.appspot.com/uploadvid/mychoice24mar/VID_20240310_073707.mp4
-  gs://run-pix.appspot.com/uploadvid/mychoice24mar/VID_20240310_073820.mp4
-  gs://run-pix.appspot.com/uploadvid/mychoice24mar/VID_20240310_073941.mp4
-  gs://run-pix.appspot.com/uploadvid/mychoice24mar/VID_20240310_074051.mp4`.split('\n')
-  const selectedFiles=filenames.slice(0,2)
+  const prefix='gs://run-pix.appspot.com/uploadvid/mychoice25jan'
+  const filenames=`2025-01-12T02:18:45.249Z~VENUE~undefined~VID_20250112_074842.mp4
+  2025-01-12T02:20:24.297Z~VENUE~undefined~VID_20250112_075021.mp4
+  2025-01-12T02:20:47.621Z~VENUE~undefined~VID_20250112_075044.mp4
+  2025-01-12T02:21:57.601Z~VENUE~undefined~VID_20250112_075153.mp4
+  2025-01-12T02:25:49.835Z~VENUE~undefined~VID_20250112_075546.mp4`.split('\n').map(x=>`${prefix}/${x.trim()}`)
+  const selectedFiles=filenames//.slice(0,2)
 
   before(function () {
     optionBackup = process.env.RUNTIME_OPTION

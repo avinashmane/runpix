@@ -4,7 +4,8 @@ export default function () {
 	const files = ref([])
 
 	function addFiles(newFiles) {
-		let newUploadableFiles = [...newFiles].map((file) => new UploadableFile(file)).filter((file) => !fileExists(file.id))
+		let newUploadableFiles = [...newFiles].map((file) => 
+			new UploadableFile(file)).filter((file) => !fileExists(file.id))
 		files.value = files.value.concat(newUploadableFiles)
 	}
 
@@ -27,11 +28,11 @@ export default function () {
 class UploadableFile {
 	constructor(file) {
 		this.file = file
-		// this.lastModified = file.lastModified
+		this.lastModified = file.lastModified
 		this.id = `${file.name}-${file.size}-${file.lastModified}-${file.type}`
 		// create data url only for images
 		this.url = file.type.includes("image") ? URL.createObjectURL(file) : ''
 		this.status = null
-		// console.debug(this.file)
+		console.debug(this.file)
 	}
 }

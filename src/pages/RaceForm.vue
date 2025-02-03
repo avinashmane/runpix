@@ -11,47 +11,51 @@
           <h1>{{ raceObj?.Name }}</h1>
         </template>
         <template #subtitle></template>
-        <template #content>
-          <table id="raceinfo" class="table-auto text-left w-full  ">
-            <tr>
-              <td> Date: </td>
-              <td> {{ raceObj?.Date }} </td>
-            </tr>
-            <tr>
-              <td>Location </td>
-              <td> {{ raceObj?.Location }} </td>
-            </tr>
 
-            <tr>
-              <td>Race Organizer </td>
-              <td>{{ raceObj?.raceOrg }}
+        <template #content>
+          <div id="raceinfo" class=" text-left w-full  ">
+            <div class="my-2 flex flex-col md:flex-row md:justify-between">
+              <div class="font-thin text-left"> Date: </div>
+              <div> {{ raceObj?.Date }} </div>
+            </div>
+            <div class="my-2 flex flex-col md:flex-row md:justify-between">
+              <div class="font-thin text-left">Location </div>
+              <div> {{ raceObj?.Location }} </div>
+            </div>
+
+            <div class="my-2 flex flex-col md:flex-row md:justify-between ">
+              <div class="font-thin text-left">Race Organizer </div>
+              <div class="">{{ raceObj?.raceOrg }}
                 <a v-if="raceObj?.linkOrg" :href="raceObj?.linkOrg"
                   class="text-blue-600 visited:text-purple-600 hover:decoration-wavy">
                   {{ raceObj?.linkOrg }}</a>
-              </td>
-            </tr>
-            {{isResultAvailable()}}
-            <tr v-for="(lbl, fld) in links" class="flex gap-2">
-              <div v-if="['linkPhotos','linkResults'].includes(fld) || raceObj?.[fld] ">
-               {{ lbl }}
-                <span v-if="fld == 'linkPhotos' && raceObj?.[fld] && raceObj?.photoStatus?.includes('avail')">
-                  <Tag value="Available" />&nbsp; 
-                  <i class="pi pi-external-link"></i>
-                  <!-- <Tag v-else value="Unavailable"/> -->
-                </span>
-                <span v-if="fld == 'linkResults' && isResultAvailable()"
-                      @click="router.push(raceObj?.[fld] || `/r/${raceObj?.id}`)">
-                  <Tag >Available</Tag><i class="pi pi-external-link"></i>
-                  <!-- <Tag v-else value="Unavailable"/> -->
-                </span>
-              <span>
-                <a :href="raceObj?.[fld]" class="text-blue-600 visited:text-purple-600 hover:decoration-wavy">
-                  {{ raceObj?.[fld] }} </a>
-                </span>
               </div>
-            </tr>
+            </div>
+            <!-- {{isResultAvailable()}} -->
+            <div v-for="(lbl, fld) in links" class="my-2 flex flex-col md:flex-row md:justify-between">
+              <div class="font-thin text-left"> {{ lbl }}</div>
+              <div>
+                <div v-if="['linkPhotos', 'linkResults'].includes(fld) || raceObj?.[fld]">
 
-          </table>
+                  <span v-if="fld == 'linkPhotos' && raceObj?.[fld] && raceObj?.photoStatus?.includes('avail')"
+                    class="text-right">
+                    <Tag value="Available" />&nbsp; 
+                    <i class="pi pi-external-link"></i>
+                    <!-- <Tag v-else value="Unavailable"/> -->
+                  </span>
+                  <span v-if="fld == 'linkResults' && isResultAvailable()"
+                        @click="router.push(raceObj?.[fld] || `/r/${raceObj?.id}`)">
+                    <Tag >Available</Tag><i class="pi pi-external-link"></i>
+                    <!-- <Tag v-else value="Unavailable"/> -->
+                  </span>
+                <span>
+                  <a :href="raceObj?.[fld]" class="text-blue-600 visited:text-purple-600 hover:decoration-wavy">
+                    {{ raceObj?.[fld] }} </a>
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
         </template>
 
         <template #footer>
@@ -226,7 +230,7 @@ div.p-selectbutton ::v-deep(div) {
   padding: 2px;
 }
 
-table#raceinfo ::v-deep(td) {
+table#raceinfo ::v-deep(div) {
   padding-top: .5em;
   border-top: thin lightgrey;
 }

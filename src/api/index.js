@@ -72,6 +72,7 @@ export const signInGoogle = () => {
         return userCredential.user;
     })
     .catch((error) => {
+        console.error(error)
         throw error.code;
     })
     // debugger;

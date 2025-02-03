@@ -5,12 +5,19 @@
   <div class="m-1">
     <Button  :label="upload ? 'Image review' : 'Bulk Upload'" @click="upload = !upload" />
   </div>
-  <Upload v-if="upload" 
+
+  <Upload v-if="upload" oldModule
           :raceId="raceId" 
           :waypoints="waypoints" 
           :message="userStore.checkAccess('photos','mychoice','upload')?'Check your permissions':''"/>
-  
-  <div v-else>
+
+  <FileUploader v-if="upload" 
+      :raceId="raceId" 
+          :waypoints="waypoints" 
+          :user="store.state.auth?.userDetails?.userData?.email?.replace('@', '$')">
+  </FileUploader>
+
+  <div v-if="!upload">
     <div class="flex align-items-center">
       <label for="showHidden" class="ml-2">Show All</label>
       <Checkbox v-model="showHidden" inputId="showHidden" value="showHidden" />
@@ -31,7 +38,7 @@
       template="FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
       currentPageReportTemplate="{first}-{last} of {totalRecords}"
     />
-    <div class="flex flex-wrap bg-gray-200 justify-evenly">
+    <div class="flex flex-wrap bg-slate-200 dark:bg-slate-800 justify-evenly">
       <div v-for="i in range(first, rows, images.length)" :key="i" class="thumb">
         <a v-if="images[i]" xhref="getURI(i)">
           <Image
@@ -125,6 +132,7 @@ import { useStore } from "vuex";
 import { useRoute } from "vue-router";
 import Paginator from "primevue/paginator";
 import Upload from "../components/Upload_alt.vue";
+import FileUploader from "../components/FileUploader.vue";
 import Image from "primevue/image";
 import Dialog from "primevue/dialog";
 import InputText from "primevue/inputtext";

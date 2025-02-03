@@ -1,13 +1,15 @@
 {
-  "name": "vite",
-  "version": "1.1.0",
+  "name": "runpix",
+  "version": "1.1.3",
   "notatype1": "module",
   "author": {
     "name": "Avinash Mane"
   },
   "scripts": {
-    "dev": "vite",
+    "dev": "HOST=192.168.1.8 vite",
     "func-serve": "firebase serve --only functions -p 5001",
+    "ngrok": "pnpm ngrok:install && ngrok http --url=firm-swan-prompt.ngrok-free.app https://localhost:5000",
+    "ngrok:install": "echo https://dashboard.ngrok.com/get-started/setup/linux?domainId=rd_2rGU62AoidL11x03u3iCojzd9ji",
     "build": "vite build",
     "serve": "vite preview",
     "hosting": "firebase deploy --only hosting",
@@ -16,6 +18,7 @@
     "test:e2e": "cucumber-js",
     "test:func": "pnpm exec mocha --exec functions/test/*.test.*js",
     "test:reprocess": "cd functions & pnpm exec mocha --reporter spec -f reprocess",
+    "admin:dev": "cd ../run-pix-admin/ && conda activate ./.conda/ && make dev",
     "express": "cd functions && export $(cat .env | grep \"^[^#;]\" |xargs) &&  node express.js ",
     "backup": "gsutil -m rsync -r -y node_modules -y .git . gs://backup-avinashmane/runpix",
     "cy:open": "cypress open",
@@ -30,13 +33,14 @@
   "dependencies": {
     "@primevue/nuxt-module": "^4.1.0",
     "add": "^2.0.6",
+    "async": "^3.2.6",
     "axios": "^1.7.7",
     "compressorjs": "^1.2.1",
     "dayjs": "^1.11.13",
     "express": "^4.18.2",
     "firebase": "^9.23.0",
     "lodash-es": "^4.17.21",
-    "nuxt": "^3.13.2",
+    "nuxt": "^3.15.1",
     "pinia": "^2.1.7",
     "primeicons": "^6.0.1",
     "primevue": "^4.1.0",
@@ -72,7 +76,8 @@
     "vite": "^5.4.8",
     "vite-bundle-visualizer": "^1.2.1",
     "vite-plugin-chunk-split": "^0.4.7",
-    "vite-plugin-mkcert": "^1.17.6"
+    "vite-plugin-mkcert": "^1.17.6",
+    "vite-plugin-qrcode": "^0.2.4"
   },
   "deletedDependencies": {
     "@google-cloud/video-intelligence": "^5.1.0",

@@ -1,4 +1,12 @@
+
 const debug=console.debug
+
+
+import dayjs from 'dayjs'
+import timezone from 'dayjs/plugin/timezone'
+import relativeTime from 'dayjs/plugin/relativeTime'
+dayjs.extend(timezone)
+dayjs.extend(relativeTime)
 
 function getDateTime(datetime) {
     let date=datetime? new Date(datetime) : new Date()
@@ -103,4 +111,5 @@ const  getPublicUrl = (folder,raceId,file) =>{
 	}
 }
 	
-export {CSVToArray,getPublicUrl,getDateTime,getLocalDateTime,debug}
+export {CSVToArray,getPublicUrl,getDateTime,getLocalDateTime,debug,
+	dayjs}

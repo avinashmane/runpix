@@ -2,6 +2,7 @@ import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import mkcert from 'vite-plugin-mkcert'
 import path from 'path'
+import { qrcode } from 'vite-plugin-qrcode';
 // import { chunkSplitPlugin } from 'vite-plugin-chunk-split';
 
 // https://vitejs.dev/config/
@@ -9,6 +10,7 @@ export default defineConfig({
   plugins: [
             vue(),
             mkcert(),
+            qrcode() // only applies in dev mode
             // chunkSplitPlugin()
             ],
   server: {
