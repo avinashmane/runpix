@@ -7,12 +7,15 @@ const { createRaceNthSunday,createSundayRace } = require("./races")
 const express = require('express');
 const exphbs = require('express-handlebars');
 var morgan = require('morgan')
+var cors = require('cors')
 const app = express();
 
 
 app.engine('handlebars', exphbs.engine({ defaultLayout: 'main' }));
 app.set('view engine', 'handlebars');
 // app.use("/dist",express.static('../dist'))
+
+app.use(cors())
 app.use(morgan('tiny'))
 //  app.use(firebaseUser.validateFirebaseIdToken);
 

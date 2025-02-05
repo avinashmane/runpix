@@ -17,17 +17,27 @@
       </TabPanel>
       <TabPanel header="Create">
           <p>
-            <div class="flex gap-5 mx-5">
+            <div class="flex flex-col gap-5 mx-5">
                 <!-- <label for="newRaceId">Race Id</label> -->
+
+                <div>
+                  <label for="newRaceId">new Race Id</label>
+                  <InputText id="newRaceId" v-model="newRaceId" aria-describedby="raceId-help" class="w-full border"/>
+                  <small id="username-help">Enter your id for the Race.  Only a-z0-9. All lowercase. No space </small>
+                </div>
+                <label for="templateRaceId">Template Race Id</label>
+                <InputText id="templateRaceId" v-model="templateRaceId" aria-describedby="templateRaceId-help" class="w-full border"/>
+
                 <Button type="button" @click="createNewRace"
                   label="Create"></Button>
-                <InputText id="newRaceId" v-model="newRaceId" aria-describedby="raceId-help" class="w-1/3 border"/>
-
             </div>
-            <small id="username-help">Enter your id for the Race.  Only a-z0-9. All lowercase. No space </small>
+            
           </p>
       </TabPanel>
-      <TabPanel header="Record">
+      <TabPanel header="Help">
+          <Button><a href="https://avinashmane.github.io/runpix-docs/" target="_blank">RunPix Documentation
+            <i class="pi pi-external-link"></i>
+          </a></Button>
           <p>
             <ol>
               <li>Edit the information of the race</li>
@@ -42,17 +52,16 @@
           </p>
       </TabPanel>
   </TabView>
-
-
   </div>
 </template>
 
 <script setup>
-import { useStore } from 'vuex';
+// import { useStore } from 'vuex';
+import { useRaceStore } from '../stores';
 import { useRouter, useLink } from 'vue-router'
 import Card from 'primevue/card' ;
 import { computed,ref } from 'vue';
-import {getDateTime} from '../helpers';
+import {dayjs, nextNthSunday} from '../helpers';
 import ToggleSwitch from 'primevue/toggleswitch';
 import {db} from '../../firebase/config'
 import TabView from 'primevue/tabview';
@@ -60,14 +69,16 @@ import TabPanel from 'primevue/tabpanel';
 import InputText from 'primevue/inputtext';
 import { doc, getDoc ,updateDoc, setDoc } from 'firebase/firestore'
 import { getPublicUrl } from "../helpers/index";
-import {chain,cloneDeep,map,take,keys,orderBy,sumBy,pickBy,split,sortBy,tap,startsWith}  from "lodash-es"
+import {chain,cloneDeep,map,take,keys,orderBy,sumBy,pickBy,split,sortBy,tap,startsWith,lowerCase}  from "lodash-es"
 import RacesCard from '../components/RacesCard.vue';
 
-const store = useStore()
+// const store = useStore()
+const raceStore = useRaceStore()
 const router = useRouter()
 
-const newRaceId=ref('newrace23month')
-const races = computed(() => {let arr = store.state.datastore.races
+const newRaceId=ref(`mychoice${dayjs().format('YYMMM').toLowerCase()}`)
+const templateRaceId=ref(`mychoice24may`)
+const races = computed(() => {let arr = raceStore.races
                               if (arr instanceof Object) 
                                 arr=orderBy(arr,"Date","desc")
                                 if (nolist.value ){
@@ -77,24 +88,28 @@ const races = computed(() => {let arr = store.state.datastore.races
                                 }
                               })
 
-store.dispatch('getRacesAction')
+// store.dispatch('getRacesAction')
 
 function createNewRace(){
   // debugger;
   if(newRaceId.value){
     let newRace=newRaceId.value.replace(/[^0-9A-z]*/g,"").toLowerCase()
-    getDoc(doc(db,'races/default'))
+    getDoc(doc(db,`races/${templateRaceId.value}`))
       .then(snap=>{
         let data=snap.data();
         data.id = newRace;
         data.name=newRaceId.value;  
         data.photoStatus="available"
         data.status=[]
+        data.timestamp={created:dayjs().toISOString()}
+        data.Date=nextNthSunday(1)
+        data.Name=`Copy of ${data.Name}`
         setDoc(doc(db,`races/${newRace}`),data)
           .then(x=>
             console.log(`Created race with id ${newRace}`)
           )
       }) 
+    router.push(`/race/${newRace}`)
   }
 }
 
@@ -102,15 +117,10 @@ let fsdb={races:[]}
 
 let nolist=ref(false)
 
-// let js=(x)=>JSON.parse(JSON.stringify(x))
-
 let klick=() => { 
   debugger;
 }
 
-// const races=getRaces(fsdb)
-// debugger;
-// console.log(fsdb)
 
 function NOP() {}
 // then in the optimised code

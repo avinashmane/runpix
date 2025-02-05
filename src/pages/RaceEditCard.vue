@@ -128,6 +128,7 @@
       </Card>
     </div>
   </div>
+
 </template>
 
 <script setup>
@@ -139,11 +140,12 @@ import StepItem from 'primevue/stepitem';
 import Step from 'primevue/step';
 import StepPanel from 'primevue/steppanel';
 import BackButton from "../components/BackButton.vue"
-import { useStore } from 'vuex';
+// import { useStore } from 'vuex';
+import { useRaceStore } from '../stores';
 // import Camera from "../components/old_Camera.vue";
 import Camera from "../components/Camera.vue";
 import GeoLoc from "../components/GeoLoc.vue";
-import RaceLog from "../components/RaceLogCard.vue";
+// import RaceLog from "../components/RaceLogCard.vue";
 // import RaceStartList from "../components/RaceStartListCard.vue";
 import RaceImages from "../components/RaceImagesCard.vue";
 import RaceInfoPanel from "../components/RaceInfoPanel.vue";
@@ -157,7 +159,7 @@ import Select from 'primevue/select';
 import { computed, ref, reactive } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { chain, cloneDeep, map, take, keys, orderBy, sumBy, pickBy, split, sortBy, tap, startsWith } from "lodash-es"
-
+import {storeToRefs} from 'pinia'
 let props = defineProps({
   option: String
 })
@@ -169,23 +171,27 @@ const router = useRouter();
 
 const raceId = route.params.raceId
 
-const store = useStore()
-store.dispatch('getRacesAction')
-let waypoint = ref(store.state.datastore.race.waypoint)  //ref("venue")
+// const store = useStore()
+// store.dispatch('getRacesAction')
+const raceStore = useRaceStore()
+raceStore.setRaceId(raceId)
+let {race} = storeToRefs(raceStore)
+let waypoint = raceStore.race?.waypoint//ref(store.state.datastore.race.waypoint)  //ref("venue")
 
-let raceObj
-let race = computed(() => {
 
-  let racefilt = store.state.datastore.races.filter(r => r.id == raceId);
+// let raceObj
+// let race = computed(() => {
 
-  if (racefilt.length > 0) {
-    // debugger
-    raceObj = cloneDeep(racefilt[0])
+//   let racefilt = store.state.datastore.races.filter(r => r.id == raceId);
 
-    return raceObj //racefilt[0]
-  } else
-    return { name: '-', Waypoints: ['VENUE'] }
-});
+//   if (racefilt.length > 0) {
+//     // debugger
+//     raceObj = cloneDeep(racefilt[0])
+
+//     return raceObj //racefilt[0]
+//   } else
+//     return { name: '-', Waypoints: ['VENUE'] }
+// });
 
 
 let bibRegex = computed(() => {

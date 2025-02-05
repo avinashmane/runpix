@@ -219,7 +219,8 @@
 
 <script setup>
 import { computed, ref } from "vue";
-import { useStore } from "vuex";
+// import { useStore } from "vuex";
+import { useRaceStore } from "../stores";
 import { useRoute, useRouter } from "vue-router";
 
 // import Paginator from "primevue/paginator";
@@ -254,8 +255,10 @@ import { useToast } from "primevue/usetoast";
 const toast = useToast();
 const route = useRoute();
 const router = useRouter();
-const store = useStore();
-const racesObj = store.state.datastore.racesObj;
+// const store = useStore();
+const raceStore = useRaceStore();
+// const racesObj = store.state.datastore.racesObj;
+const racesObj = raceStore.racesObj;
 const raceId = route.params.raceId;
 const race = racesObj[raceId];
 const validHeaders = map(config.startListHeaders,x=>x.field);

@@ -72,17 +72,25 @@ async function addDecodedIdTokenToRequest(idToken, req) {
 }
 
 class Firestore {
+  cfg = {}
+
   constructor() {
     if (!admin.apps.length)
       admin.initializeApp()
     this.firestore = admin.firestore()
+    this.firestore.settings({ ignoreUndefinedProperties: true });
+    this.firestore.doc('app/config').onSnapshot(snap => this.cfg = snap.data());
+
+    this.storage = admin.storage()
 
   }
   col = (path) => this.firestore.doc(path)
   /** read data /w callback */
   doc = (path) => this.firestore.doc(path)
+
   get = (path, callback) => this.doc(path).get()
     .then(x => callback(x.data()))
+
   getCol = (path, callback) => this.firestore.collection(path).get()
     .then(snap => {
       let arr = []

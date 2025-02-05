@@ -112,17 +112,19 @@
   import {db,  storage  } from "../../firebase/config"
   import { doc, getDoc ,updateDoc, setDoc } from 'firebase/firestore'
   import { ref as stoRef,  uploadBytes,  uploadString  } from "firebase/storage";
-  import {  useStore  } from "vuex";
-  const store = useStore()
-  const captureCount = store.state.captureCount
+// import { useStore } from "vuex";
+// const store = useStore()
+// const captureCount = store.state.captureCount
+  import { useUserStore, useRaceStore } from '../stores';
   import { config } from '../config';
   const str=(x)=>JSON.stringify(x)
-  
+  const userStore = useUserStore()
+  const raceStore = useRaceStore()
 
   const UPLOADS_FOLDER = config.storage.uploads;
   const UPLOADVIDS_FOLDER = config.storage.uploadvid
   
-  const userData = store.state.auth.userDetails.userData
+  const userData = userStore.profile//store.state.auth.userDetails.userData
 
   /**
    * navigator.mediaDevices.getSupportedConstraints()  
@@ -303,7 +305,7 @@
 
   function recordBib(dist){
     // if bib is mentioned...update firebase
-    const counter=getCaptureCounter();
+    const counter = userStore.getCounter('capture')//getCaptureCounter()
     let ts=new Date().toISOString()
     let bibNo=bib.value.trim()
     // console.log(dist,bib.value,bibNo)
@@ -389,7 +391,7 @@ const playButtonListener= (idx) => {
 
 
 const uploadVideo=(event,wpt,ts) => {
-  const counter = getCaptureCounter()
+  const counter = userStore.getCounter('capture')//getCaptureCounter()
   wpt = wpt || props.waypoint
   let timestamp = ts || new Date().toISOString()
   // debugger
@@ -424,11 +426,11 @@ const downloadButtonListener=  () => {
   }, 100);
 };
 
-function getCaptureCounter() {
-  const counter=store.state.counters.capture;
-  store.dispatch('incrementCountAction', 'capture');
-  return counter;
-}
+// function getCaptureCounter() {
+//   // const counter=store.state.counters.capture;
+//   // store.dispatch('incrementCountAction', 'capture');
+//   return userStore.getCounter('capture');
+// }
 
 function handleDataAvailable(event) {
   // timeStamp

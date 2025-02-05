@@ -18,8 +18,6 @@
 
 <script setup>
 import { computed,  ref } from 'vue' 
-import { useStore } from 'vuex';
-import { useToast } from "primevue/usetoast";
 import Paginator from 'primevue/paginator';
 
 import { db, storage } from "../../firebase/config" 
@@ -33,8 +31,6 @@ let props = defineProps({
   waypoint: String,
 })
 console.log(props.bibRegex)
-
-const store = useStore()
 
 const first = ref(0);
 const rows = ref(20);

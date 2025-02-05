@@ -196,16 +196,10 @@
 </template>
 
 <script setup>
-// const props=defineProps({
-//   raceId: String,
-//   race: String,
-// })
-// const props={
-//   raceId: raceId,
-//   race: race,
-// }
+
 import { computed, ref, onBeforeUnmount } from "vue";
-import { useStore } from "vuex";
+// import { useStore } from "vuex";
+import { useRaceStore } from "../stores";
 import { useRoute, useRouter } from "vue-router";
 import axios from 'axios';
 import Paginator from "primevue/paginator";
@@ -232,41 +226,27 @@ import {
   deleteDoc
 } from "firebase/firestore";
 import {
-  chain,
-
-  cloneDeep,
-  map,
-  each,
-  take,
-  keys,
-  groupBy,
-  orderBy as _orderBy,
-  sumBy,
-  pickBy,
-  uniqBy,
-  split,
-  sortBy,
-  tap,
-  extend,
-  startsWith,
-} from "lodash-es";
+  chain, cloneDeep,  map,  orderBy as _orderBy,  sumBy,  pickBy,  uniqBy,  
+  split,  sortBy,  tap,  extend,  startsWith,} from "lodash-es";
 import {debug} from "../helpers"
 import _ from 'lodash-es'
 import dayjs from "dayjs"
 import duration from 'dayjs/plugin/duration'
 dayjs.extend(duration)
+import {storeToRefs} from 'pinia'
 
 const GS_PREFIX = config.GS_PREFIX;
 const NOMATCH = "N/A";
-const store = useStore();
+// const store = useStore();
+const raceStore = useRaceStore();
 const route = useRoute();
 const router = useRouter();
-const raceId = route.params.raceId;
+const raceId =  route.params.raceId;
+raceStore.setRaceId(raceId)
+// store.dispatch("getRaceObjAction", raceId);
 
-store.dispatch("getRaceObjAction", raceId);
-
-const racesObj = store.state.datastore.racesObj;
-const race = computed(() => store.state.datastore.race);
+const racesObj = raceStore.racesObj//store.state.datastore.racesObj;
+const {race} = storeToRefs(raceStore)//computed(() => store.state.datastore.race);
 
 const bibsOptions = ["Matched", "Pattern", "All", NOMATCH]; //matched
 const bibsVal = ref("All"); //matched
@@ -780,22 +760,19 @@ const showToast = (summary,mesg,severity) => {
 };
 
 function finalize_results_server(){
-  const url=''
+  const url=`${config.app.API_URL}/race/${raceId}/results`
+
   return axios
-    .post(url, props.data, {
+    .post(url, {}, {
       headers: {
         "Content-Type": "application/json",
       },
     })
     .then((ret) => {
-      console.log("Certificate generated", ret);
-      cert.value.status = "Y";
-      cert.value.url = ret.data.contentUrl;
-      console.log(cert);
+      console.log("test result", ret);
       return ret;
     })
     .catch((e) => {
-      cert.value.status = "E";
       console.warn( e);
     });
 }

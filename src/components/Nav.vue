@@ -4,11 +4,11 @@
       <span class="flex items-center w-full justify-center">
           <Menubar :model="items" class="w-full bg-transparent">
             <template #start>
-              <a class="ml-2 text-primary" href="/">
+              <router-link class="ml-2 text-primary" to="/">
                 <img class="logo" 
                   src="/assets/graphics/logo_runpix.png" 
                   :alt="site" /> 
-              </a>              
+              </router-link>              
             </template>
             <template #item="{ item, props, hasSubmenu }">
                 <router-link v-if="item.route" v-slot="{ href, navigate }" :to="item.route" custom>
@@ -26,7 +26,7 @@
 
             <template #end>
               <div class="sm:flex items-center w-[30%]  justify-center">
-                <div v-if="userState.isSignIn" class="flex flex-row">
+                <div v-if="userStore.isSignIn" class="flex flex-row">
                   <router-link to="/" class="mr-2 hover:text-[#FF9000] transition ease-in-out">
                     <i class="pi pi-home" style="font-size: 2rem"></i>
                   </router-link>
@@ -48,29 +48,33 @@
         </Menubar>
       </span>
     </div>
-  </div>
+    <div class="mt-25"></div>
+  <!-- {{userStore.profile}} -->
 
+  </div>
+  {{userStore.isSignIn}}
 </template>
 
 <script setup>
 import { firebaseAuth } from '../../firebase/config';
-import { useStore } from "vuex";
+// import { useStore } from "vuex";
+import {useRouter} from 'vue-router'
 import { ref,watchEffect, computed } from "vue";
-import { useUserStore } from '../stores';
+import { useUserStore, useRaceStore } from '../stores';
 import Menubar from "primevue/menubar";
 const userStore =  useUserStore()
-const store = useStore()
-
-const userState = computed(() => store.state.auth.userDetails)
+// const store = useStore()
+const router=useRouter()
 
 const firebaseUser = () => firebaseAuth.onAuthStateChanged(user => {
   // console.warn(`firebaseAuth.onAuthStateChanged ${JSON.stringify(user)}`)
   if (user) {
     userStore.login(user)
-    store.commit('successRequestUser', user)
+    router.push('/home')
+    // store.commit('successRequestUser', user)
   } else {
     userStore.logout()
-    store.commit('failRequestUser', 'Fail to get user')
+    // store.commit('failRequestUser', 'Fail to get user')
   }
 });
 
@@ -117,7 +121,7 @@ let site= computed(()=>{
         icon: 'pi pi-info',
         url: 'https://avinashmane.github.io/runpix-docs/'
     },
-    userState.isSignIn ? 
+    userStore.isSignIn ? 
     {
         label: 'Logout',
         icon: 'pi pi-exit',
@@ -126,16 +130,16 @@ let site= computed(()=>{
     {
         label: 'Login',
         icon: 'pi pi-star',
-        command: () => {  // copied from login card
-          store.dispatch('signInGoogleAction').then(() => {
-            if (!signInState.isError) {
-              store.dispatch('getUserAction')
-              router.push('/home')
-            } else {
-              debug('error in dispatch')
-            }
-          })
-        }
+        command: async () => {  // copied from login card
+          await userStore.signInGoogleAction()
+          if (userStore.isSignIn) {//!signInState.isError
+            // store.dispatch('getUserAction')
+            router.push('/home')
+          } else {
+            debug('error in dispatch')
+          }
+        }//).catch(console.error)
+        //}
     },
 ]);
 </script>

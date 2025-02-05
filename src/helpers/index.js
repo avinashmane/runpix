@@ -8,6 +8,7 @@ import relativeTime from 'dayjs/plugin/relativeTime'
 dayjs.extend(timezone)
 dayjs.extend(relativeTime)
 
+
 function getDateTime(datetime) {
     let date=datetime? new Date(datetime) : new Date()
     return date.toISOString().replace(/[\-:\.]/g,"").split(/[TZ]/g).slice(0,2) 
@@ -18,6 +19,9 @@ function getLocalDateTime(datetime) {
     return date.toLocaleString()
 }
 
+function nextNthSunday(n=1){
+	return dayjs().add(n, 'weeks').startOf('week').format('YYYY-MM-DD')
+}
 //https://www.bennadel.com/blog/1504-ask-ben-parsing-csv-strings-with-javascript-exec-regular-expression-command.htm
 // This will parse a delimited string into an array of
 	// arrays. The default delimiter is the comma, but this
@@ -111,5 +115,5 @@ const  getPublicUrl = (folder,raceId,file) =>{
 	}
 }
 	
-export {CSVToArray,getPublicUrl,getDateTime,getLocalDateTime,debug,
+export {CSVToArray,getPublicUrl,getDateTime,getLocalDateTime,debug,nextNthSunday,
 	dayjs}

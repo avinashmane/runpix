@@ -89,6 +89,7 @@
     </div>
   </div>
   <!-- <button @click="klick">x</button> -->
+
 </template>
 
 <script setup>
@@ -106,10 +107,13 @@ import { getDateTime } from "../helpers"
 import { db, storage } from "../../firebase/config"
 import { doc, getDoc, updateDoc, setDoc } from 'firebase/firestore'
 import { ref as stoRef, uploadBytes, uploadString } from "firebase/storage";
-import { useStore } from "vuex";
-const store = useStore()
-const captureCount = store.state.captureCount
-const JSS = JSON.stringify
+// import { useStore } from "vuex";
+// const store = useStore()
+// const captureCount = store.state.captureCount
+import { config } from '../config';
+import { useUserStore, useRaceStore } from '../stores';
+const userStore = useUserStore()
+const raceStore = useRaceStore()
 const compact = (x) => isNaN(x) ? x : Intl.NumberFormat('en', { notation: 'compact' }).format(x) //compact number
 console.time('cam')
 const log = (...x) => console.timeLog('cam', ...x)
@@ -123,7 +127,7 @@ const props = defineProps({
 const UPLOADS_FOLDER = config.storage.uploads;
 const UPLOADVIDS_FOLDER = config.storage.uploadvid
 
-const userData = store.state.auth.userDetails.userData
+const userData = userStore.profile//store.state.auth.userDetails.userData
 
 /**
  * navigator.mediaDevices.getSupportedConstraints()  
@@ -306,8 +310,7 @@ const recordButtonListener = () => {
 };
 
 function startRecording() {
-
-  const counter = getCaptureCounter()// const _mimeType = mimeType.value;
+  const counter = userStore.getCounter('capture')//getCaptureCounter()
   const options = {
     // mimeType: mimeType.value
     // audioBitsPerSecond: 128000,
@@ -430,18 +433,6 @@ const uploadVideo = (blobId) => {
 
 }
 
-// const uploadVideo_old = (event, wpt, ts) => {
-//   const counter = getCaptureCounter()
-//   wpt = wpt || props.waypoint
-//   let timestamp = ts || new Date().toISOString()
-//   // debugger
-//   let email = userData.email || "userData.email"
-//   let uploadPath = `${UPLOADVIDS_FOLDER}/${props.raceId}/${timestamp}~${wpt}~${email.replace("@", "$")}~vid_${counter}.webm`
-//   const metadata = { contentType: 'video/webm', };
-
-//   uploadBuffer(uploadPath, metadata);
-
-// }
 
 function uploadBuffer(uploadPath, metadata, blobId) {
   let uploadRef = stoRef(storage, uploadPath);
@@ -473,11 +464,11 @@ const downloadButtonListener = () => {
   }, 100);
 };
 
-function getCaptureCounter() {
-  const counter = store.state.counters.capture;
-  store.dispatch('incrementCountAction', 'capture');
-  return counter;
-}
+// function getCaptureCounter() {
+//   const counter = store.state.counters.capture;
+//   store.dispatch('incrementCountAction', 'capture');
+//   return counter;
+// }
 
 function getSupportedMimeTypes() {
   const possibleTypes = [

@@ -41,23 +41,18 @@
 </template>
 
 <script setup>
-import { useStore } from 'vuex';
+// import { useStore } from 'vuex';
+import { useRaceStore } from "../stores";
 import Camera from "../components/Camera.vue";
 import CameraVideo from "../components/CameraVideo.vue";
 import GeoLoc from "../components/GeoLoc.vue";
-// import RaceLog from "../components/RaceLogCard.vue";
-// import RaceStartList from "../components/RaceStartListCard.vue";
-// import RaceImages from "../components/RaceImagesCard.vue";
-// import RaceInfoPanel from "../components/RaceInfoPanel.vue";
+
 import BackButton from '../components/BackButton.vue'
-
 import Card from 'primevue/card';
-
 import SelectButton from 'primevue/selectbutton';
-
-
 import Select from 'primevue/select';
 import { computed, ref, reactive } from 'vue';
+import {storeToRefs } from 'pinia'
 import { useRoute } from 'vue-router';
 import {chain,cloneDeep,map,take,keys,orderBy,sumBy,pickBy,split,sortBy,tap,startsWith}  from "lodash-es"
 
@@ -68,25 +63,28 @@ let props = defineProps ({
 const bibRegexDefault = /^\d{3,5}$/;
 
 const route = useRoute();  
-const raceId = route.params.raceId
 console.log(route)
-const store = useStore()
-store.dispatch('getRacesAction')
-let waypoint=ref(store.state.datastore.race.waypoint)  //ref("venue")
+// const store = useStore()
+// store.dispatch('getRacesAction')
+const raceStore = useRaceStore()
+const raceId = route.params.raceId
+raceStore.setRaceId(raceId)
+let {waypoint}=storeToRefs(raceStore)//ef()//store.state.datastore.race.waypoint)  //ref("venue")
 
-let raceObj
-let race=computed(()=>{
+// let raceObj
+let race = raceStore.race
+// let race=computed(()=>{
 
-  let racefilt=store.state.datastore.races.filter(r=>r.id==raceId);
+//   let racefilt=store.state.datastore.races.filter(r=>r.id==raceId);
 
-  if(racefilt.length>0) {
-    // debugger
-    raceObj=cloneDeep(racefilt[0])
+//   if(racefilt.length>0) {
+//     // debugger
+//     raceObj=cloneDeep(racefilt[0])
   
-    return raceObj //racefilt[0]
-  } else 
-    return {name:'-',Waypoints:['VENUE']}
-});
+//     return raceObj //racefilt[0]
+//   } else 
+//     return {name:'-',Waypoints:['VENUE']}
+// });
 
 
 let bibRegex=computed(()=>{

@@ -3,7 +3,7 @@ import App from './App.vue'
 import './index.css'
 import router from './router'
 
-import store from './store'; //vuex to be removed
+//import store from './store'; //vuex to be removed
 import { createPinia } from 'pinia' ; // move to pinia
 
 import PrimeVue from 'primevue/config';
@@ -28,12 +28,12 @@ if (import.meta.env.MODE === 'development') {
     app.config.performance = true
 }
 
-app.use(store)
-    .use(VueGtag, {
+app.use(VueGtag, {
         property: {
         id: "G-BV8G5NRLDP"
         }
     })
+    // .use(store)
     .use(VueSocialSharing)
     .use(router)
     .use(pinia)

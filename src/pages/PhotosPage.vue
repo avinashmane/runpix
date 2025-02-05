@@ -100,7 +100,8 @@
 </template>
 
 <script setup>
-import { useStore } from 'vuex';
+// import { useStore } from 'vuex';
+import {useRaceStore} from '../stores'
 import ImageCard from "../components/ImageCard.vue";
 import Select from 'primevue/select';
 import Card from 'primevue/card';
@@ -125,13 +126,14 @@ import { debug } from "../helpers"
 const year = ref(new Date().getUTCFullYear())
 let years = Array(year.value - (year.value - 6)).fill('').map((v, idx) => year.value - idx);
 
-const store = useStore()
-store.dispatch('getRacesAction')
+// const store = useStore()
+// store.dispatch('getRacesAction')
+const raceStore = useRaceStore()
 
 const route = useRoute();
 const router = useRouter()
 const races = computed(() => {
-  const races = orderBy(store.state.datastore.races
+  const races = orderBy( raceStore.races //store.state.datastore.races
     .filter(x => new Date(x.Date).getFullYear() == year.value)
     .filter(r => (r.photoStatus && (r.photoStatus.indexOf("available") >= 0))),
     "Date", "desc")

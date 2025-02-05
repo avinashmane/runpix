@@ -1,9 +1,10 @@
 <script setup>
 import RegisterCard from '../components/RegisterCard.vue'
 import Message from "../components/Message.vue";
-import { useStore } from "vuex";
+// unused
+// import { useStore } from "vuex";
 
-const store = useStore()
+// const store = useStore()
 const registerState = store.state.auth.register
 
 </script>

@@ -2,12 +2,13 @@
 import ProfileCard from '../components/ProfileCard.vue'
 import ChangePasswordCard from "../components/ChangePasswordCard.vue";
 import Message from "../components/Message.vue";
-import { useStore } from 'vuex';
+// import { useStore } from 'vuex';
 import { computed } from 'vue';
-
-const store = useStore()
-const isShow = computed(() => store.state.actionSheet.changePasswordSheet.isShow)
-const changePasswordState = store.state.auth.changePassword
+import { useUserStore } from '../stores';
+// const store = useStore()
+const userStore = useUserStore()
+const isShow = computed(() => userStore.isShow) //store.state.actionSheet.changePasswordSheet.isShow
+// const changePasswordState = store.state.auth.changePassword
 
 </script>
 
@@ -19,12 +20,12 @@ const changePasswordState = store.state.auth.changePassword
         <ChangePasswordCard v-if="isShow" />
       </Transition>
     </div>
-    <Message
+    <!-- <Message
         :success="changePasswordState.isSuccess"
         successMsg="Change Password Success"
         :warning="changePasswordState.isError"
         :warningMsg="changePasswordState.errorMessage"
-    />
+    /> -->
   </div>
 </template>
 

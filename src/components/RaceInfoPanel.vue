@@ -78,7 +78,8 @@ import Chips from 'primevue/chips'
 import ToggleButton from 'primevue/togglebutton';
 import IftaLabel from 'primevue/iftalabel';
 import MultiSelect from 'primevue/multiselect';
-import { useStore } from 'vuex';
+// import { useStore } from 'vuex';
+import { useUserStore, useRaceStore} from '../stores'
 import { computed ,ref, reactive } from 'vue';
 import { useRoute } from 'vue-router';
 import { doc, getDoc ,updateDoc, setDoc } from 'firebase/firestore'
@@ -87,7 +88,7 @@ import {db} from '../../firebase/config'
 import {chain,cloneDeep,map,take,keys,orderBy,sumBy,pickBy,split,sortBy,tap,startsWith} from 'lodash-es'
 import { getLocalDateTime ,debug } from '../helpers';
 import { config } from '../config';
-
+import {storeToRefs} from 'pinia'
 // let js=(x)=>JSON.parse(JSON.stringify(x))
 let getArr=(x,sep=',')=> (x && typeof x ==  "string" )? x.split(sep): x 
 let joinArr=(x,sep=",")=>{//debug(x);
@@ -100,16 +101,19 @@ let joinArr=(x,sep=",")=>{//debug(x);
 const route = useRoute();  
 const raceId = route.params.raceId
 
-const store = useStore()
-store.dispatch('getRacesAction')
-
-let race=computed(()=>{
-  let racefilt=store.state.datastore.races.filter(r=>r.id==raceId);
-  if(racefilt.length) {
-    Object.keys(arrayLabels).forEach((k)=>{if(k in racefilt[0]) raceArr.value[k]=joinArr(racefilt[0][k])})
-    return racefilt[0]
-  } else return {name:'-',Waypoints:['VENUE']}
-  });
+// const store = useStore()
+// store.dispatch('getRacesAction')
+const raceStore = useRaceStore()
+const userStore = useUserStore()
+raceStore.setRaceId(raceId)
+let {race}=storeToRefs(raceStore)
+// let race=computed(()=>{
+//   let racefilt=store.state.datastore.races.filter(r=>r.id==raceId);
+//   if(racefilt.length) {
+//     Object.keys(arrayLabels).forEach((k)=>{if(k in racefilt[0]) raceArr.value[k]=joinArr(racefilt[0][k])})
+//     return racefilt[0]
+//   } else return {name:'-',Waypoints:['VENUE']}
+//   });
 
 const labels=config.raceInfoPanelLabels
 const arrayLabels={
@@ -141,7 +145,7 @@ let flagOff=(e,a)=>{
     'races',raceId,'readings',`${now}_START_${props.waypoint}`),
     {
       timestamp: now,
-      userId: store.state.auth.userDetails.userData.email
+      userId: userStore?.profile?.email //store.state.auth.userDetails.userData.email
     }
   );
   debug(ts)

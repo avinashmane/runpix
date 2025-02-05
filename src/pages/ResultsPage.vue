@@ -52,7 +52,7 @@
             <div v-for="r, category in catTop" @click="setBib(r.Bib)" 
               class="flex flex-row shadow-md justify-left items-center">
               <span v-for="f in ['Rank', 'Bib', 'Name', 'Race Time']" 
-                :class="f+'   p-1 text-sm'">
+                :class="f+' p-1 text-sm'">
                 {{ r[f] }}
               </span>
             </div>
@@ -68,8 +68,8 @@
 
 <script setup>
 import { config } from "../config"
-import { useStore } from 'vuex';
-
+// import { useStore } from 'vuex';
+import { useRaceStore } from "../stores";
 import AutoComplete from 'primevue/autocomplete';
 import Card from 'primevue/card';
 import ResultCard from "../components/ResultCard.vue"
@@ -84,10 +84,10 @@ import {chain,cloneDeep,map,take,keys,orderBy,groupBy,sumBy,pickBy,split,sortBy,
 const router = useRouter()
 const route = useRoute();
 const params = route.params;
-const store = useStore()
-store.dispatch('getRacesAction')
-
-const races = computed(() => orderBy(store.state.datastore.races
+// const store = useStore()
+// store.dispatch('getRacesAction')
+const raceStore = useRaceStore()
+const races = computed(() => orderBy(raceStore.races//.value//store.state.datastore.races
   .filter(x => checkResStatus(x)),
   "Date","desc")
 )
@@ -96,11 +96,11 @@ let race = computed(() =>
     races.value.find(x => x.id == raceId.value) : { Name: '' })
 
 let raceId = ref(params.raceId)
-// let bib = ref(params.bib)
 
-if (params.raceId)
+if (params.raceId){
+  raceStore.setRaceId(params.raceId)
   loadRaceId(params.raceId)
-
+}
 const bibSelection = ref(params.bib);
 const items = ref([]);
 const entries = ref([])

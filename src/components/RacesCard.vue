@@ -29,19 +29,23 @@ const props=defineProps({
 import DataView from 'primevue/dataview'
 import RaceCard from "../components/RaceCard.vue";
 import { orderBy } from 'lodash-es'
-import { useStore } from "vuex";
+// import { useStore } from "vuex";
+
 import { computed,ref } from 'vue';
-const store = useStore()
+// const store = useStore()
+import { useRaceStore } from '../stores';
+const raceStore =  useRaceStore()
 const allRaces = ref(false)
 const races = computed(() => {
     const ret = orderBy(
-        store.state.datastore.races
+        // store.state.datastore.races
+        raceStore.races
             .filter(race => !race?.status?.includes('nolist')),
         ["Date"], ['desc'])
         .filter((x, i) => allRaces.value ? true : i < 5)  // show top 10 races
     // .filter(x => new Date(x.Date).getFullYear() == new Date().getFullYear())
     // .filter(x => checkResStatus(x))  
-    console.log(ret)
+    console.log(ret.map(x=>x.id).join(','))
     return ret
 })
 </script>

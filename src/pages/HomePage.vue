@@ -1,13 +1,15 @@
 <script setup>
-import { useStore } from "vuex";
+// import { useStore } from "vuex";
+import { useUserStore } from "../stores";
 import RacesCard from "../components/RacesCard.vue";
+import LoginCard from "../components/LoginCard.vue";
 import Image from 'primevue/image';
 import Panel from 'primevue/panel'
-const store = useStore()
-store.dispatch('getRacesAction')
-
-const signInState = store.state.auth.signIn
-const userData = store.state.auth.userDetails.userData
+// const store = useStore()
+// store.dispatch('getRacesAction')
+const userStore = useUserStore()
+// const signInState = store.state.auth.signIn
+const userData = userStore.profile//store.state.auth.userDetails.userData
 const dispKeys = { 'displayName': 'Name', 'email': 'eMail' }//"uid":"uid",
 
 let items = [
@@ -66,19 +68,20 @@ let items = [
             <Image :src="i.img" :alt="i.label" />
           </router-link>
         </div>
+
         <div v-if="userData.uid">
           <div v-for="(v, k) in dispKeys">
             <span><b>{{ v }}: </b></span>
             <span>{{ userData[k] }}</span>
           </div>
-
+          <small class="text-primary-400">{{ userData.uid}}</small>
         </div>
         <div v-else>
-          Not logged in
+          <LoginCard />
         </div>
       </div>
       </p>
-
+    
   </Panel>
 
 </template>

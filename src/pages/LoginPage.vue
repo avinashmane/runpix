@@ -4,11 +4,13 @@ import Message from "../components/Message.vue";
 // import Menu from 'primevue/menu';
 import RacesCard from "../components/RacesCard.vue";
 import Image from 'primevue/image';
-import {useStore} from "vuex";
-
-const store = useStore()
-const signInState = store.state.auth.signIn
-store.dispatch('getRacesAction')
+// import {useStore} from "vuex";
+import { useUserStore } from "../stores";
+// const store = useStore()
+// const signInState = store.state.auth.signIn
+// store.dispatch('getRacesAction')
+const userStore = useUserStore()
+// const signInState = userStore.signIn
 
 
 let items= [
@@ -46,10 +48,10 @@ let items= [
         <LoginCard />
       </div>
     </div>
-    <Message
+    <!-- <Message
         :warning="signInState.isError"
         :warningMsg="signInState.errorMessage"
-    />
+    /> -->
   </div>
 </template>
 

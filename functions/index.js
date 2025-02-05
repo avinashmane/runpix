@@ -14,7 +14,6 @@ let lazy={ // modules to be lazy loaded
 } 
 
 const functions = require('firebase-functions');
-const admin = require('firebase-admin');
 const sharp = require('sharp')
 const exifr = require('exifr');
 const {debounce,isEmpty}  = require('lodash'); //stack
@@ -33,37 +32,24 @@ const { DEBUG_MODE, GS_URL_PREFIX, JPEG_EXTENSION, RUNTIME_OPTION, UPLOADS_FOLDE
   THUMB_JPG_OPTIONS,settings } = require('./settings');
 const { getNormalSize, parseObjName , getIsoDate , addSeconds, log, debug, error
   } = require('./utils');
-  const { firestore,updFSReadings, delFSReadings, updFSImageData,updFSVideoData } = require('./firebaseUser');
+const { firestore,updFSReadings, delFSReadings, updFSImageData,updFSVideoData } = require('./firebaseUser');
 
 // Node.js core modules
+/**
+ * Structure
+ * 1 includes
+ * 2 configation
+ * 3 HTTP triggers: image generator
+ * 4 Firestore triggered
+ * 5. Storage triggered: Scan images
+*/
 
-
-const JSS=JSON.stringify
-// firestore settor/gettors
-const doc=(path)=>admin.firestore().doc(path)
-const get=(path,callback)=>doc(path).get().then(x=>callback(x.data())) 
-const getCol=(path,callback)=>admin.firestore().collection(path).get()
-                        .then(snap=>{
-                            let arr=[]
-                            snap.forEach(doc=>arr.push(callback(doc)))
-                            return arr;
-                        })
-
-// Since this code will be running in the Cloud Functions environment
-// we call initialize Firestore without any arguments because it
-// detects authentication from the environment.
-let cfg ;
-if(admin.apps.length==0) {
-  admin.initializeApp();
-  admin.firestore().settings({ ignoreUndefinedProperties: true });
-  admin.firestore().doc('app/config').onSnapshot(snap=>cfg=snap.data())
-}
 
 let watermarks={}; //key="raceId" : watermark sharp image
 const {getRaceCfg} = require("./races")
 /* ~~~~~~~~~~~~ 3. HTTPS functions  ~~~~~~~~~~~~~ */
- const {app} = require("./express");
-const { getRaceCfg } = require('./races');
+const {app} = require("./express");
+// const { admin, getCol, doc } = require('./firebaseAdmin');
 
  
  // This HTTPS endpoint can  be made accessed by `Authorization` HTTP header
@@ -75,8 +61,6 @@ exports.api = functions.https.onRequest(app);
 exports.timingUpdate = functions.firestore
     .document('races/{raceId}/videos/{videoPath}')
     .onWrite((change, context) => {
-
-      
       // // Get an object with the current document value.
       const raceId = context.params.raceId
       const videoPath = context.params.videoPath
@@ -157,7 +141,7 @@ exports.activitiesToResult = functions.firestore
   // // Get an object with the current document value.
   const raceId = context.params.raceId
   const race  = await firestore.get(`/races/${raceId}`,x=>x)
-  const activities = await getCol(`/races/${raceId}/activities`,
+  const activities = await firestore.getCol(`/races/${raceId}/activities`,
     doc=>raceTiming.mapActivityToResult(doc,[]))
 
     allEntries=raceTiming.checkRuleSplitDups(activities)
@@ -189,7 +173,7 @@ exports.activitiesToResult = functions.firestore
     });
 
 
-     doc( `races/${raceId}`).update({
+     firestore.doc( `races/${raceId}`).update({
          "timestamp.live": new Date().toISOString(),
      });
 
@@ -342,7 +326,7 @@ async function compressImage(raceId,filePath, bucketName, metadata) {
 
   // log(">>>",raceId, fileName)
 
-  const bucket = admin.storage().bucket(bucketName);
+  const bucket = firestore.storage.bucket(bucketName); 
   
   try{
     let imgMetadata;
@@ -572,9 +556,9 @@ exports.testHttp = functions.https.onRequest(async (req, res)=>{
 async function save_result(raceId, options) {
 
   const race = await getRaceCfg(raceId)
-  const bibs = await getCol(`/races/${raceId}/bibs`,
+  const bibs = await firestore.getCol(`/races/${raceId}/bibs`,
     doc => (Object.assign({ id: doc.id }, doc.data())))
-  const data = await getCol(`/races/${raceId}/readings`,
+  const data = await firestore.getCol(`/races/${raceId}/readings`,
     doc => raceTiming.mapReading(doc, bibs))
   
   
@@ -595,7 +579,7 @@ async function save_result(raceId, options) {
     category.entries.forEach((x) => {
       try {
         // console.log(`${x.Rank} ${x.Name} ${x['Race Time']}`)
-        doc(`races/${raceId}/result/${x.Bib}`)
+        firestore.doc(`races/${raceId}/result/${x.Bib}`)
           .set(x)
           .then(x=> {stats.savedResults++})
           .catch(console.error)
@@ -607,7 +591,7 @@ async function save_result(raceId, options) {
   });
   
   // update /races
-  doc(`races/${raceId}`).update({
+  firestore.doc(`races/${raceId}`).update({
     "timestamp.result": new Date().toISOString(),
     stats: stats
   });

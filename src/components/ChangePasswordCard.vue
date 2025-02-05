@@ -1,12 +1,15 @@
 <script setup>
-import { useStore } from 'vuex';
+// import { useStore } from 'vuex';
+import { useUserStore } from "../stores";
 import {ref, reactive } from "vue";
 import InputText from 'primevue/inputtext';
 import Button from 'primevue/button';
 import LoadingSpinner from './LoadingSpinner.vue';
 import {debug} from "../helpers"
 
-const store = useStore()
+/** not converted to PINIA . not used component */
+// const store = useStore()
+const store=useUserStore()
 const changePasswordState = store.state.auth.changePassword
 const errorMessage = changePasswordState.errorMessage
 

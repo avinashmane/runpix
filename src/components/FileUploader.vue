@@ -31,7 +31,7 @@
         </div>
         {{ loadedFiles }}/{{ files?.length }} files uploaded at {{ waypoint.value }}
         <br/>
-        <div v-if="loadingFiles">Uploading {{ loadingFiles }}  as {{ store.profile.email }} at {{ waypoint.value }}</div>
+        <div v-if="loadingFiles">Uploading {{ loadingFiles }}  as {{ userStore.profile.email }} at {{ waypoint.value }}</div>
         
         <!-- {{ first }}{{ URLs }} -->
 
@@ -79,7 +79,7 @@ import createUploader from "../helpers/file-uploader";
 
 const waypoint = ref("VENUE");
 
-const store = useUserStore()
+const userStore = useUserStore()
 
 
 const loadingInProgress=ref(false)
@@ -108,7 +108,7 @@ function uploadFilesNow() {
     const {uploadFiles}=createUploader({
         raceId: props.raceId,
         waypoint: waypoint.value,
-        user: store.profile.email,
+        user: userStore.profile.email,
     });
     loadingInProgress.value=true
     uploadFiles(files.value,(err,res)=>{

@@ -21,7 +21,7 @@
 
 <script setup>
 import { computed, ref } from 'vue'
-import { useStore } from 'vuex';
+// import { useStore } from 'vuex';
 
 import Paginator from 'primevue/paginator';
 import InputText from 'primevue/inputtext';
@@ -59,8 +59,8 @@ debugger;
 const race = props.race;
 const GS_PREFIX=config.GS_PREFIX
 const NOMATCH='N/A'
-const store = useStore()
-const races = store.state.datastore.races;
+// const store = useStore()
+// const races = store.state.datastore.races;
 
 const filtBibs = computed(()=>{
   // search text debugger

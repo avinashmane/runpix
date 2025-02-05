@@ -1,17 +1,85 @@
+/**
+ * races
+ */
 const _ = require("lodash");
 const { firestore } = require("./firebaseUser");
 const dayjs = require("dayjs");
-const admin = require("firebase-admin");
 // const admin = require("firebase-admin");
 // const { debug } = require("./utils");
 const { debug } = require("./utils");
-// const admin = require('firebase-admin');
+const { log } = require("async");
+
 /**
  * Races that are started
  * Not expired
  */
 
 let activeRaces={}
+
+class Race{
+    bucketName='run-pix.appspot.com' //gs://
+    bucket= firestore
+            .storage
+            .bucket(this.bucketName)
+
+    constructor(id){
+        this.id = id
+    }
+    async getAttr(){
+        return await firestore.doc(`/races/${this.id}`)
+                .get()
+                .then(snap=>{ 
+                    if (snap.exists)
+                        return {id:snap.id,...snap.data()}
+                    else
+                        return {}
+            })
+    }
+    async getCol(path){
+        return await firestore.getCol(`/races/${this.id}/${path}`,
+            (snap)=>{ 
+                    if (snap.exists)
+                        return {id:snap.id,...snap.data()}
+                    else
+                        return {}
+            })
+    }
+    /**
+     * 
+     * @param {*} path  /processed|uploadvid|thumbs|uploads/{raceID}
+     * @returns 
+     */
+    async getBlobs(path,prefix=''){
+        const options = {
+            prefix: `${path}/${this.id}/${prefix||''}`,
+            };
+        // Lists files in the bucket, filtered by a prefix
+        const [files]=await this.bucket
+                    .getFiles(options)
+        return files.map(x=>x.name)
+    }
+
+    async checkBlob(blobPath){
+        const blobPart=blobPath.split('/')
+        if (blobPart[0]=='uploadvid') {
+            const path=`races/${this.id}/videos/${blobPart[2]}`
+            try{
+                return firestore.doc(path)
+                    .get()
+                    .then((snap)=>{
+                        // if(snap.exists){
+                        //     console.log(`processed ${path}`,)//snap.data()
+                        // } else {
+                        //     console.log(`unprocessed ${path}`)
+                        // }
+                        return {blob:blobPath,processed:snap.exists}
+                    })
+            }
+            catch(e){console.error(e)}
+        }
+    }
+
+}
 
 async function readLiveRaces(
     status = ['live'],
@@ -99,11 +167,12 @@ const getRaceCfg = async (race) => {
 };
 // exports.getRaceCfg = getRaceCfg;
 
-export {
+module.exports = {
     readLiveRaces,
     createRaceNthSunday,
     createRace,
     createSundayRace,
     getRaceCfg,
-    race_cfg
+    race_cfg,
+    Race
 };

@@ -10,7 +10,7 @@
   <FileUploader v-if="upload" 
       :raceId="raceId" 
           :waypoints="waypoints" 
-          :user="store.state.auth?.userDetails?.userData?.email?.replace('@', '$')">
+          :user="userStore.profile?.email?.replace('@', '$')">
   </FileUploader>
 
   <hr class="my-4"/>
@@ -132,7 +132,7 @@
 
 <script setup>
 import { computed, ref, onMounted, reactive } from "vue";
-import { useStore } from "vuex";
+// import { useStore } from "vuex";
 import { useRoute } from "vue-router";
 import Paginator from "primevue/paginator";
 import Upload from "../components/Upload_alt.vue";
@@ -159,26 +159,29 @@ import { debug } from "../helpers";
 import BackButton from "../components/BackButton.vue";
 
 const GS_PREFIX = config.GS_PREFIX;
-const store = useStore();
+// const store = useStore();
 const route = useRoute();
 
-import {useUserStore}  from '@/stores/index.js'
+import {useUserStore,useRaceStore}  from '@/stores/index.js'
 const userStore = useUserStore()
+const raceStore = useRaceStore()
 
 const first = ref(0);
 const rows = ref(20);
 const upload = ref(true);
 
-if (!store.state.datastore.races.length )
-  store.dispatch("getRacesAction")
+// if (!store.state.datastore.races.length )
+//   store.dispatch("getRacesAction")
   
 let raceId = route.params.raceId; // name of parameter
+raceStore.setRaceId(raceId)
+
 let imagePath = route.query.img; // name of query
 const imgNode = (raceId, imagePath) => `races/${raceId}/images/${imagePath}`;
 let raceDoc = doc(db, "races", raceId); //
 
 const waypoints = computed(()=>{
-  const raceObj=store.state.datastore.races.find(x=>x.id=raceId);
+  const raceObj=raceStore.race//s.find(x=>x.id=raceId); //store.state.datastore.races
   const distances=raceObj?.Distances.map(x=> x.includes('K')?x:`${x}K`)    ||[]
   debug(raceId,raceObj,distances)
   return distances.concat(raceObj?.Waypoints || ['VENUE','END'])})

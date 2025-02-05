@@ -1,12 +1,15 @@
 <script setup>
-import { useStore } from 'vuex';
+// import { useStore } from 'vuex';
+import { useUserStore } from "../stores";
+
 import {ref, reactive } from "vue";
 import InputText from 'primevue/inputtext';
 import Button from 'primevue/button';
 import LoadingSpinner from './LoadingSpinner.vue';
 import router from "../router";
 
-const store = useStore()
+/** Pinia migration is not completed yet..unused */
+const store = useUserStore()
 const registerState = store.state.auth.register
 
 const passwordModel = ref('')

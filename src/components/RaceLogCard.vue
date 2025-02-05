@@ -1,4 +1,5 @@
 <template>
+  <!-- unused on Jan 2025 -->
   <div>
     Start:  {{startTime.toLocaleString()}} - 
     <!-- <InputMask v-model="startTime" 
@@ -106,7 +107,7 @@
 
 <script setup>
 import { computed, ref } from 'vue'
-import { useStore } from 'vuex';
+// import { useStore } from 'vuex';
 
 import Paginator from 'primevue/paginator';
 import Image from 'primevue/image';
@@ -132,8 +133,8 @@ let props = defineProps({
 const race = props.race;
 const GS_PREFIX=config.GS_PREFIX
 const NOMATCH='N/A'
-const store = useStore()
-const races = store.state.datastore.races;
+// const store = useStore()
+// const races = store.state.datastore.races;
 
 const startListCols=config.startListHeaders
 

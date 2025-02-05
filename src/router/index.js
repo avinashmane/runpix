@@ -19,22 +19,23 @@ import RaceEdit from "../pages/RaceEditCard.vue";
 import RaceEntry from "../pages/RaceEntry.vue";
 import TestFunctions from "../pages/TestFunctions.vue";
 import NotFoundPage from "../pages/exceptions/NotFoundPage.vue";
-
+import { useUserStore } from "../stores";
 import {
     firebaseAuth
 } from '../../firebase/config';
 
 import { debug } from "../helpers";
+
+let userStore
 const nextIfLogin=(next,ifLogged,notLogged)=>{
-    firebaseAuth.onAuthStateChanged(user => {
-        // debugger
-        // debug('user',user,ifLogged,notLogged)
-        if (user) {
-            next(ifLogged);
-        } else {
-            next(notLogged);
-        }
-    });
+    if(!userStore)
+        userStore=useUserStore()
+    
+    if(userStore.isSignIn){
+        next(ifLogged);
+    } else {
+        next(notLogged);
+    }
 }
 
 const routes = [

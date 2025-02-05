@@ -21,7 +21,7 @@
         <span>Drag Your Files Here</span>
         <span class="smaller">
           or <strong><em>click here</em></strong> to upload files
-          <span v-if="userData?.email"> as {{ userData?.email }}</span>
+          <span v-if="userStore.profile?.email"> as {{ userStore?.profile?.email }}</span>
         </span>
       </span>
 
@@ -76,14 +76,18 @@ import DropZone from "../components/DropZone.vue";
 import FilePreview from "../components/FilePreview.vue";
 import Select from "primevue/select";
 import { ref } from "vue";
-import { useStore } from "vuex";
+// import { useStore } from "vuex";
+import {useUserStore,useRaceStore} from '../stores'
 import {dayjs} from "../helpers"
 // File Management
 import useFileList from "../helpers/file-list";
 const { files, addFiles, removeFile } = useFileList();
 
-const store = useStore();
-const userData = store.state.auth?.userDetails?.userData;
+// const store = useStore();
+const userStore = useUserStore()
+const raceStore = useRaceStore()
+
+const userData = userStore.profile//store.state.auth?.userDetails?.userData;
 
 const waypoint = ref("VENUE");
 const Waypoints = ref(props.waypoints);
@@ -99,7 +103,7 @@ import createUploader from "../helpers/file-uploader";
 const { uploadFiles } = createUploader({
   raceId: props.raceId,
   waypoint: waypoint.value,
-  user: userData?.email?.replace("@", "$"),
+  user: userStore?.profile?.email?.replace("@", "$"),
 });
 
 function removeAllFiles(){

@@ -31,9 +31,11 @@ export default {
 </script>
 
 <script setup>
-import {    useStore  } from "vuex";
-const store = useStore()
-const gps = store.state.datastore.gps
+// import {    useStore  } from "vuex";
+// const store = useStore()
+import { useRaceStore } from '../stores';
+const raceStore =  useRaceStore()
+const gps = raceStore.gps// store.state.datastore.gps
 
 let geoLocPerm=ref(false)
 

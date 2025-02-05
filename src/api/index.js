@@ -3,6 +3,7 @@ import { collection, doc, getDocs, getDoc, setDoc, onSnapshot  } from "firebase/
 import { config } from "../config";
 import {debug} from "../helpers"
 import { firebaseAuth, db } from '../../firebase/config';
+// import { useUserStore } from "../stores";
 
 export const getUser = () => {
     try {
@@ -14,6 +15,7 @@ export const getUser = () => {
 
 export const getUserObservable = () => {
     try {
+        // const userStore=useUserStore()
         firebaseAuth.onAuthStateChanged(
             (user) => {
                 debug('firebaseAuth.onAuthStateChanged()')

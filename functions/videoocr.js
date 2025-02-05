@@ -84,8 +84,10 @@ function readFile(filePath, encoding = 'utf8') {
   }
 
 function videoDetectionFilter(dat,pattern=/^\d*$/){
-    let arr = _.flatten(filterTexts(dat,pattern)
-                            .map(t=>
+    const texts=filterTexts(dat,pattern)
+    if (!texts) return []
+    
+    let arr = _.flatten(texts.map(t=>
                                 t.segments?.map(x=>seg2txt(x,t.text))
                             )
                         )

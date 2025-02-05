@@ -34,8 +34,8 @@ describe('Check Express functions', function () {
         chai.request(cfg.baseUrl)
           .get(`/race/${race}`)
           .end((err, res) => {
-            res.should.have.status(200);
-            res.body.should.be.a('object');
+            res?.should.have.status(200);
+            res?.body.should.be.a('object');
             //   debug(race,res.body)
             //   res.body.length.should.not.be.equal(0);
             done();
@@ -46,9 +46,9 @@ describe('Check Express functions', function () {
         chai.request(cfg.baseUrl)
           .get(`/healthcheck`)
           .end((err, res) => {
-            res.should.have.status(200);
-            res.body.should.be.a('object');
-            debug(res.body)
+            res?.should.have.status(200);
+            res?.body.should.be.a('object');
+            debug(res?.body)
             //   res.body.length.should.not.be.equal(0);
             done();
           });

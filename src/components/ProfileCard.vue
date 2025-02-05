@@ -1,13 +1,15 @@
 <script setup>
 import { computed } from 'vue';
-import { useStore } from 'vuex';
+// import { useStore } from 'vuex';
+import { useUserStore } from '../stores';
 import router from "../router";
 
-const store = useStore()
-const userState = computed(() => store.state.auth.userDetails)
-const userData= store.state.auth.userDetails.userData.toJSON()
+const userStore = useUserStore()
+// const userState = computed(() => store.state.auth.userDetails)
+const userData= userStore.profile//store.state.auth.userDetails.userData.toJSON()
 const logOut = () => {
-  store.dispatch('logOutAction')
+  userStore.logout()
+  // store.dispatch('logOutAction')
   router.push('/login')
 }
 const getDate=(x)=>{
@@ -16,7 +18,8 @@ const getDate=(x)=>{
   return d
 }
 const showChangePassword = () => {
-  return store.dispatch('activeChangePasswordSheetAction')
+  userStore.showChangePassword()
+  // return store.dispatch('activeChangePasswordSheetAction')
 }
 
 </script>
@@ -32,11 +35,11 @@ const showChangePassword = () => {
     </div>
     
     <div class="mt-28">
-      <h1 class="text-3xl text-left ml-5 " v-text="userData.displayName" />
-      <h1 class="text-xl text-left ml-5 mb-7" v-text="userData.email" />
-      <h1 class="text-sm text-left ml-5 mb-3" >uid: {{userData.uid}}</h1>
-      <h1 class="text-sm text-left ml-5 mb-3" >Last Login: {{ getDate(userData.lastLoginAt) }}</h1>
-
+      <h2 class="text-3xl text-left ml-5 " v-text="userData.displayName" />
+      <h2 class="text-xl text-left ml-5 mb-7" v-text="userData.email" />
+      <h2 class="text-sm text-left ml-5 mb-3" >uid: {{userData.uid}}</h2>
+      <h2 class="text-sm text-left ml-5 mb-3" >Last Login: {{ getDate(userData.lastLoginAt) }}</h2>
+      <h2 class="text-sm text-left ml-5 mb-3" >Roles: {{userStore.roles}}</h2>
       
       <div class="text-center mr-5 flex justify-end">
         <button class="bg-[#2B2E4A] rounded-full drop-shadow-lg text-white text-md h-9 w-[85px] hover:bg-[#FF9000] transition ease-in-out mr-5" @click="logOut">LogOut</button>
