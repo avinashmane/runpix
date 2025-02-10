@@ -1,14 +1,11 @@
 
 <template>
     <div id="app">
-        
-        
         <svg :viewBox="'0 0 '+2*radius+' '+2*radius" class="svg"> 
             <!-- R - width/2  v-if="props.background"  -->
         <circle v-bind='{cx: props.radius, cy: props.radius, r: props.radius}'  stroke="none" :fill="props.fill"/>
         <circle v-if="props.ring" v-bind='{cx: props.radius, cy: props.radius}'  r="210" fill="transparent" stroke="none" :stroke-width="fontSize*2"/>
 
-        
         <!-- <path d=" oldd="M60,250a190,190 0 1,1 380,0" " fill="transparent" v-bind="{stroke: hsl}" stroke-width="8px" />
          -->
         <path id="top"
@@ -37,12 +34,6 @@
         </text>
         </svg>
 
-    
-        <div class="wrapper">
-        <input type="text" class="input" v-model="top"/>/
-        <input type="text" class="input" v-model="center"/>/
-        <input type="text" class="input" v-model="bottom"/>
-        </div>
     </div>
 </template>
 
@@ -54,9 +45,9 @@
 * font family: 
 */
 import { ref,computed  } from "vue";
-const top = ref( 'THE TEST ADASRSH')
-const center= ref ('WW')
-const bottom= ref('MONTH 2023')
+// const top = ref( 'THE TEST ADASRSH')
+// const center= ref ('WW')
+// const bottom= ref('MONTH 2023')
 
 const props = defineProps({
     radius: { type: Number, required: true },

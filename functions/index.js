@@ -8,14 +8,9 @@
 */
 'use strict';
 /* ~~~~~~~~~~~~ 1. includes ~~~~~~~~~~~~~ */
-let lazy={ // modules to be lazy loaded
-  videocr:null,
-  Video:null// video intelligence
-} 
 
 const functions = require('firebase-functions');
 const sharp = require('sharp')
-const exifr = require('exifr');
 const {debounce,isEmpty}  = require('lodash'); //stack
 const dayjs = require("dayjs")
 // Vision API
@@ -30,7 +25,7 @@ const { DEBUG_MODE, GS_URL_PREFIX, JPEG_EXTENSION, RUNTIME_OPTION, UPLOADS_FOLDE
   UPLOADVID_FOLDER, META_KEYS, bibRegex, NOTIMING_WAYPOINTS, testData, PROCESSED_FOLDER, 
   THUMBNAILS_FOLDER, WATERMARK_PATH, NOTFOUND, RESIZE_OPTION, JPG_OPTIONS, THUMBSIZE_OPTION, 
   THUMB_JPG_OPTIONS,settings } = require('./settings');
-const { getNormalSize, parseObjName , getIsoDate , addSeconds, log, debug, error
+const { parseObjName , getIsoDate , addSeconds, log, debug, error
   } = require('./utils');
 const { firestore,updFSReadings, delFSReadings, updFSImageData,updFSVideoData } = require('./firebaseUser');
 
@@ -46,7 +41,7 @@ const { firestore,updFSReadings, delFSReadings, updFSImageData,updFSVideoData } 
 
 
 let watermarks={}; //key="raceId" : watermark sharp image
-const {getRaceCfg} = require("./races")
+const {getRaceCfg,save_result} = require("./races")
 /* ~~~~~~~~~~~~ 3. HTTPS functions  ~~~~~~~~~~~~~ */
 const {app} = require("./express");
 // const { admin, getCol, doc } = require('./firebaseAdmin');
@@ -365,26 +360,6 @@ async function compressImage(raceId,filePath, bucketName, metadata) {
   return {attrs:attrs,imagePath: newFilePath}
 }
 
-async function getImageMetadata(bucket,filePath,metadataReqd=true) {
-  // Downloads the file into a buffer in memory.
-  const contents =   await bucket.file(filePath).download();
-  let img,size,imgMetadata;
-  try{
-      img = sharp(contents[0])// contents
-      size = getNormalSize(await img.metadata())
-      imgMetadata=size
-  } catch (e){
-    error(`can't make sharp object for ${filePath}`,e)
-  }
-  if (metadataReqd){
-    imgMetadata =  Object.assign(imgMetadata,
-                        await exifr.parse(contents[0],true)
-    )
-  }
-  return [img, imgMetadata]
-}
-
-
 /**
  * Saves image in storage after a) resize b) watermark
  * @param {*} bucket 
@@ -481,70 +456,23 @@ function saveThumb(bucket, filePath, image,metadata) {
  * scanVideo:  gets text annotations from GCS video to firestore
  * @param {*} gcsUri 
  */
-lazy.videocr=require('./videoocr')
+const videoocr=require('./videoocr');
+const { getImageMetadata } = require('./imageProcessing');
   
 exports.scanVideo = async function (storageObject) {
   let gcsUri = storageObject
-  try{
-    if (typeof storageObject=== 'object') {
-      gcsUri = `gs://${storageObject?.bucket}/${storageObject?.name}`
-      /**
-      bucket; // The Storage bucket that contains the file.
-      name; // File path in the bucket.
-      contentType; // File content type.
-      */
-    } 
     
-    var [bucket,raceId,videoPath] = gcsUri.split(/\//,).splice(-3)
-    var [ignore, ignore_, waypoint, userId, date, gps, fileName] = parseObjName(videoPath);
-
-  } catch (e) {
-    console.error(`error parsing ${gcsUri}`,e)
-  }
-
-  // raceId='testrun'
-  // const detections = [ {
-  //   text: 'testt',
-  //   confidence: 0.9237396717071533,
-  //   secStart: 0.233333,
-  //   secEnd: 0.333333,
-  //   frames: 2
-  // }]
-  const raw_detections = await detectVideoText(gcsUri)
-  // printannotations(raw_detections);
-  const detections = lazy.videocr.videoDetectionFilter(raw_detections, /^\d*$/)
-  log(`scanVideo(${gcsUri}).text`,detections.map(x=>x.text))
-    
-  return await updFSVideoData( raceId, videoPath, detections, date, waypoint) 
+  if (typeof storageObject=== 'object') {
+    gcsUri = `gs://${storageObject?.bucket}/${storageObject?.name}`
+    /**
+    bucket; // The Storage bucket that contains the file.
+    name; // File path in the bucket.
+    contentType; // File content type.
+    */
+  } 
+  
+  return await videoocr.scanVideoPath(raceId,gcsUri)
 };
-
-
-const detectVideoText = async function (gcsUri) {
-  // [START video_detect_text]
-  // Imports the Google Cloud Video Intelligence library
-
-  lazy.Video = lazy.Video || require('@google-cloud/video-intelligence');
-  // Creates a client
-  lazy.videoClient = lazy.videoClient || new lazy.Video.VideoIntelligenceServiceClient();
-
-  const request = {
-    inputUri: gcsUri,
-    features: ['TEXT_DETECTION'],
-  };
-  try {
-    // Detects text in a video
-    const [operation] = await lazy.videoClient.annotateVideo(request);
-    // console.log(`Waiting for operation to complete...`, request);
-    
-    // Gets annotations for video
-    const results = await operation.promise()
-    const textAnnotations = results[0]?.annotationResults?.[0]?.textAnnotations;
-
-    return textAnnotations
-  } catch (err) {
-    console.error(`>> ${gcsUri}>>`, err);
-  }
-}
 
 exports.testHttp = functions.https.onRequest(async (req, res)=>{
   log("testHttp",req.query?.raceId)
@@ -552,51 +480,6 @@ exports.testHttp = functions.https.onRequest(async (req, res)=>{
 
 });
 
-
-async function save_result(raceId, options) {
-
-  const race = await getRaceCfg(raceId)
-  const bibs = await firestore.getCol(`/races/${raceId}/bibs`,
-    doc => (Object.assign({ id: doc.id }, doc.data())))
-  const data = await firestore.getCol(`/races/${raceId}/readings`,
-    doc => raceTiming.mapReading(doc, bibs))
-  
-  
-  const allEntries = raceTiming.addStatusFields(data,
-    race?.timestamp?.start)
-  
-  const ret = raceTiming.finalize_results(allEntries, race)
-
-  let stats={
-    bibs :bibs.length,
-    readings: data.length,
-    results: ret.length || 0,
-    savedResults: 0
-  }
-  // Save all entries
-  ret.docs.forEach((category) => {
-    log(`saving ${category.entries.length} entries for ${category.cat}`);
-    category.entries.forEach((x) => {
-      try {
-        // console.log(`${x.Rank} ${x.Name} ${x['Race Time']}`)
-        firestore.doc(`races/${raceId}/result/${x.Bib}`)
-          .set(x)
-          .then(x=> {stats.savedResults++})
-          .catch(console.error)
-
-      } catch (e) {
-        console.error("error saving", e);
-      }
-    });
-  });
-  
-  // update /races
-  firestore.doc(`races/${raceId}`).update({
-    "timestamp.result": new Date().toISOString(),
-    stats: stats
-  });
-  return stats
-}
 
 const debounced_save_result = debounce(save_result, 2000)
 
@@ -623,6 +506,5 @@ exports.receiveRaceActivities = functions.pubsub.topic(settings.indiathon.topic)
 /**
  * Exports for testing
  */
-exports.readFile = lazy.videocr.readFile
-exports.imageresult = lazy.videocr.imageresult;
-exports.save_result = save_result
+exports.readFile = videoocr.readFile
+exports.imageresult = videoocr.imageresult;

@@ -128,7 +128,7 @@ export const getDocAsync = async (path,callback) => {
         const docRef = doc(db, path);
         return onSnapshot(docRef,docSnap=> {
             let dat= docSnap.data();
-            callback(dat);
+            callback(dat,docSnap.id);
         })
     }catch(error) {
             // doc.data() will be undefined in this case
@@ -156,6 +156,13 @@ export const getRacesAsync = (callback) => {
     }
 }
 
+export const getAllDocsRT = async (path, docCallback) => {
+    const racesRef = collection(db, path);// Query(xx,where("state", "==", "CA"));
+    return onSnapshot(racesRef, (querySnapshot) => {
+      const cities = [];
+      querySnapshot.forEach( doc=> docCallback(doc.data(),doc.id) );
+    })
+}
 
 export const getAllDocs = (path) => {
     const racesRef = collection(db, path);

@@ -9,7 +9,7 @@ export async function uploadFile(file, props) {
 	// track status and upload file
 	file.status = 'loading'
 
-	let timestamp = new Date(file.file.lastModified).toISOString()
+	let timestamp = new Date(file.timestamp).toISOString()//(file.file.lastModified).toISOString()
 	let uploadLoc = (file.file.type.split("/")[0]=='video') ? config.storage.viduploads : config.storage.uploads
 	let uploadPath = `${uploadLoc}/${props.raceId}/${timestamp}~${props.waypoint}~${props.user}~${file.file.name}`
 	debugger;

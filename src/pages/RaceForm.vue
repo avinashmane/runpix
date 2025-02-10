@@ -63,11 +63,17 @@
         <template #footer>
           <div class="flex justify-around gap-2 my-2">
 
+            <Button name="races" label="Races" raised icon="pi pi-chevron-left" @click="router.push('/e')"></Button>
+
             <a v-if="race?.linkPhotos" :href="race?.linkPhotos">
               <Button name="photos" raised icon="pi pi-images" class="">
               </Button>
             </a>
 
+            <RouterLink :to="`/r/${race?.id}`">
+              <Button name="results" raised icon="pi pi-clock" class="">
+              </Button>
+            </RouterLink>
 
             <RouterLink v-if="menuButtons && userStore.checkAccess('race', race?.id, 'update')" v-for="(icon, path) in {
               edit: 'pi-pencil',
@@ -84,20 +90,14 @@
             }" :to="`/e/${race.id}/${path}`">
               <Button :name="path" raised :icon="'pi ' + icon" class="bg-sky-300" />
             </RouterLink>
-            <!-- <Button name="entry" label="Enter Bibs" raised icon="pi pi-hashtag" class=""
-            :to="`/e/${race.id}/entry`" />
-            <Button name="record" label="Record Video" raised icon="pi pi-video" class=""
-            :to="`/e/${race.id}/entry/video`" /> -->
-
 
             <RouterLink v-if="props.menuButtons && userStore.checkAccess('photos', race?.id, 'timing')"
               :to="`/e/${race.id}/images`">
               <Button name="upload" labe raised icon="pi pi-bolt" class="bg-sky-400" />
             </RouterLink>
-          </div>
-          <div class="flex justify-around gap-2 my-2">
+          <!-- </div>
+          <div class="flex justify-around gap-2 my-2"> -->
 
-          <Button name="races" label="Races" raised icon="pi pi-chevron-left" @click="router.push('/e')"></Button>
           <SplitButton v-if="checkAccessEventRole(race?.id)" :label="race?.id" :model="menuItems" raised />
           </div>
         </template>

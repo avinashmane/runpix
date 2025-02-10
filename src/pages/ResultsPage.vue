@@ -28,7 +28,8 @@
   <!--Show the leader board -->
   <Card v-if="!bibSelection && raceInfo.top" class="w-full mx-auto my-2 ">
       <template #subtitle>
-        <div class="flex w-full justify-end">
+        {{ race?.linkPhotos || '--'}}
+        <div class="flex w-full justify-end" >
           <a v-if="race.linkPhotos && ['available'].includes(race.photoStatus)" 
               :href="race.linkPhotos" class="p-button font-bold text-white">
               Photos
@@ -78,6 +79,7 @@ import { collection, getDocs, doc, query, where, limit, onSnapshot } from "fireb
 import { db } from "../../firebase/config"
 import { useRoute, useRouter } from 'vue-router';
 import { computed, ref } from 'vue';
+import {storeToRefs} from 'pinia'
 import {chain,cloneDeep,map,take,keys,orderBy,groupBy,sumBy,pickBy,split,sortBy,tap,startsWith, each}  from "lodash-es"
 // import * as _ from 'lodash-es'
 
@@ -91,9 +93,11 @@ const races = computed(() => orderBy(raceStore.races//.value//store.state.datast
   .filter(x => checkResStatus(x)),
   "Date","desc")
 )
-let race = computed(() =>
-  (races.value.length && raceId.value) ?
-    races.value.find(x => x.id == raceId.value) : { Name: '' })
+
+// let race = computed(() =>
+//   (races.value.length && raceId.value) ?
+//     races.value.find(x => x.id == raceId.value) : { Name: '' })
+const {race}=storeToRefs(raceStore)
 
 let raceId = ref(params.raceId)
 

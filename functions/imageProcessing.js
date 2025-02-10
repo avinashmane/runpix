@@ -7,6 +7,31 @@
  * 5. Storage triggered: Scan images
 */
 'use strict';
+const exifr = require("exifr");
+const sharp = require("sharp");
+const { getNormalSize, error } = require("./utils");
+
+
+async function getImageMetadata(bucket, filePath, metadataReqd = true) {
+  // Downloads the file into a buffer in memory.
+  const contents = await bucket.file(filePath).download();
+  let img, size, imgMetadata;
+  try {
+    img = sharp(contents[0]); // contents
+    size = getNormalSize(await img.metadata());
+    imgMetadata = size;
+  } catch (e) {
+    error(`can't make sharp object for ${filePath}`, e);
+  }
+  if (metadataReqd) {
+    imgMetadata = Object.assign(imgMetadata,
+      await exifr.parse(contents[0], true)
+    );
+  }
+  return [img, imgMetadata];
+}
+exports.getImageMetadata = getImageMetadata;
+
 
 function getImageHeight(meta) {
   try {

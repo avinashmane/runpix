@@ -2,7 +2,7 @@
     <!--List of all races or RaceCards-->
     <h1 @dblclick="klick" class="text-center text-xl">Races</h1> 
 
-    <DataView :value="races" :sort-field="Date" :sort-order="-1" :pt="{
+    <DataView v-if="races.length" :value="races" :sort-field="Date" :sort-order="-1" :pt="{
         header: { class: 'bg-red-500 ' },
         content: { class: 'text-lg ' },
         title: {class:'text-xl'}
@@ -16,6 +16,7 @@
         </template>
 
     </DataView>
+    <img v-else src="/assets/graphics/finisher-1.jpg"/>
 
     <Button v-if="races.length" class="justify-end" :label="allRaces?'Less':'More'" @click="allRaces=!allRaces"></Button>
 </template>

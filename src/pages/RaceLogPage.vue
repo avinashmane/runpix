@@ -1,16 +1,21 @@
 <template>
   <Toast/>
-
+ 
   <Card id="provisional" class="bg-white">
-    <template #title> Provisional Timing {{ raceId }} </template>
-    <template #content>
-      <div>
-        Start: {{ race?.timestamp?.start?.toLocaleString() || isLive() ? 'Live' : '--'}} 
-        <!-- <InputMask v-model="startTime" 
-        dateTimeFormat="YYYY-MM-DD HH:mm:SS" placeholder="YYYY-MM-DD HH:MM:SS" mask="9999-99-99 99:99:99"/> -->
-      </div>
 
-      <div id="selections" class="flex align-items-center">
+    <template #title> Provisional Timing {{ raceId }}   
+    </template>
+    <template #content>
+      <div v-for="(ts,k) in race?.timestamp " class="capitalize">
+        {{ k }} timestamp : {{ dayjs(ts).format('YYYY-MM-DD HH:mm:ss') }}
+        <!-- Start: {{ race?.timestamp?.start?.toLocaleString() || isLive() ? 'Live' : '--'}}  -->
+      </div>
+      <div>Unique/All readings : {{uniqBy(allEntries,'bib').length}}/{{allEntries.length}} 
+        by {{uniq(map(allEntries,x=>x.userId.split(/\W/g)[0])).join(', ')}}</div>
+      <div>{{ stats.readings }}</div>
+      <!-- {{ allEntries }} -->
+      
+      <div id="selections" class="flex align-items-center mt-2">
         <!-- <label for="showAll" class="ml-2">All:</label> -->
         <Select
           :options="showAllOptions"
@@ -25,7 +30,8 @@
 
       <div id="sort" class="flex align-items-center">
         <Select :options="sortOptions" v-model="sortVal" />
-        <InputText v-model="bibSearch" />
+        <InputText class="shrink-1" v-model="bibSearch" />
+        <span @click="bibSearch=''" class="pi pi-times"></span>
       </div>
 
       <Paginator
@@ -36,12 +42,12 @@
         currentPageReportTemplate="{first}-{last} of {totalRecords}"
       />
       <table class="w-full">
-        <tr>
-          <th v-for="h in ['TS', 'Time', 'Bib', 'WP', 'U']">{{ h }}</th>
-        </tr>
-        <tr v-for="i in range(first, rows)">
+        <div class="flex justify-between">
+          <div v-for="h in ['TS', 'Time', 'Bib', 'WP', 'U']" >{{ h }}</div>
+        </div>
+        <div v-for="i in range(first, rows)" class="flex justify-between">
           <template v-if="entries[i]">
-            <td>
+            <div class="w-[2rem]">
               {{ i + 1 }}
               <br />
               <i
@@ -49,58 +55,63 @@
                 class="pi pi-pencil"
                 :class="entries[i].status"
               />
-            </td>
-            <td>
+            </div>
+            <div class="w-[5rem]">
               {{ formatDate(entries[i].timestamp) }}
               <br />
               <i>{{ isLive()
                   ? dayjs.duration(entries[i].elapsed,"s").format('HH:mm:ss') 
                   : period(entries[i].timestamp) }}</i>
-            </td>
-            <td>
+            </div>
+            <div class="flex-1 shrink truncate">
               <span :class="entries[i].status">{{ entries[i].bib }}</span>
 
               <small>&nbsp;{{ entries[i].status }}</small>
               <br />
               <small>{{ abbr(entries[i].name, 24) }}</small>
               <!-- <b>{{entries[i].score}}</b> -->
-            </td>
-            <td>
+            </div>
+            <div class="w-[4rem]">
               {{ entries[i].waypoint }}
               <small>
                 <u>{{ isLive()
                   ? entries[i].device_name
                   : abbr(entries[i].userId) }}</u>
               </small>
-            </td>
-            <td v-if="isLive()" class="image w-20%">
+            </div>
+            <div class="image w-[5rem] ">
+              <a v-if="isVideo(entries[i].imagePath)" :href="getVideoUrl(entries[i].imagePath)" target="_blank">
+                <i class="pi pi-external-link" />
+              </a>
+
               <Image
-                v-if="entries[i].imagePath"
+                v-else-if="isImage(entries[i].imagePath)"
                 preview
-                :src="GS_PREFIX + entries[i].imagePath.replace('processed', 'thumbs')"
+                :src="GS_PREFIX + entries[i].imagePath?.replace('processed', 'thumbs')"
               />
               <span v-else
                 ><small>{{ entries[i].type }}</small></span
               >
 
-            </td>
-            <td class="w-1/12">
+            </div>
+            <div v-if="isLive()" class="w-1/12">
               <a :href="'https://www.strava.com/activities/'+entries[i].activity" target="_blank"><i
                 class="pi pi-external-link"
               /></a>
-            </td>
+            </div>
           </template>
-        </tr>
+        </div>
       </table>
 
       <Dialog v-model:visible="visible" modal header="Please review carefully">
+
         <div>
           <div v-if="entries[entryToEdit].imagePath">
             <Image :src="GS_PREFIX + entries[entryToEdit].imagePath" />
           </div>
-          <tr v-if="race" >
-            <td>{{ race.status }}</td>
-            <td>
+          <div v-if="race" >
+            <div>{{ race.status }}</div>
+            <div>
               {{
                 race.timestamp
                   ? `${new Date(race.timestamp.start).toLocaleTimeString()} "${
@@ -108,16 +119,16 @@
                     }"`
                   : ""
               }}
-            </td>
-          </tr>
-          <tr
+            </div>
+          </div>
+          <div
             v-for="(v, k) in { userId: 'User', id: 'Id', score: 'Score' }"
             @dblclick="klick"
           >
-            <td>{{ v }}</td>
-            <td>{{ entries[entryToEdit][k] }}</td>
-          </tr>
-          <tr
+            <div>{{ v }}</div>
+            <div>{{ entries[entryToEdit][k] }}</div>
+          </div>
+          <div
             v-for="(v, k) in {
               bib: 'Bib',
               status: 'Status [valid or invalid]',
@@ -125,56 +136,76 @@
               type: 'Type',
             }"
           >
-            <td>{{ v }}</td>
-            <td>
+            <div>{{ v }}</div>
+            <div>
               <InputText
                 stype="k=='timestamp'?'datetime-local':'text'"
                 v-model="entries[entryToEdit][k]"
               />
-            </td>
-          </tr>
-          <tr>
-            <td>Timestamp</td>
-            <td>
+            </div>
+          </div>
+          <div>
+            <div>Timestamp</div>
+            <div>
               <InputText
                 nontype="datetime-local"
                 v-model="entries[entryToEdit].timestamp"
               />
               {{ formatDate(entries[entryToEdit].timestamp) }}
-            </td>
-          </tr>
+            </div>
+          </div>
           <!-- {{period(entries[entryToEdit].timestamp))}} -->
         </div>
-        <p>Total entries {{ allEntries.length }}</p>
-        <template #footer>
-          <Button
-            v-if="entries[entryToEdit].status != 'invalid'"
-            label="Invalidate"
-            @click="
-              setStatus(entries[entryToEdit].id, 'invalid');
-              visible = false;
-            "
-            text
-          />
-          <Button
-            v-if="entries[entryToEdit].status != 'valid'"
-            label="Validate"
-            @click="
-              setStatus(entries[entryToEdit].id, 'valid');
-              visible = false;
-            "
-            text
-          />
-          <Button label="No" icon="pi pi-times" @click="visible = false" text />
-          <Button
-            label="Save"
-            @click="
-              submitChange();
-              visible = false;
-            "
-            icon="pi pi-check"
-            autofocus
-          />
+
+        <div>Bib entries {{bibEntries.length}}/{{ allEntries.length }}
+          <div v-for="b in bibEntries">
+            <div >
+              {{b.i}} {{b.waypoint}} {{dayjs(b.timestamp).format('HH:mm:ss')}}
+              {{b.status}} {{ b.imagePath?.slice(-10)||'-' }}
+            </div>
+          </div>
+        </div>
+
+        <template #footer >
+          <div class="flex flex-wrap justify-between">
+            <Button
+              v-if="entries[entryToEdit].status != 'invalid'"
+              label="Invalidate"
+              @click="
+                setStatus(entries[entryToEdit].id, 'invalid');
+                visible = false;
+              "
+              text
+            />
+            <Button
+              v-if="entries[entryToEdit].status != 'valid'"
+              label="Validate"
+              @click="
+                setStatus(entries[entryToEdit].id, 'valid');
+                visible = false;
+              "
+              text
+            />
+            <Button label="No" icon="pi pi-times" @click="visible = false" text />
+            <Button
+              label="Save"
+              @click="
+                submitChange();
+                visible = false;
+              "
+              icon="pi pi-check"
+              autofocus
+            />
+            <Button
+              label="ChgDistAll "
+              @click="
+                submitChange('oneImage');
+                visible = false;
+              "
+              icon="pi pi-check"
+              autofocus
+            />
+          </div>
         </template>
       </Dialog>
     </template>
@@ -208,26 +239,19 @@ import Dialog from "primevue/dialog";
 import InputText from "primevue/inputtext";
 import Checkbox from "primevue/checkbox";
 import Select from "primevue/select"; // optional
-// import TabView from 'primevue/tabview';
-// import TabPanel from 'primevue/tabpanel';
+import { getAllDocsRT } from "../api";
 import Card from "primevue/card"; // optional
 import { db, storage } from "../../firebase/config"; //storage
 import { config } from "../config";
 import {
-  collection,
-  query,
-  doc,
-  limit,
-  orderBy,
-  onSnapshot,
-  getDocs,
+  collection,query,doc,onSnapshot,
   updateDoc,
   setDoc,
   deleteDoc
 } from "firebase/firestore";
 import {
-  chain, cloneDeep,  map,  orderBy as _orderBy,  sumBy,  pickBy,  uniqBy,  
-  split,  sortBy,  tap,  extend,  startsWith,} from "lodash-es";
+  chain, cloneDeep,  map, mapValues, orderBy as _orderBy,  sumBy,  groupBy,  uniqBy,  
+  split,  sortBy, throttle, tap,  extend,  uniq,} from "lodash-es";
 import {debug} from "../helpers"
 import _ from 'lodash-es'
 import dayjs from "dayjs"
@@ -243,7 +267,6 @@ const route = useRoute();
 const router = useRouter();
 const raceId =  route.params.raceId;
 raceStore.setRaceId(raceId)
-// store.dispatch("getRaceObjAction", raceId);
 
 const racesObj = raceStore.racesObj//store.state.datastore.racesObj;
 const {race} = storeToRefs(raceStore)//computed(() => store.state.datastore.race);
@@ -254,8 +277,8 @@ const showAll = ref("Valid");
 const showAllOptions = ["All", "Valid", "Invalid"];
 const genderOptions = ["All", "Male", "Female"];
 const genderVal = ref("All");
-const sortOptions = ["Desc", "Asc"];
-const sortVal = ref("Asc");
+const sortOptions = ['Timestamp Asc','Timestamp Desc','Bib Desc','Bib Asc']
+const sortVal = ref(sortOptions[0])
 const bibSearch = ref("");
 const waypoints = ref(["All"]); // availably waypoints
 const selWpt = ref("All"); // selected waypoints (for display)
@@ -268,6 +291,24 @@ let raceDoc = doc(db, "races", raceId); //
 function isLive(){
   return race.value?.status?.includes('live')
 }
+function isVideo(x){
+  return x ? "mp4,mkv".includes(x.split('.').pop().toLowerCase()) : false
+}
+function isImage(x){
+  return x ? "png,jpg,jpeg,gif".includes(x.split('.').pop().toLowerCase()) : false
+}
+function getVideoUrl(x){
+  return `https://firebasestorage.googleapis.com/v0/b/run-pix.appspot.com/o/uploadvid%2F${raceId}%2F${x}?alt=media` //2025-01-12T01%3A48%3A03.437Z~10K~avinashmane%40gmail.com~VID_20250112_071748.mp4
+}
+const getReadingSource=(reading)=>(reading.hasOwnProperty('imagePath')?
+                                reading.imagePath?.split(".").pop():'keyed')
+
+const stats=computed(()=>({
+   readings: mapValues(groupBy(map(allEntries.value,
+                                x=>`${x.waypoint}-${getReadingSource(x)}`)),
+                      g=>g.length),
+   status:uniqBy(map(allEntries.value, x=>`${x.waypoint}-${x.status}`),x=>x)
+}))
 const getReadingsPath=()=>isLive()?"activities":"readings"
 
 const totalFinalizedEntries = ref(null);
@@ -325,20 +366,22 @@ onBeforeUnmount(()=> {
 
 function toastBib(querySnapshot){
   querySnapshot.docChanges().forEach(change => {
+    if(true){
       const data=change.doc.data()
       if (change.type === 'added') {
         showToast(`${data.bib} @ ${data.waypoint}`,period(data.timestamp))
-        console.log('New  ', data);
+        // console.log('New  ', data);
       }
       if (change.type === 'modified') {
         showToast(`CHG ${data.bib} @ ${data.waypoint}`,period(data.timestamp),"info")
-        console.log('Modified  ', data);
+        // console.log('Modified  ', data);
       }
       if (change.type === 'removed') {
         showToast(`REM ${data.bib} @ ${data.waypoint}`,period(data.timestamp),"warning")
-        console.log('Removed  ', data);
+        // console.log('Removed  ', data);
       }
-    });
+    }
+  });
 }
 
 let entries = computed(() => {
@@ -361,17 +404,16 @@ let entries = computed(() => {
       ret = ret.filter((x) => x.gender == genderVal.value);
   }
 
-    // sort
-  // debugger
-
-  ret = _orderBy(ret, "timestamp", sortVal.value.toLowerCase());
+  // sort
+  const _sortVal=(x=0)=>sortVal.value.toLowerCase().split(" ")[x]
+  ret = _orderBy(ret,_sortVal(0),_sortVal(1))
 
   // search text debugger
   if (bibSearch.value)
     ret = ret.filter(
       (x) =>
         x.bib.includes(bibSearch.value) ||
-        x.name.includes(bibSearch.value) ||
+        x.name.toLowerCase().includes(bibSearch.value.toLowerCase()) ||
         x.status.includes(bibSearch.value)
     );
 
@@ -597,6 +639,7 @@ function toggleDialog(i) {
     visible.value = false;
   }
 }
+const bibEntries=computed(()=>allEntries.value.filter(x=>x.bib==entries.value[entryToEdit.value].bib))
 
 const setStatus = (id, val) => {
   const e = allEntries.value.filter((x) => x.id == id);
@@ -610,21 +653,35 @@ const setStatus = (id, val) => {
   }
 };
 
-function submitChange() {
+function submitChange(type = 'onebib') {
   let regExp = getBibRegExp();
+  let curEntry = cloneDeep(entries.value[entryToEdit.value]);
 
-  if (entries.value[entryToEdit.value].bib.search(regExp) >= 0) {
-    let payload = cloneDeep(entries.value[entryToEdit.value]);
-    let path = `races/${raceId}/${getReadingsPath()}/${payload.id}`;
-    delete payload.id;
-    // debugger
-    // debug(typeof payload.timestamp, payload.timestamp)
-    payload.timestamp = new Date(payload.timestamp).toISOString();
-    debug(`Saving ${JSON.stringify(payload)}`);
+  if (type == "onebib") {
+    if (curEntry.bib.search(regExp) >= 0) {
+      const id=curEntry.id
+      delete curEntry.id;
+      curEntry.timestamp = new Date(curEntry.timestamp).toISOString();
+      // debug(typeof payload.timestamp, payload.timestamp)
+      _updateReadingPath(id,curEntry);
+    } else {
+      console.warn(`Non bib found`);
+    }
+  } else if (type == 'oneImage') {
+     
+    const entriesToUpdate = allEntries.value.map((x, i) => ({ i: i, ...x }))
+              .filter(x => (x.imagePath == curEntry.imagePath) 
+                  && (x.bib == curEntry.bib) 
+                  && (x.waypoint !== curEntry.waypoint))
+    entriesToUpdate.forEach(x => _updateReadingPath(x.id,{waypoint:curEntry.waypoint}))
+  }
+
+
+  function _updateReadingPath(id,payload) {
+    let path = `races/${raceId}/${getReadingsPath()}/${id}`;
+    debug(`Saving ${path}=${JSON.stringify(payload)}`);
 
     updateDoc(doc(db, path), payload);
-  } else {
-    console.warn(`Non bib found `);
   }
 }
 
@@ -644,6 +701,7 @@ Start Time "7:10:00"
  // this should be done in backend one logic
 function finalize_results() {
   console.log(`finalizing results: ${allEntries.value.length}`);
+  processedFinalizedEntries.value=0
   const keys_ = split("bib name timestamp status waypoint gender imagePath", " ");
 
   // map data
@@ -754,13 +812,13 @@ import { useToast } from 'primevue/usetoast';
 const toast = useToast();
 
 const showToast = (summary,mesg,severity) => {
-    toast.add({ //severity: severity||'success', 
+    throttle(toast.add({ //severity: severity||'success', 
                 summary: summary||'Bib missing', 
-                detail: mesg||'Message Content', life: 2000 });
+                detail: mesg||'Message Content', life: 2000 }));
 };
 
 function finalize_results_server(){
-  const url=`${config.app.API_URL}/race/${raceId}/results`
+  const url=`${config.app.API_URL}/api/race/${raceId}/results`
 
   return axios
     .post(url, {}, {
@@ -779,7 +837,7 @@ function finalize_results_server(){
 
 function resetResults(bib=null){
   const deleteRef=(ref)=>{
-          ret =deleteDoc(ref);
+          const ret =deleteDoc(ref);
           console.log(ref.path)
           return ret
         }
@@ -804,7 +862,7 @@ function resetResults(bib=null){
 </script>
 
 <style scoped>
-td.image {
+div.image {
   max-width: 2em;
 }
 

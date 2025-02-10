@@ -1,10 +1,10 @@
 
 <template>
   <div class="flex flex-cols justify-around py-2 mx-4 mx-auto dark:bg-blue-900 hover:items-center">
-    <div v-for="x in footer" :href="x.link" class="flex flex-col">
+    <a v-for="x in footer" :href="x.link" class="flex flex-col">
       <i :class="x.icon+' text-xl text-center'"/>
       <div class="mx-auto">{{x.text}}</div>
-    </div>
+    </a>
     <!-- <a href="">
       <i class="" ></i>
       RUNPIX @2023
@@ -26,6 +26,8 @@
 </template>
 
 <script setup>
+import {useRouter} from 'vue-router'
+const router = useRouter()
 let header="text|icon|link".split('|')
 let values=`
 RUNPIX @2023|pi pi-camera|https://www.facebook.com/runpixindia

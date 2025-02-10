@@ -71,6 +71,9 @@ async function addDecodedIdTokenToRequest(idToken, req) {
   }
 }
 
+/**
+ * Firebase class:  Should be renamed as firestore and instance should be runpix
+ */
 class Firestore {
   cfg = {}
 
@@ -99,13 +102,14 @@ class Firestore {
     })
 }
 
-let firestore_ = new Firestore()
-exports.firestore = firestore_
+let firestore_runpix = new Firestore()
+exports.admin = admin;
+exports.firestore = firestore_runpix;
 
 exports.validateFirebaseIdToken = validateFirebaseIdToken;
 
 async function firebaseGet(path) {
-  var docRef = firestore_.doc(path);
+  var docRef = firestore_runpix.doc(path);
   return docRef.get().then((doc) => {
     if (doc.exists) {
       return doc.data();
@@ -122,7 +126,7 @@ async function updFSImageData(raceId, imagePath, detections, texts, exifdata) {
   // return await admin.firestore()
   //               .collection('races').doc(raceId)
   //               .collection('images').doc(imagePath).
-  return await firestore.doc(`races/${raceId}/images/${imagePath}`).
+  return await firestore_runpix.doc(`races/${raceId}/images/${imagePath}`).
     set({
       imagePath: imagePath,
       texts: texts,

@@ -1,6 +1,6 @@
 
 const debug = require("debug")("RUNPIX:SERVER")
-const { createRaceNthSunday,createSundayRace } = require("./races")
+const { createRaceNthSunday,createSundayRace, save_result, getRaceCfg } = require("./races")
 /**
  * all express app related things
  */
@@ -51,6 +51,7 @@ function renderImage(res, req, p) {
   // });
 }
 
+// app.options('/race/:raceId/results', cors()) /
 app.post('/race/:raceId/results', async (req, res) => {
   //test link http://localhost:5000/race/werun2023
   const _ret = await save_result(req.params.raceId, req.query)

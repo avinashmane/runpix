@@ -128,6 +128,7 @@
     <Button raised icon="pi pi-chevron-left" class="p-2" />
   </router-link>
   </div>
+  ---
 </template>
 
 <script setup>
@@ -142,10 +143,9 @@ import Dialog from "primevue/dialog";
 import InputText from "primevue/inputtext";
 import Select from "primevue/select";
 import Checkbox from "primevue/checkbox";
-import { getDocData } from "../api";
+import { getAllDocsRT, getDocData } from "../api";
 import { getPublicUrl } from "../helpers";
 import { db, storage } from "../../firebase/config";
-// import { ref as dbRef, getDownloadURL } from "firebase/storage";
 import {
   collection,
   query,
@@ -199,15 +199,16 @@ let images = computed(() =>
 );
 let allImages = ref([]);
 
-const q = query(collection(raceDoc, "images"));
-const unsubscribe = onSnapshot(q, (querySnapshot) => {
-  const _images = [];
-  querySnapshot.forEach((doc) => {
-    let data = doc.data();
-    _images.push(filterBibNos(data));
-  });
-  allImages.value = _images;
-});
+console.log('raceStore.getVideos()',await raceStore.getVideos())
+// const q = query(collection(raceDoc, "images"));
+// const unsubscribe = onSnapshot(q, (querySnapshot) => {
+//   const _images = [];
+//   querySnapshot.forEach((doc) => {
+//     let data = doc.data();
+//     _images.push(raceStore.filterBibNos(data));
+//   });
+//   allImages.value = _images;
+// });
 
 /**
  * Filter bib numbers

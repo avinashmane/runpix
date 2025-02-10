@@ -1,7 +1,5 @@
 import { initializeApp } from 'firebase/app'
-import { getAuth,
-    // connectAuthEmulator ,initializeAuth, indexedDBLocalPersistence, browserPopupRedirectResolver
- } from 'firebase/auth'
+import { getAuth, } from 'firebase/auth'
 import { getFirestore, doc ,getDoc   } from "firebase/firestore"; 
 import { getStorage } from "firebase/storage"
 import { config } from '../src/config';
@@ -21,15 +19,10 @@ if (import.meta.dev) console.log(firebaseConfig)
 initializeApp(firebaseConfig)
 const firebaseAuth = getAuth()
 // connectAuthEmulator(firebaseAuth, "http://localhost:5000");
-// const firebaseAuth = initializeAuth({
-//     persistence: indexedDBLocalPersistence,
-//     popupRedirectResolver: browserPopupRedirectResolver// No popupRedirectResolver defined
-//   })
-// debugger;    
+
+
 const db = getFirestore()
 const storage = getStorage()
 // console.debug('firebaseAuth', firebaseAuth)
-
-
 
 export { firebaseAuth, db, storage }

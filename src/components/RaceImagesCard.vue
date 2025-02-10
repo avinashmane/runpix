@@ -1,6 +1,7 @@
 <template>
 
-    <Paginator v-model:first="first" v-model:rows="rows" :totalRecords="images.length" template="FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
+    <Paginator v-model:first="first" v-model:rows="rows" :totalRecords="images.length" 
+      template="FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
       currentPageReportTemplate="{first}-{last} of {totalRecords}" />
     <div class="flex flex-wrap bg-gray-200 justify-evenly">      
       <div v-for="i in range(first,rows,images.length)" :key="i" class="thumb">
@@ -24,14 +25,14 @@ import { db, storage } from "../../firebase/config"
 import { ref as dbRef, getDownloadURL } from "firebase/storage";
 import { collection,query,doc, onSnapshot, getDocs } from "firebase/firestore";
 import Image from "primevue/image";
+import { useRaceStore } from '../stores';
 
 let props = defineProps({
   raceId: String,
   bibRegex: String,
   waypoint: String,
 })
-console.log(props.bibRegex)
-
+const raceStore = useRaceStore()
 const first = ref(0);
 const rows = ref(20);
 
@@ -44,20 +45,11 @@ const unsubscribe = onSnapshot(q, (querySnapshot) => {
   querySnapshot.forEach((doc) => {
       let data = doc.data()
       getUrl(images.value.length, data.imagePath)
-      _images.push(filterBibNos(data));
+      _images.push(raceStore.filterBibNos(data));
   });
   images.value = _images
 });
 
-/**
- * Filter bib numbers
- */
-function filterBibNos(d) {
-    let re=RegExp(props.bibRegex ? `^${props.bibRegex}$` : '^\\d{3,5}$')
-    d.textAnnotations=d.textAnnotations.filter(
-          t=>t.description.search(re)!=-1)
-    return d;
-}
 
 function getUrl(i,filePath,thumb=true,retry=true){
   let baseFile=filePath.split('/').pop().replace('.png',".jpg")

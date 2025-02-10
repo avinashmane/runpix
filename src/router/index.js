@@ -30,7 +30,7 @@ let userStore
 const nextIfLogin=(next,ifLogged,notLogged)=>{
     if(!userStore)
         userStore=useUserStore()
-    
+    debug(userStore.isSignIn,next)
     if(userStore.isSignIn){
         next(ifLogged);
     } else {

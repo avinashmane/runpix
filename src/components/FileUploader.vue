@@ -11,6 +11,7 @@
                 placeholder="Select a Waypoint"
                 class="w-1/2 m-2 px-2 "
             />
+
         <input ref="fileInput" multiple type="file" @change="handleFileChange" hidden />
         <div class="flex flex-col md:flex-row justify-around w-full ">
             <div class="flex justify-around gap-4">
@@ -26,24 +27,32 @@
             @page="pageHandler" />
 
 
-        <div class="flex justify-center">
+        <div class="flex md:flex-row flex-col justify-between">
+            <div>
+                <label for="ts">Timestamp from filename </label>
+                <Checkbox id="ts" v-model="tsFromFilename" binary @change="handleFileChange"/>
+            </div>
+            {{ loadedFiles }}/{{ files?.length }} files uploaded at {{ waypoint }}
+            <br/>
 
         </div>
-        {{ loadedFiles }}/{{ files?.length }} files uploaded at {{ waypoint.value }}
-        <br/>
-        <div v-if="loadingFiles">Uploading {{ loadingFiles }}  as {{ userStore.profile.email }} at {{ waypoint.value }}</div>
         
+        <div v-if="loadingFiles" class="text-sm">
+                Uploading {{ loadingFiles }} as {{ userStore?.profile?.email }} at {{ waypoint }}</div>
+            
         <!-- {{ first }}{{ URLs }} -->
-
         <div for v-for="(f, i) in files.slice(first, first + rows)" :key="i"
             class="flex flex-col md:flex-row bg-slate-100 dark:bg-slate-900 justify-around w-full ">
             <img v-if="f.file.type.includes('image')" :src="getThumbUrl(f.file)" :alt="f.name"
                 class="w-full md:w-1/3 shadow object-contain  m-2 max-h-40 " />
             <div class="flex flex-col w-full">
                 <div>{{ f.file.name }}</div>
-                <div class="flex-none text-sm" @click="removeFile(i)">🗑️{{ first + i + 1 }} {{ byteValue(f.file.size) }}</div>
-
-                <div class="flex-1 text-sm">{{ dayjs(f.file.lastModified).format('YYYY-MM-DD HH:mm:ss') }} -- {{ f.status }}</div>
+                <div class="flex-none text-sm" @click="removeFile(i)">
+                    🗑️{{ first + i + 1 }} {{ byteValue(f.file.size) }} | {{ showUploadStatus(f.status) }}
+                </div>
+                
+                <div class="flex-1 text-sm">{{ dayjs(f.timestamp).format('YYYY-MM-DD HH:mm:ss') }} | 
+                    {{ tsFromFilename ? dayjs(f.file.lastModified).format('YYYY-MM-DD HH:mm:ss') : '-' }} </div>
             </div>
         </div>
 
@@ -67,8 +76,8 @@ const props = defineProps({
   }
 });
 
-import { dayjs } from '../helpers';
-// import DataView from 'primevue/dataview';
+import { dayjs,getTimeStampFromStr } from '../helpers';
+import Checkbox from 'primevue/checkbox';
 import Paginator from 'primevue/paginator';
 import { useUserStore } from '../stores';
 import Select from 'primevue/select';
@@ -81,24 +90,32 @@ const waypoint = ref("VENUE");
 
 const userStore = useUserStore()
 
+const tsFromFilename = ref(false); //temp
 
 const loadingInProgress=ref(false)
+const checked=ref(false)
 const fileInput = ref(null)
 const files = ref([])
 const rows = ref(5)
 const first = ref(0)
 const URLs = ref([])
 const logs=ref([]) // only for debug
-const loadingFiles=computed(()=>files.value.filter(f=>f.status=='loading').length)
+const loadingFiles=computed(()=>files.value.filter(f=>f.status=='loading').map(f=>f.file.name).join(", "))
 const loadedFiles=computed(()=>files.value.filter(f=>f.status==true).length)
 
+const  showUploadStatus=(x)=>x?(x===true?'✅':'⏱️'):"-"
+
 function handleFileChange() {
-    files.value = Array.from(fileInput.value?.files)
-                .map(file=>{
+    const files_list=Array.from(fileInput.value?.files)
+    console.log(`files list ${files_list.length}`);
+    files.value =files_list.map(file=>{
                     // logs.value.push(file.lastModified )
-                    // console.log(file);
+                    
                     return {
                         file:file,
+                        timestamp:tsFromFilename.value?
+                                getTimeStampFromStr(file.name):
+                                file.lastModified,
                         status:null
                 }})
     refreshThumbUrls(first.value)

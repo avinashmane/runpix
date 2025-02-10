@@ -1,8 +1,8 @@
 import { defineStore } from "pinia";
-import { ref, computed } from "vue";
+import { ref, computed, watch } from "vue";
 import { debug } from "../helpers"
 // import { getAuth, onAuthStateChanged } from "firebase/auth";
-import { pick, assign, omit } from 'lodash-es'
+import { pick, assign, omit, isEmpty } from 'lodash-es'
 import {
     signIn,
     signInGoogle,
@@ -13,10 +13,12 @@ import {
     reAuthenticate,
     getDocData,
     getDocAsync,
-    getRaces,
-    getRacesAsync
+    getRacesAsync,
+    getAllDocsRT,
+    getAllDocs,
 } from "../api";
 import { firebaseAuth, db } from '../../firebase/config';
+
 
 const PROFILE_FIELDS = "displayName,uid,email,photoURL".split(",")
 
@@ -238,42 +240,48 @@ export const useUserStore = defineStore('UserStore', () => {
  * --------------------------------------------------------
  */
 export const useRaceStore = defineStore('RaceStore', () => {
+    const defaultRace={waypoint:'VENUE',Name:null,Date:null,Location:null,Distances:[],status:[]}
     const races = ref([])
     const racesObj = ref({})
     const raceId = ref()
-    // const race : {waypoint:'VENUE'},
+    const race = ref( defaultRace)
     const gps = ref({})
     const waypoint = ref('VENUE')
-    const sub = {} // subscriptions
-
-    sub['getRacesMutation'] = getRacesAsync((data) => {
+    const readings = ref([])
+    const images = ref([])
+    const videos = ref([])
+    const subDocs = ref({})
+    const unsubscribe = {} // subscriptions
+    
+    unsubscribe['getRacesMutation'] = getRacesAsync((data) => {
         races.value = data;
         racesObj.value = data.reduce((a, x) => ({ ...a, [x.id]: x }), {})
     })
 
-    const race = computed(() => {
-        if (raceId.value) {
-            return racesObj.value[raceId.value]
-        } else {
-            return { waypoint: 'VENUE' }
-        }
-    })
+    watch(racesObj, ()=>{mapRaceId(raceId.value)})
 
     function setRaceId(id) {
+        if(raceId.value == id && !race.value.Name) 
+            return race.value
+        mapRaceId(id)
+    }
+    /** triggered via watch on action */
+    function mapRaceId(id){
         raceId.value = id
+        const _race=racesObj.value?.[raceId.value]
+        if(!isEmpty(_race)){
+            race.value=_race
+        } else {
+            race.value=defaultRace
+        }
+        return _race
     }
     /**
      * fetches all races in advance
      */
     async function getRacesAction() {
         try {
-            // const response = await getRaces();
-            // this.races = response;
-            // this.racesObj = payload.reduce( (a,x) =>{
-            //     a[x.id] = x
-            //     return a
-            // },{})
-            sub['getRacesMutation'] = sub['getRacesMutation'] ||
+            unsubscribe['getRacesMutation'] = unsubscribe['getRacesMutation'] ||
                 getRacesAsync((data) => {
                     races.value = data;
                     racesObj.value = data.reduce((a, x) => ({ ...a, [x.id]: x }), {})
@@ -282,7 +290,62 @@ export const useRaceStore = defineStore('RaceStore', () => {
             console.error("Failed getting errors", error)
         }
     };
+    /**
+     * Filter bib numbers
+     */
+    function filterBibNos(d) {
+        let re=RegExp(race.bibPattern || '^\\d{3,5}$')
+        d.textAnnotations=d.textAnnotations.filter(
+            t=>t.description.search(re)!=-1)
+        return d;
+    }
 
-    return { races, racesObj, raceId, race, gps, waypoint, setRaceId, getRacesAction }
+
+    async function getImages(subpath) {
+        const arr = [];
+        if (unsubscribe['images']==undefined){
+            unsubscribe['images'] =getAllDocsRT(`races/${raceId.value}/images`, (data, id) => {
+                arr.push(data)
+            })
+        }
+        // const q = query(collection(raceDoc, subpath));
+        // unsubscribe[subpath] = onSnapshot(q, (querySnapshot) => {
+        //     const data = [];
+        //     querySnapshot.forEach((doc) => {
+        //         let data = doc.data()
+        //         getUrl(images.value.length, data.imagePath)
+        //         data.push(raceStore.filterBibNos(data));
+        //     });
+        //     return data
+        // });
+    }
+    async function _getAllSubDocsRT(subpath) {
+        // let raceDoc=doc(db, "races", this.raceId); //
+        if (unsubscribe[subpath]==undefined){
+            subDocs.value[subpath]=[]
+            unsubscribe[subpath]= getAllDocsRT(`races/${raceId.value}/${subpath}`, (data, id) => {
+                subDocs.value[subpath].push(data)
+                // console.log(data)
+            })
+        }
+        return subDocs.value[subpath]
+    }
+    async function getBibs() {
+        // let raceDoc=doc(db, "races", this.raceId); //
+        return _getAllSubDocsRT('bibs')
+    }
+    async function getVideos() {
+        // let raceDoc=doc(db, "races", this.raceId); //
+        return _getAllSubDocsRT('videos')
+    }
+    async function getImagesVideos(){
+        // const images=await getDocAsync(`races/${raceId.value}/images`)
+        // const videos=await getDocAsync('videos')
+        return images.value.concat(videos.value)
+    }
+
+    return { races, racesObj, raceId, race, gps, waypoint, 
+        setRaceId, getRacesAction, filterBibNos,
+        getImages, getVideos, getBibs, getImagesVideos }
 })
 

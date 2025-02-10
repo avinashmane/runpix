@@ -2,7 +2,7 @@
 import TestComponent from "../components/TestComponent.vue";
 import Button from "primevue/button"
 import InputText from 'primevue/inputtext';
-import SvgText from "../components/SvgText.vue"
+// import SvgText from "../components/SvgText.vue"
 import { ref } from "vue";
 import {useUserStore}  from '@/stores/index.js'
 import Toast from 'primevue/toast';

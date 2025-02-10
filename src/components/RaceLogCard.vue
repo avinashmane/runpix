@@ -173,7 +173,8 @@ let entries=computed(()=> {
   } 
   
   // sort  
-  ret = _orderBy(ret,"timestamp",sortVal.value.toLowerCase())
+  const _sortVal=(x=0)=>sortVal.value.toLowerCase().split(" ")[x]
+  ret = _orderBy(ret,_sortVal(0),_sortVal(1))
   
   // search text debugger
   if (bibSearch.value) ret = ret.filter(x=>x.bib.includes(bibSearch.value))
@@ -187,8 +188,8 @@ const showAll=ref('Valid')
 const showAllOptions=['All','Valid','Invalid']
 const genderOptions= ['All','Male','Female']
 const genderVal = ref('All')
-const sortOptions = ['Desc','Asc']
-const sortVal = ref('Asc')
+const sortOptions = ['Timestamp Desc','Timestamp Asc','Bib Desc','Bib Asc']
+const sortVal = ref(sortOptions.value[0])
 const bibSearch = ref('')
 const waypoints=ref(['All']) // availably waypoints
 const selWpt=ref('All') // selected waypoints (for display)

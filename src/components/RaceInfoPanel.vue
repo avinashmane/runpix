@@ -2,45 +2,47 @@
 
   <form>
     <template v-for="(label,key) in labels" >
-      <div class="w-full flex gap-1" v-if="!'Waypoints id'.includes(key)">
-        <span class="text-sm w-[30%]">
+      <div class="w-full flex flex-col md:flex-row mb-2 w-full text-left" v-if="!'Waypoints id'.includes(key)">
+        <div class="text-sm p-0 w-full md:w-[30%]">
             {{(typeof label=="string") ? label : label.label}}
-        </span>
-        <span class="w-full">
-          <InputText v-if='typeof label=="string"' :disabled="!editable" 
+        </div>
+        <div class="pr-1 w-full">
+          <InputText v-if='typeof label=="string"' :disabled="!editable" class="w-full"
               v-model="race[key]" autofocus />
-          <InputMask v-else :disabled="!editable"  
+          <InputMask v-else :disabled="!editable"  class="w-full"
               v-model="race[key]" v-bind:mask="label.mask" :placeholder="label.placeholder" />
-        </span>
+        </div>
       </div>
     </template>
 
-    <tr>
-      <small>
+    <div class="w-full flex flex-col md:flex-row mb-2 w-full text-left" >
+      <div class="text-sm p-0 w-full md:w-[30%]">
         Distances
-      </small>
-      <td>
-        <InputText :disabled="!editable" separator=","
+      </div>
+      <div class="pr-1 w-full">
+        <InputText :disabled="!editable" separator="," class="w-full"
           v-model="raceArr.Distances" aria-labelledby="multiple" />
-      </td>
-    </tr>
-    <tr>
-      <small>
+      </div>
+    </div>
+    <div class="w-full flex flex-col md:flex-row mb-2 w-full text-left" >
+      <div class="text-sm p-0 w-full md:w-[30%]">
         Waypoints
-      </small>
-      <td>
-        <InputText :disabled="!editable" 
+      </div>
+      <div class="pr-1 w-full">
+        <InputText :disabled="!editable" class="w-full"
           v-model="raceArr.Waypoints" aria-labelledby="multiple" />
-      </td>
-    </tr>
+      </div>
+    </div>
+
     <div>
       <small>Status</small>
       <MultiSelect :disabled="!editable" class="status-button"
         v-model="race.status"  :options="raceStatusOptions"
         multiple aria-labelledby="multiple" />
     </div>
-    <div v-for="(v,k) in race.timestamp">
-      {{k}} : {{getLocalDateTime(v)}} <span class="text-sm italics">{{ v }}</span>
+
+    <div v-for="(v,k) in race.timestamp" class="capitalize">
+      {{k}} : {{dayjs(v).format("MMM D, YYYY h:mm:ss A Z")}} 
     </div>
     
     <Inplace :disabled="!editable">
@@ -60,8 +62,8 @@
       <Button :disabled="!editable" @click="flagOff" class="w-9rem bg-blue-500 hover:bg-blue-400">Flag Off</Button>
     </div>
   </form>
-  <div>
-    TODO:  racelogo, raceorg, racelink:{racelink,raceorg,reg,result,pic}
+  <div v-if="!editable">
+    NOTE: You need to be in edit mode to make changes or flag-off
   </div>
 </template>
 
@@ -86,7 +88,7 @@ import { doc, getDoc ,updateDoc, setDoc } from 'firebase/firestore'
 import {db} from '../../firebase/config'
 
 import {chain,cloneDeep,map,take,keys,orderBy,sumBy,pickBy,split,sortBy,tap,startsWith} from 'lodash-es'
-import { getLocalDateTime ,debug } from '../helpers';
+import { getLocalDateTime,dayjs ,debug } from '../helpers';
 import { config } from '../config';
 import {storeToRefs} from 'pinia'
 // let js=(x)=>JSON.parse(JSON.stringify(x))

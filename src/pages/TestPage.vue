@@ -2,7 +2,7 @@
 import TestComponent from "../components/TestComponent.vue";
 import Button from "primevue/button"
 import InputText from 'primevue/inputtext';
-import SvgText from "../components/SvgText.vue"
+// import SvgText from "../components/SvgText.vue"
 import { ref } from "vue";
 import { CSVToArray } from "../helpers";
 import Toast from 'primevue/toast';
@@ -51,18 +51,13 @@ function handleFileChange(x){
   <br/>{{ userStore.checkAccess('race','test',"any") }}
 
   <div id="testzone" class="container mx-auto">
-    <SvgText bottom="testAvinash" 
+    <!-- <SvgText bottom="testAvinash" 
             radius="250" 
             fontSize="60"
             top="Race Event" 
             radius-ringwidth
-            center="AM"/>
-    <!-- <SvgText bottom="testAvinash" 
-            radius=150
-            fontSize=30
-            top="Race Event" 
-            ring
             center="AM"/> -->
+    
   </div>
 
   <div class="container mx-auto">

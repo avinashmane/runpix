@@ -67,14 +67,13 @@ const userStore =  useUserStore()
 const router=useRouter()
 
 const firebaseUser = () => firebaseAuth.onAuthStateChanged(user => {
-  // console.warn(`firebaseAuth.onAuthStateChanged ${JSON.stringify(user)}`)
+  console.warn(`firebaseAuth.onAuthStateChanged ${JSON.stringify(user)}`)
   if (user) {
     userStore.login(user)
-    router.push('/home')
-    // store.commit('successRequestUser', user)
+    if (router.currentRoute.value.path == '/login')
+      router.push('/home')
   } else {
     userStore.logout()
-    // store.commit('failRequestUser', 'Fail to get user')
   }
 });
 

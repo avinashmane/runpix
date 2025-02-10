@@ -68,7 +68,7 @@ describe('OCR video basic tests', function () {
 
   var indexModule = require('../index.js'); // Works for both ESM and CommonJS
   var videocrModule = require('../videoocr.js'); // Works for both ESM and CommonJS
-  this.timeout(20000); 
+  // this.timeout(20000); 
   
   before(function () {
 
