@@ -34,7 +34,7 @@
       <div class="flex flex-column gap-2 p-float-label">
         <InputText id="bib" v-model="bib" placeholder="Enter a single bib number" 
           aria-describedby="bib-help" class="w-1/3 border bg-yellow-50"/>
-        <Button v-for="d in race?.Distances" @click="recordBib(d)" class="text-white p-2 bg-blue-500 hover:bg-blue-400">
+        <Button v-for="d in race?.Distances" @click="recordBib(d)" class="text-white p-2 bg-blue-500 dark:bg-blue-700 hover:bg-blue-400 dark:hover:bg-blue-600">
           {{d}}
         </Button>
           

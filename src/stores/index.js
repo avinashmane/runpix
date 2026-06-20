@@ -16,6 +16,7 @@ import {
     getRacesAsync,
     getAllDocsRT,
     getAllDocs,
+    setDocData
 } from "../api";
 import { firebaseAuth, db } from '../../firebase/config';
 
@@ -91,6 +92,9 @@ export const useUserStore = defineStore('UserStore', () => {
                     profile.value = assign(profile.value,
                         omit(profileInfoInFireStore, ["roles"]))
                 })
+            setDocData(`users/${profile.value.email}`, 
+                {lastLogin:new Date()}, 
+                true)
         } catch (e) {
             throw e
         }
@@ -104,12 +108,13 @@ export const useUserStore = defineStore('UserStore', () => {
      * @returns true|false
      */
     function checkAccess(objType, objId, accessType,) {
+
         const checkAnyRegex = (listString, value) =>
-            listString?.split(",").some(x => RegExp(x, "i").test(value));
+            listString?.split(",").some(x => RegExp(x.replace("*",".*"), "i").test(value));
 
         try {
             // debugger
-            // debug(roles)
+            // console.warn(roles, objId)
             if (!roles?.value)   // if roles not defined...no access
                 return false
             if (/^test/i.test(objId))   // Anything test...all access granted
@@ -156,6 +161,7 @@ export const useUserStore = defineStore('UserStore', () => {
     function logout() {
         debug('Pinia:logout')
         isSignIn.value = false
+        roles.value = {}
         profile.value = {}
 
     }

@@ -189,7 +189,7 @@
               </template>
             </template>
           </Column>
-          <Column :rowEditor="true" class="bg-blue-200"
+          <Column :rowEditor="true" class="bg-blue-200 dark:bg-blue-700"
           style="width: 10%; min-width: 8rem" bodyStyle="text-align:center"></Column>
         </DataTable>
 

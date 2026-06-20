@@ -55,7 +55,7 @@ const validateForm = () => {
 </script>
 
 <template>
-  <form class="flex-col text-center bg-white md:w-[75%] rounded-xl shadow-lg mx-auto sm:w-full p-5 relative" @submit.prevent="register" @change="validateForm">
+  <form class="flex-col text-center bg-white dark:bg-slate-800 md:w-[75%] rounded-xl shadow-lg mx-auto sm:w-full p-5 relative" @submit.prevent="register" @change="validateForm">
     <LoadingSpinner v-if="registerState.isLoading" />
     <h1 class="text-left text-2xl mb-10 ml-3">Register</h1>
     <div class="md:w-[65%] mx-auto my-10 sm:w-full">

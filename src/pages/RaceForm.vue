@@ -4,14 +4,15 @@
       <Card>
         <template #header>
           <div class="w-full">
-            <img class="mx-auto max-h-80 shadow-lg" :src="getPublicUrl('processed', race?.id, race?.coverPage)" />
+            <img class="mx-auto max-h-80 shadow-lg" 
+              :src="(race?.coverPage) ? getPublicUrl('processed', race?.id, race?.coverPage) : get_default_race_image(race?.id)" />
           </div>
         </template>
         <template #title>
           <h1>{{ race?.Name }}</h1>
         </template>
         <template #subtitle>
-          {{ raceId }}
+          {{ raceStore.raceId }}
         </template>
 
         <template #content>
@@ -98,14 +99,16 @@
           <!-- </div>
           <div class="flex justify-around gap-2 my-2"> -->
 
-          <SplitButton v-if="checkAccessEventRole(race?.id)" :label="race?.id" :model="menuItems" raised />
+          <SplitButton :disabled ="!userStore.checkAccess('race', race?.id, 'admin')" :label="race?.id" :model="menuItems" raised />
+          <!-- {{ userStore.checkAccess('race', race?.id, 'admin') }} -->
+
           </div>
         </template>
 
       </Card>
     </div>
   </div>
-  {{ race?.id }}
+
 </template>
 
 <script setup>
@@ -119,13 +122,14 @@ import { useRouter, useLink, useRoute } from 'vue-router'
 import { computed, ref, reactive } from 'vue';
 import Card from 'primevue/card';
 import SplitButton from 'primevue/splitbutton';
+import { get_default_race_image } from '../helpers/race';
 
 // import SelectButton from 'primevue/selectbutton';
 import { config } from '../config';
 import Tag from 'primevue/tag'
 import RaceEdit from "../pages/RaceEditCard.vue";
 import { getPublicUrl } from "../helpers/index";
-import { getUser, checkAccessEventRole } from "../api"
+import { getUser } from "../api"
 import { chain, cloneDeep, map, take, keys, orderBy, sumBy, pickBy, split, sortBy, tap, startsWith } from "lodash-es"
 import { useUserStore } from '../stores';
 import {storeToRefs} from 'pinia'
@@ -199,10 +203,6 @@ const options = ref(['Record', 'Start List', 'Provisional', 'Final Results',
 ]); //'Info',,'Images'
 const option = ref(props.option ?? 'Info');
 
-
-// console.log({ "race": race, raceId: raceId, props: props, user: getUser() })
-
-// let js=(x)=>JSON.parse(JSON.stringify(x))
 
 let klick = () => {
   debugger;

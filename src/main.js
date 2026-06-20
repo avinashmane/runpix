@@ -3,7 +3,7 @@ import App from './App.vue'
 import './index.css'
 import router from './router'
 
-//import store from './store'; //vuex to be removed
+
 import { createPinia } from 'pinia' ; // move to pinia
 
 import PrimeVue from 'primevue/config';

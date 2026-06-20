@@ -710,7 +710,7 @@ function finalize_results() {
     .filter((x) => "valid split volunteer dnf dns".includes(x.status.toLowerCase()))
     .map((x) => {
       let startTime = race.value?.timestamp.start
-        ? new Date(race.value?.timestamp.start).toTimeString()
+        ? new Date(race.value?.timestamp.start).toISOString()
         : "-";
       // debug(typeof x.timestamp)
       return {
@@ -723,7 +723,7 @@ function finalize_results() {
         "Start Time": startTime,
         "Race Time": period(x.timestamp),
         "Finish Time":
-          typeof x.timestamp == "string" ? x.timestamp : x.timestamp.toTimeString(),
+          typeof x.timestamp == "string" ? x.timestamp : x.timestamp.toISOString(),
         Status: x.status,
         Rank: "",
       };

@@ -5,7 +5,7 @@
         <img alt="user header" src="/images/finisher.png" />
     </template> -->
     <template #title>
-      <div class="w-full text-white dark:text-slate-100 bg-slate-700 dark:bg-primary-100 text-center rounded-lg shadow-lg py-3">{{ race.Name }}</div>
+      <div class="w-full text-white dark:text-slate-100 bg-slate-700 dark:bg-slate-800 text-center rounded-lg shadow-lg py-3">{{ race.Name }}</div>
       <div class="flex flex-row w-full mt-10">
         <img v-if="race.coverPage"
         :src="getPublicUrl('processed', race.id, race.coverPage)"
@@ -35,19 +35,19 @@
     <template #content>
       <div class="mx-auto">
         <div v-for="(v,k) in resultData"
-          class="flex flex-col md:flex-row w-full justify-between gap-2">
-          <div class="font-thin text-center md:text-start text-sm">{{ k }}</div>
-          <div class="font-bold text-center md:text-end">{{ v }}</div>
+          class="flex flex-col md:flex-row w-full justify-between gap-x-2">
+          <div class="font-thin text-center md:text-start md:w-1/3 text-sm mx-0">{{ k }}</div>
+          <div class="font-bold text-center md:w-2/3">{{ v }}</div>
           <hr class="md:hidden"/>
         </div>
 
         <div v-if="bibData.device_name">
-          <div  class="font-thin text-center md:text-start">Device</div>
-          <div>{{ bibData.device_name }} ({{ bibData.event }})</div>
+          <div class="font-thin text-center md:text-start md:w-1/3 text-sm">Device</div>
+          <div class="font-bold text-center md:w-2/3">{{ bibData.device_name }} ({{ bibData.event }})</div>
         </div>
         <div v-if="bibData.activity">
-          <div class="font-thin text-center md:text-start">Activity</div>
-          <div class="font-bold text-center md:text-end"><a class="text-blue-600 dark:text-blue-500 hover:underline" 
+          <div class="font-thin text-center md:text-start md:w-1/3 text-sm">Activity</div>
+          <div class="font-bold text-center md:w-2/3"><a class="text-blue-600 dark:text-blue-500 hover:underline" 
             :href="`https://www.strava.com/activities/${bibData.activity}`" >{{bibData.activity }}</a>&nbsp;
             <small> Check out the activity!</small></div>
           
@@ -57,7 +57,7 @@
       <div class="relative isolate">
         <span class="w-full absolute top-0 left-0 text-center mt-8 text-4xl">{{ initials(bibData.Name ) }}</span>
         <img src="/assets/graphics/award.svg" alt="award ribbon"
-              class="h-40 mx-auto w-full dark:invert"/>
+              class="h-40 mt-2 mx-auto w-full dark:invert"/>
             
       </div>
 
@@ -91,7 +91,7 @@ const props=defineProps({
 })
 import Card from 'primevue/card';
 import SvgTextCicle from '../components/SvgTextCircle.vue';
-import { getPublicUrl, dayjs } from "../helpers";
+import { getPublicUrl, dayjs, isIsoDate } from "../helpers";
 import Certificate  from '../components/CertificateView.vue';
 import {ref, computed} from 'vue'
 
@@ -122,15 +122,18 @@ function initials(name){
                 .map(x=>x.toUpperCase().slice(0,1))
                 .join("")
 }
+
 function timeFmt(time_str){
   // if only time is passed?
   // if( (/(am|pm)/i.test(time_str))){
   if(time_str?.split(' ')[0].includes('day')) {  // first word includes day
+    console.log(time_str)
     return dayjs(time_str+' UTC').format('HH:mm:ss A Z')
     time_str= time_str.split(' ').slice(1).join(' ' )// skip first column i.e.
   } else {
-    time_str= race.value.Date+" "+time_str
-    console.log(time_str)
+    if( !isIsoDate(time_str) ) {
+      time_str= race.value.Date+" "+time_str
+    }
     return dayjs(time_str).format('HH:mm:ss A Z')
   }
 }

@@ -57,9 +57,9 @@
     
     <div class="flex-row">
       <ToggleButton v-model="editable" onLabel="Review" offLabel="Edit"
-      onIcon="pi pi-edit" offIcon="pi pi-no" class="w-9rem bg-blue-500 hover:bg-blue-400" />
-      <Button :disabled="!editable" @click="saveChanges" class="w-9rem bg-blue-500 hover:bg-blue-400">Save Changes</Button>
-      <Button :disabled="!editable" @click="flagOff" class="w-9rem bg-blue-500 hover:bg-blue-400">Flag Off</Button>
+        onIcon="pi pi-edit" offIcon="pi pi-no" class="w-9rem bg-blue-500 dark:bg-blue-700 hover:bg-blue-400 dark:hover:bg-blue-600" />
+      <Button v-if="editable" @click="saveChanges" class="w-9rem bg-blue-500 dark:bg-blue-700 hover:bg-blue-400 dark:hover:bg-blue-600">Save Changes</Button>
+      <Button v-if="editable" @click="flagOff" class="w-9rem bg-blue-500 dark:bg-blue-700 hover:bg-blue-400 dark:hover:bg-blue-600">Flag Off</Button>
     </div>
   </form>
   <div v-if="!editable">

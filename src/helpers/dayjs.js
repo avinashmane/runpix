@@ -43,6 +43,12 @@ function getTimeStampFromStr(str){
      return new Date(`${m[1]}-${m[2]}-${m[3]} ${m[4]}:${m[5]}:${m[6]}`).toISOString()
 }
 
+export function isIsoDate(str) {
+    if (!/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/.test(str)) return false;
+    const d = new Date(str); 
+    return !isNaN(d.getTime()) && d.toISOString()===str; // valid date 
+  }
+  
 export {getDateTime,getLocalDateTime,nextNthSunday,getTimeStampFromStr,
 	dayjs}
 

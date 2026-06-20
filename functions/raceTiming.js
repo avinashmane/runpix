@@ -62,9 +62,9 @@ function finalize_results(allEntries,race) {
                 Gender: gender,
                 Category:
                     x.status == "valid" ? `${suffixK(x.waypoint)} - ${gender}` : `Other - ${x.status}`,
-                "Start Time": startTime ? startTime.format(ts_fmt) : '-',
+                "Start Time": startTime ? startTime.toISOString() : '-',
                 "Race Time": race_time,
-                "Finish Time": timestamp.format(ts_fmt),
+                "Finish Time": timestamp.toISOString(),
                 Status: x.status,
                 Rank: "",
                 // activity_key: 

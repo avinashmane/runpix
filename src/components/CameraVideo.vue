@@ -23,7 +23,7 @@
       <div class="flex flex-row gap-2 p-float-label my-2">
         <InputText id="bib" v-model="bib" placeholder="Enter a single bib number" aria-describedby="bib-help"
           class="w-1/3 border bg-yellow-50" />
-        <Button v-for="d in race?.Distances" @click="recordBib(d)" class="text-white p-2 bg-blue-500 hover:bg-blue-400">
+        <Button v-for="d in race?.Distances" @click="recordBib(d)" class="text-white p-2 bg-blue-500 dark:bg-blue-700 hover:bg-blue-400 dark:hover:bg-blue-600">
           {{ d }}
         </Button>
       </div>
@@ -83,7 +83,7 @@
         <div>
           {{ recordedBlobs.length }} / {{ Object.values(recordedBlobs).reduce((sum, f) => sum = sum + f?.buffer?.size, 0)
             / 10 ** 6 }}
-          <span class="text-gray-500 text-xs">: {{ errorMsg }}</span>
+          <span class="text-gray-500 dark:text-gray-400 text-xs">: {{ errorMsg }}</span>
         </div>
       </div>
     </div>

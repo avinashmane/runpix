@@ -5,7 +5,7 @@
           <Menubar :model="items" class="w-full bg-transparent">
             <template #start>
               <router-link class="ml-2 text-primary" to="/">
-                <img class="logo" 
+                <img class="logo rounded-lg" 
                   src="/assets/graphics/logo_runpix.png" 
                   :alt="site" /> 
               </router-link>              
@@ -37,8 +37,14 @@
                       crossorigin="anonymous"
                       alt="profile" />
                   </router-link>
+                  <Button to="/" class="mr-2 hover:text-[#FF9000] transition ease-in-out" @click="userStore.logout()">
+                    <i class="pi pi-sign-out" style="font-size: 2rem"></i>
+                  </Button>                  
                 </div>
-                <div v-else>
+                <div v-else class="flex flex-row">
+                  <Button to="/" class="mr-2 hover:text-[#FF9000] transition ease-in-out" @click="signInGoogle">
+                    <i class="pi pi-sign-in" style="font-size: 2rem"></i>
+                  </Button>
                   <router-link to="/login" class=" mr-2 transition ease-in-out">
                     <i class="pi pi-home" style="font-size: 2rem"></i>
                   </router-link>
@@ -67,7 +73,7 @@ const userStore =  useUserStore()
 const router=useRouter()
 
 const firebaseUser = () => firebaseAuth.onAuthStateChanged(user => {
-  console.warn(`firebaseAuth.onAuthStateChanged ${JSON.stringify(user)}`)
+  // console.warn(`firebaseAuth.onAuthStateChanged ${JSON.stringify(user)}`)
   if (user) {
     userStore.login(user)
     if (router.currentRoute.value.path == '/login')
@@ -78,6 +84,16 @@ const firebaseUser = () => firebaseAuth.onAuthStateChanged(user => {
 });
 
 watchEffect(firebaseUser)
+
+const signInGoogle =async () => {
+  await userStore.signInGoogleAction().then(x=>{
+    if (userStore.isSignIn) {
+      router.push('/home')
+    } else {
+      debug('error in dispatch')
+    }
+  })
+}
 
 let site= computed(()=>{
   if (document.location.href.toLowerCase().search("fitness.forthe.life")!=-1) 

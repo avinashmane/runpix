@@ -26,6 +26,10 @@ function handleFileChange(x){
 </script>
 
 <template>
+
+{{ userStore.roles }}
+
+<hr>
 <h3 @click="handleFileChange">Show a file-select field which allows only one file to be chosen:</h3>
 >>> {{ logs }}
 <form action="/action_page.php">
@@ -45,10 +49,10 @@ function handleFileChange(x){
   <!-- {{ userStore.roles }} -->
   <Toast/>
   <Button label="toast" @click='show()'>Show</Button>
-  <br/>{{ userStore.checkAccess('race','mychoice',"any") }}
-  <br/>{{ userStore.checkAccess('race','werun',"any") }}
-  <br/>{{ userStore.checkAccess('race','mychoice',"any") }}
-  <br/>{{ userStore.checkAccess('race','test',"any") }}
+  <br/>mychoice {{ userStore.checkAccess('race','mychoice',"any") }}
+  <br/>werun {{ userStore.checkAccess('race','werun',"any") }}
+  <br/>sunday {{ userStore.checkAccess('race','sunday',"any") }}
+  <br/>test {{ userStore.checkAccess('race','test',"any") }}
 
   <div id="testzone" class="container mx-auto">
     <!-- <SvgText bottom="testAvinash" 

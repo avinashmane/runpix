@@ -31,10 +31,10 @@
         {{ race?.linkPhotos || '--'}}
         <div class="flex w-full justify-end" >
           <a v-if="race.linkPhotos && ['available'].includes(race.photoStatus)" 
-              :href="race.linkPhotos" class="p-button font-bold text-white">
+              :href="race.linkPhotos" class="p-button font-bold">
               Photos
           </a>
-          <a v-if="race.linkFeedback" :href="race.linkFeedback" class="p-button font-bold  text-white">
+          <a v-if="race.linkFeedback" :href="race.linkFeedback" class="p-button font-bold">
             Feedback
           </a>
         </div>
@@ -48,7 +48,7 @@
 
       <template #content>
         <div v-for="catTop, cat in raceInfo.top">
-          <h2 class="text-2xl bg-indigo-300 shadow-lg px-2 rounded my-2">{{ cat }}</h2>
+          <h2 class="text-2xl bg-slate-200 dark:bg-slate-800 shadow-lg px-2 rounded my-2">{{ cat }}</h2>
           <div class="w-full">
             <div v-for="r, category in catTop" @click="setBib(r.Bib)" 
               class="flex flex-row shadow-md justify-left items-center">

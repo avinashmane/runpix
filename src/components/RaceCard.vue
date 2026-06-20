@@ -1,10 +1,10 @@
 <template>
   <!--small Race Card-->
-  <div class="flex flex-row w-full rounded dark:bg-slate-700 light:bg-yellow-50 shadow-lg h-30 mb-2 p-2">
+  <div class="flex flex-row w-full rounded bg-yellow-50 dark:bg-slate-700 shadow-lg h-30 mb-2 p-2">
 
     <div id="raceImage" class="flex flex-col mx-auto align-middle w-20" @click="router.push(`/e/${race.id}`)">
       <img  class="w-16 rounded-full shadow-lg object-cover aspect-square"
-        :src="race?.coverPage ? getPublicUrl('thumbs', race?.id, race?.coverPage) : defaultRaceImage" />
+        :src="race?.coverPage ? getPublicUrl('thumbs', race?.id, race?.coverPage) : get_default_race_image(race?.id) " />
         <!-- 
           v-if="race?.coverPage"
           <SvgTextCicle v-else class="mx-auto m-2"
@@ -67,9 +67,11 @@ const props = defineProps({
 import { getPublicUrl } from "../helpers/index";
 import { useRouter } from 'vue-router';
 import SvgTextCicle from '../components/SvgTextCircle.vue';
-import defaultRaceImage from '../assets/race_image.png'
 import { ref } from 'vue'
+import { get_default_race_image } from '../helpers/race';
+
 const router = useRouter()
 const smallButton = ref({ label: { class: 'text-sm' } })
+
 </script>
 <style scoped></style>

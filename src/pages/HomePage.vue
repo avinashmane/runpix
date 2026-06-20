@@ -33,7 +33,7 @@ let items = [
 
 <template>
 
-  <div class="rounded bg-white shadow-lg m-2 p-2">
+  <div class="rounded bg-white dark:bg-slate-800 shadow-lg m-2 p-2">
     <div class="w-full text-center ">
       <h1 class="text-xl">Home </h1>
       <RacesCard :menu="['photos', 'results']"/>
@@ -74,7 +74,7 @@ let items = [
             <span><b>{{ v }}: </b></span>
             <span>{{ userData[k] }}</span>
           </div>
-          <small class="text-primary-400">{{ userData.uid}}</small>
+          <!-- <small class="text-primary-400">{{ userData.uid}}</small> -->
         </div>
         <div v-else>
           <LoginCard />

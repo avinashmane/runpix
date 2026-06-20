@@ -67,12 +67,12 @@ const validateForm = () => {
   <!-- <LoadingSpinner v-if="signInState.isLoading" /> -->
 
   <div class="w-full mt-2 mb-2">
-    <button class="bg-blue-300 rounded-full drop-shadow-lg text-white text-md h-9 w-full opacity-40 ableSignIn" @click="signInGoogle">
+    <button class="bg-blue-300 dark:bg-blue-700 hover:bg-blue-200 dark:hover:bg-blue-600 rounded-full drop-shadow-lg text-white text-md h-9 w-full opacity-40 ableSignIn" @click="signInGoogle">
       Login with Google</button>
   </div>
 
 
-  <form v-if="route.query.email" class="flex-col text-center bg-white w-full rounded-xl shadow-lg mx-auto sm:w-full p-5 relative" 
+  <form v-if="route.query.email" class="flex-col text-center bg-white dark:bg-slate-800 w-full rounded-xl shadow-lg mx-auto sm:w-full p-5 relative"
     @submit.prevent="signIn" @change="validateForm">
     <h1 class="text-left text-2xl mb-10 ml-3">Login</h1>
     <div class="md:w-[65%] mx-auto my-10 sm:w-full">
@@ -90,7 +90,7 @@ const validateForm = () => {
       </span>
       <p v-if="localState.passwordError" class="text-red-500 text-xs italic text-left">Password is required</p>
     </div>
-    <button class="bg-[#2B2E4A] rounded-full drop-shadow-lg text-white text-md h-9 w-[85px] opacity-40" 
+    <button class="bg-[#2B2E4A] rounded-full drop-shadow-lg text-md h-9 w-[85px] opacity-40" 
     :class="{ 'ableSignIn': !localState.disableSignIn }" :disabled="localState.disableSignIn">
       Login</button>
     <br/>

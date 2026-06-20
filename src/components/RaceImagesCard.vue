@@ -3,7 +3,7 @@
     <Paginator v-model:first="first" v-model:rows="rows" :totalRecords="images.length" 
       template="FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
       currentPageReportTemplate="{first}-{last} of {totalRecords}" />
-    <div class="flex flex-wrap bg-gray-200 justify-evenly">      
+    <div class="flex flex-wrap bg-gray-200 dark:bg-slate-700 justify-evenly">
       <div v-for="i in range(first,rows,images.length)" :key="i" class="thumb">
         <a v-if="images[i]" :href="getURI(i)">
           <Image v-if="images[i].imagePath"  

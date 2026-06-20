@@ -45,7 +45,7 @@
 
   <Card class="my-2">
     <template #content>
-      <div class="flex flex-wrap bg-gray-200 w-full justify-evenly">
+      <div class="flex flex-wrap bg-gray-200 dark:bg-slate-700 w-full justify-evenly">
         <!-- <ImageCard v-for="img in images" v-bind:raceId="raceId" v-bind:bibNo="bibNo" v-bind:imagePath="img.imagePath"/> -->
         <!-- <div class="flex-auto bg-teal-400 p-4 m-2">1</div>   -->
         <div v-for="(img, i) in images">
